@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
-import { getProducts, addToWishlist, getWishlist, getUnreadNotificationCount, logout, createOrder, applyCoupon, getMe } from "@/lib/api";
+import { getProducts, addToWishlist, getWishlist, getUnreadNotificationCount, logout, createOrder, applyCoupon, getMe, getInventory } from "@/lib/api";
 import Link from "next/link";
-import { Heart, ShoppingCart, ImageIcon, Star, Bell, KeyRound, LogOut, Moon, Sun, X, Plus, Tag, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { Heart, ShoppingCart, Star, Bell, KeyRound, LogOut, Moon, Sun, X, Plus, Tag, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { InteractiveCheckout, type CheckoutProduct } from "@/components/ui/interactive-checkout";
 import { useRouter, usePathname } from "next/navigation";
 import { useTheme } from "@/components/ThemeProvider";
 
@@ -13,6 +14,12 @@ interface Product {
   category: string;
   price: number | string;
   image?: string;
+}
+
+interface InventoryItem {
+  product: number;
+  quantity: number;
+  stock_status: "in_stock" | "low_stock" | "out_of_stock";
 }
 
 const userNav = [
@@ -27,6 +34,7 @@ export default function LandingPage() {
   const pathname = usePathname();
   const { theme, toggle } = useTheme();
   const [products, setProducts] = useState<Product[]>([]);
+  const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [wishlistIds, setWishlistIds] = useState<Set<number>>(new Set());
   const [addingId, setAddingId] = useState<number | null>(null);
@@ -64,6 +72,12 @@ export default function LandingPage() {
       .then((r) => setProducts(Array.isArray(r.data) ? r.data : r.data.results ?? []))
       .catch(() => {})
       .finally(() => setLoading(false));
+
+    if (token) {
+      getInventory()
+        .then((r) => setInventory(Array.isArray(r.data) ? r.data : r.data.results ?? []))
+        .catch(() => {});
+    }
 
     if (token) {
       getWishlist()
@@ -130,7 +144,21 @@ export default function LandingPage() {
       setTimeout(() => closeOrderModal(), 2000);
     } catch (err: unknown) {
       const data = (err as { response?: { data?: unknown } })?.response?.data;
-      setOrderError(data ? JSON.stringify(data) : "Failed to place order.");
+      if (data && typeof data === "object") {
+        const obj = data as Record<string, unknown>;
+        if (typeof obj.error === "string") {
+          setOrderError(obj.error);
+        } else if (typeof obj.detail === "string") {
+          setOrderError(obj.detail);
+        } else {
+          const msgs = Object.entries(obj)
+            .map(([field, val]) => `${field}: ${Array.isArray(val) ? val.join(", ") : val}`)
+            .join("\n");
+          setOrderError(msgs);
+        }
+      } else {
+        setOrderError("Failed to place order. Check all fields and try again.");
+      }
     } finally { setSaving(false); }
   };
 
@@ -138,6 +166,36 @@ export default function LandingPage() {
   const removeItem = (i: number) => setItems(items.filter((_, idx) => idx !== i));
   const updateItem = (i: number, field: string, value: string | number) =>
     setItems(items.map((item, idx) => idx === i ? { ...item, [field]: field === "quantity" ? (Number(value) || 1) : value } : item));
+
+  const checkoutProducts: CheckoutProduct[] = products.map((p) => {
+    const inv = inventory.find((i) => (i.product === p.id) || ((i as unknown as Record<string, unknown>).product_id === p.id));
+    const rawStatus = inv?.stock_status ?? (inv as unknown as Record<string, unknown>)?.status as string;
+    const normalizeStatus = (s: string | undefined): "in_stock" | "low_stock" | "out_of_stock" | undefined => {
+      if (!s) return undefined;
+      const lower = s.toLowerCase().replace(/\s+/g, "_");
+      if (lower.includes("low")) return "low_stock";
+      if (lower.includes("out") || lower === "out_of_stock") return "out_of_stock";
+      if (lower.includes("in") || lower === "in_stock") return "in_stock";
+      return undefined;
+    };
+    return {
+      id: p.id,
+      name: p.name,
+      price: parseFloat(String(p.price)),
+      category: p.category,
+      image: p.image,
+      stockStatus: normalizeStatus(rawStatus),
+      stockQty: inv?.quantity,
+    };
+  });
+
+  const handleCartCheckout = (cartItems: { productId: number; quantity: number }[]) => {
+    if (!isLoggedIn) { router.push("/login"); return; }
+    setOrderError(""); setOrderSuccess(false);
+    setCouponCode(""); setCouponResult(null); setCouponError("");
+    setItems(cartItems.map((i) => ({ product: String(i.productId), quantity: i.quantity })));
+    setOrderModal(true);
+  };
 
   const handleLogout = async () => {
     const refresh = localStorage.getItem("refresh_token");
@@ -320,58 +378,33 @@ export default function LandingPage() {
 
         {/* Products */}
         <section id="products" style={{ padding: "32px 40px 60px" }}>
-          <h2 style={{ fontSize: "24px", fontWeight: 700, letterSpacing: "-0.5px", marginBottom: "24px", color: "var(--text)" }}>All Products</h2>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "24px" }}>
+            <h2 style={{ fontSize: "24px", fontWeight: 700, letterSpacing: "-0.5px", color: "var(--text)" }}>All Products</h2>
+            {isLoggedIn && products.length > 0 && (
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                {products.filter((p) => wishlistIds.has(p.id)).length > 0 && (
+                  <span style={{ fontSize: "13px", color: "var(--text-3)" }}>
+                    <Heart size={12} style={{ display: "inline", marginRight: "4px" }} fill="#ef4444" color="#ef4444" />
+                    {wishlistIds.size} wishlisted
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
 
           {loading ? (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "20px" }}>
-              {[...Array(6)].map((_, i) => (
-                <div key={i} style={{ borderRadius: "16px", background: "var(--card-2)", height: "300px" }} />
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              {[...Array(4)].map((_, i) => (
+                <div key={i} style={{ borderRadius: "16px", background: "var(--card-2)", height: "84px" }} />
               ))}
             </div>
-          ) : products.length === 0 ? (
-            <p style={{ color: "var(--text-3)", textAlign: "center", padding: "60px 0" }}>No products available.</p>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "20px" }}>
-              {products.map((product) => {
-                const inWishlist = wishlistIds.has(product.id);
-                const adding = addingId === product.id;
-                return (
-                  <div key={product.id} style={{ borderRadius: "16px", border: "1px solid var(--border)", overflow: "hidden", background: "var(--card)", transition: "box-shadow 0.2s" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.boxShadow = "var(--card-shadow)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "none")}>
-
-                    <div style={{ position: "relative", aspectRatio: "1", background: "var(--card-2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      {product.image ? (
-                        <img src={product.image} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                      ) : (
-                        <ImageIcon size={32} color="var(--text-3)" />
-                      )}
-                      <button
-                        onClick={() => handleWishlist(product.id)}
-                        disabled={adding}
-                        title={isLoggedIn ? (inWishlist ? "In wishlist" : "Add to wishlist") : "Sign in to add to wishlist"}
-                        style={{ position: "absolute", top: "12px", right: "12px", width: "34px", height: "34px", borderRadius: "99px", background: "var(--bg-elevated)", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", cursor: adding ? "wait" : "pointer", transition: "all 0.2s" }}
-                      >
-                        <Heart size={15} fill={inWishlist ? "#ef4444" : "none"} color={inWishlist ? "#ef4444" : "var(--text-2)"} />
-                      </button>
-                    </div>
-
-                    <div style={{ padding: "16px" }}>
-                      <p style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-3)", letterSpacing: "0.5px", textTransform: "uppercase", marginBottom: "6px" }}>{product.category}</p>
-                      <h3 style={{ fontSize: "15px", fontWeight: 600, color: "var(--text)", marginBottom: "10px", lineHeight: 1.3 }}>{product.name}</h3>
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                        <span style={{ fontSize: "16px", fontWeight: 700, color: "var(--text)" }}>Rs. {parseFloat(String(product.price)).toFixed(2)}</span>
-                        <button
-                          onClick={() => openOrderModal(product)}
-                          style={{ display: "flex", alignItems: "center", gap: "5px", padding: "7px 14px", fontSize: "13px", fontWeight: 600, color: "#fff", background: "var(--accent)", border: "none", borderRadius: "8px", cursor: "pointer" }}>
-                          <ShoppingCart size={13} /> Buy
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <InteractiveCheckout
+              products={checkoutProducts}
+              onCheckout={handleCartCheckout}
+              isLoggedIn={isLoggedIn}
+              onLoginRequired={() => router.push("/login")}
+            />
           )}
         </section>
 
@@ -422,7 +455,6 @@ export default function LandingPage() {
                   <label style={{ display: "block", fontSize: "13px", fontWeight: 500, color: "var(--text-2)", marginBottom: "7px" }}>Payment Method</label>
                   <select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)} style={{ width: "100%", padding: "10px 14px", borderRadius: "10px", border: "1px solid var(--border)", fontSize: "14px", outline: "none", background: "var(--card-2)", color: "var(--text)", appearance: "none" }}>
                     <option value="cod">Cash on Delivery</option>
-                    <option value="esewa">eSewa</option>
                   </select>
                 </div>
 
@@ -507,6 +539,7 @@ export default function LandingPage() {
           </div>
         </div>
       )}
+
     </div>
   );
 }

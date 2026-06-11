@@ -33,7 +33,8 @@ export default function ProductsPage() {
   const [uploadTargetId, setUploadTargetId] = useState<number | null>(null);
 
   const pageSize = 5;
-  const totalPages = Math.ceil(count / pageSize);
+  const totalPages = Math.ceil((count || products.length) / pageSize);
+  const paginatedProducts = products.slice((page - 1) * pageSize, page * pageSize);
 
   const load = () => {
     setLoading(true);
@@ -148,7 +149,7 @@ export default function ProductsPage() {
                 ))}</tr>
               </thead>
               <tbody>
-                {products.map((p) => (
+                {paginatedProducts.map((p) => (
                   <tr key={p.id}>
                     <td>
                       {p.image ? (

@@ -29,7 +29,7 @@ export default function LoginPage() {
         isAdmin = !!(payload.is_staff || payload.is_superuser);
         localStorage.setItem("is_admin", String(isAdmin));
       } catch { localStorage.setItem("is_admin", "false"); }
-      router.push("/orders");
+      router.push(isAdmin ? "/dashboard" : "/");
     } catch {
       setError("Invalid username or password.");
     } finally {

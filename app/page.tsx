@@ -1,10 +1,12 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
-import { getProducts, addToWishlist, getWishlist, createOrder, applyCoupon, getUnreadNotificationCount, logout, getMe } from "@/lib/api";
+import { getProducts, addToWishlist, getWishlist, createOrder, applyCoupon, getUnreadNotificationCount, logout, getMe, getInventory } from "@/lib/api";
 import Link from "next/link";
 import { Heart, X, Plus, Tag, CheckCircle, Star, Package, Bell, KeyRound, LogOut, ChevronLeft, ChevronRight } from "lucide-react";
-import ProductCard from "@/components/ui/card";
+import { InteractiveCheckout, type CheckoutProduct } from "@/components/ui/interactive-checkout";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import EsewaPayment from "@/components/ui/esewa-payment";
+import KhaltiPayment from "@/components/ui/khalti-payment";
 import { useRouter, usePathname } from "next/navigation";
 import { useTheme } from "@/components/ThemeProvider";
 
@@ -74,6 +76,7 @@ export default function Home() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [unreadCount, setUnreadCount] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [inventory, setInventory] = useState<{ product: number; quantity: number; stock_status: "in_stock" | "low_stock" | "out_of_stock" }[]>([]);
 
   const [orderModal, setOrderModal] = useState(false);
   const [customerName, setCustomerName] = useState("");
@@ -83,6 +86,12 @@ export default function Home() {
   const [saving, setSaving] = useState(false);
   const [orderError, setOrderError] = useState("");
   const [orderSuccess, setOrderSuccess] = useState(false);
+  const [esewaModal, setEsewaModal] = useState(false);
+  const [esewaOrderId, setEsewaOrderId] = useState<number | null>(null);
+  const [esewaAmount, setEsewaAmount] = useState(0);
+  const [khaltiModal, setKhaltiModal] = useState(false);
+  const [khaltiOrderId, setKhaltiOrderId] = useState<number | null>(null);
+  const [khaltiAmount, setKhaltiAmount] = useState(0);
   const [couponCode, setCouponCode] = useState("");
   const [couponResult, setCouponResult] = useState<{ discount_amount: string; final_amount: string; message?: string } | null>(null);
   const [couponError, setCouponError] = useState("");
@@ -91,6 +100,10 @@ export default function Home() {
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     setIsLoggedIn(!!token);
+    if (localStorage.getItem("is_admin") === "true") {
+      router.replace("/dashboard");
+      return;
+    }
     if (token) {
       getMe().then((r) => {
         setUsername(r.data.username || "");
@@ -109,6 +122,11 @@ export default function Home() {
     }
     if (token) {
       getUnreadNotificationCount().then((r) => setUnreadCount(r.data?.count ?? 0)).catch(() => {});
+    }
+    if (token) {
+      getInventory()
+        .then((r) => setInventory(Array.isArray(r.data) ? r.data : r.data.results ?? []))
+        .catch(() => {});
     }
   }, []);
 
@@ -179,12 +197,41 @@ export default function Home() {
     e.preventDefault();
     setSaving(true); setOrderError("");
     try {
-      await createOrder({ customer_name: customerName, delivery_city: deliveryCity, payment_method: paymentMethod, items: items.map(i => ({ product: parseInt(i.product), quantity: i.quantity })) });
-      setOrderSuccess(true);
-      setTimeout(() => closeOrderModal(), 2000);
+      const res = await createOrder({ customer_name: customerName, delivery_city: deliveryCity, payment_method: paymentMethod, items: items.map(i => ({ product: parseInt(i.product), quantity: i.quantity })) });
+      if (paymentMethod === "esewa") {
+        const total = couponResult ? parseFloat(couponResult.final_amount) : getSubtotal();
+        setEsewaOrderId(res.data.id);
+        setEsewaAmount(total);
+        closeOrderModal();
+        setEsewaModal(true);
+      } else if (paymentMethod === "khalti") {
+        const total = couponResult ? parseFloat(couponResult.final_amount) : getSubtotal();
+        setKhaltiOrderId(res.data.id);
+        setKhaltiAmount(total);
+        closeOrderModal();
+        setKhaltiModal(true);
+      } else {
+        setOrderSuccess(true);
+        setTimeout(() => closeOrderModal(), 2000);
+      }
     } catch (err: unknown) {
       const data = (err as { response?: { data?: unknown } })?.response?.data;
-      setOrderError(data ? JSON.stringify(data) : "Failed to place order.");
+      if (data && typeof data === "object") {
+        const obj = data as Record<string, unknown>;
+        // Single "error" or "detail" key → show message directly
+        if (typeof obj.error === "string") {
+          setOrderError(obj.error);
+        } else if (typeof obj.detail === "string") {
+          setOrderError(obj.detail);
+        } else {
+          const msgs = Object.entries(obj)
+            .map(([field, val]) => `${field}: ${Array.isArray(val) ? val.join(", ") : val}`)
+            .join("\n");
+          setOrderError(msgs);
+        }
+      } else {
+        setOrderError("Failed to place order. Check all fields and try again.");
+      }
     } finally { setSaving(false); }
   };
 
@@ -195,6 +242,37 @@ export default function Home() {
 
   const categories = ["All", ...Array.from(new Set(products.map(p => p.category)))];
   const filtered = activeCategory === "All" ? products : products.filter(p => p.category === activeCategory);
+
+  const checkoutProducts: CheckoutProduct[] = filtered.map((p) => {
+    const inv = inventory.find((i) => (i.product === p.id) || ((i as unknown as Record<string, unknown>).product_id === p.id));
+    const rawStatus = inv?.stock_status ?? (inv as unknown as Record<string, unknown>)?.status as string;
+    const normalizeStatus = (s: string | undefined): "in_stock" | "low_stock" | "out_of_stock" | undefined => {
+      if (!s) return undefined;
+      const lower = s.toLowerCase().replace(/\s+/g, "_");
+      if (lower.includes("low")) return "low_stock";
+      if (lower.includes("out") || lower === "out_of_stock") return "out_of_stock";
+      if (lower.includes("in") || lower === "in_stock") return "in_stock";
+      return undefined;
+    };
+    return {
+      id: p.id,
+      name: p.name,
+      price: parseFloat(String(p.price)),
+      category: p.category,
+      image: p.image,
+      stockStatus: normalizeStatus(rawStatus),
+      stockQty: inv?.quantity,
+    };
+  });
+
+  const handleCartCheckout = (cartItems: { productId: number; quantity: number }[]) => {
+    if (!isLoggedIn) { router.push("/login"); return; }
+    setOrderError(""); setOrderSuccess(false);
+    setCouponCode(""); setCouponResult(null); setCouponError("");
+    setItems(cartItems.map((i) => ({ product: String(i.productId), quantity: i.quantity })));
+    setOrderModal(true);
+  };
+
   const subtotal = getSubtotal();
   const discount = couponResult ? parseFloat(couponResult.discount_amount) : 0;
 
@@ -333,19 +411,12 @@ export default function Home() {
               {[...Array(6)].map((_, i) => <div key={i} style={{ height: "360px", borderRadius: "20px", ...glassCard }} />)}
             </div>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "20px" }}>
-              {filtered.map((product, idx) => (
-                <FadeIn key={product.id} delay={idx * 40}>
-                  <ProductCard
-                    product={product}
-                    isWishlisted={wishlistIds.has(product.id)}
-                    addingToWishlist={addingId === product.id}
-                    onToggleWishlist={handleWishlist}
-                    onAddToCart={openOrderModal}
-                  />
-                </FadeIn>
-              ))}
-            </div>
+            <InteractiveCheckout
+              products={checkoutProducts}
+              onCheckout={handleCartCheckout}
+              isLoggedIn={isLoggedIn}
+              onLoginRequired={() => router.push("/login")}
+            />
           )}
         </div>
       </section>
@@ -404,6 +475,7 @@ export default function Home() {
                   <select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)} style={{ ...inputStyle, appearance: "none" }}>
                     <option value="cod">Cash on Delivery</option>
                     <option value="esewa">eSewa</option>
+                    <option value="khalti">Khalti</option>
                   </select>
                 </div>
 
@@ -487,6 +559,22 @@ export default function Home() {
         </div>
       )}
       </div>
+
+      {esewaModal && esewaOrderId && (
+        <EsewaPayment
+          orderId={esewaOrderId}
+          amount={esewaAmount}
+          onClose={() => setEsewaModal(false)}
+        />
+      )}
+
+      {khaltiModal && khaltiOrderId && (
+        <KhaltiPayment
+          orderId={khaltiOrderId}
+          amount={khaltiAmount}
+          onClose={() => setKhaltiModal(false)}
+        />
+      )}
     </div>
   );
 }

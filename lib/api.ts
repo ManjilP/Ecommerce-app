@@ -91,7 +91,7 @@ export const createOrder = (data: unknown) => api.post("/api/orders/", data);
 export const updateOrder = (id: number, data: unknown) => api.put(`/api/orders/${id}/`, data);
 export const deleteOrder = (id: number) => api.delete(`/api/orders/${id}/`);
 export const cancelOrder = (id: number) => api.post(`/api/orders/${id}/cancel/`);
-export const confirmPayment = (id: number) => api.post(`/api/orders/${id}/confirm-payment/`);
+export const confirmPayment = (id: number, transaction_id?: string) => api.post(`/api/orders/${id}/confirm-payment/`, transaction_id ? { transaction_id } : {});
 export const trackOrder = (id: number) => api.get(`/api/orders/${id}/track/`);
 export const getPaymentQR = (id: number) => api.get(`/api/orders/${id}/payment-qr/`);
 export const updateOrderStatus = (id: number, status: string) => api.patch(`/api/orders/${id}/update-status/`, { status });

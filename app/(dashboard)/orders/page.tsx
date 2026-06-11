@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-import { getOrders, cancelOrder, deleteOrder, createOrder, getProducts, trackOrder, getPaymentQR, updateOrderStatus, applyCoupon, confirmPayment } from "@/lib/api";
-import { ShoppingCart, Ban, Trash2, Plus, X, Search, ChevronLeft, ChevronRight, MapPin, QrCode, ArrowRight, Tag, CheckCircle, CreditCard } from "lucide-react";
+import { getOrders, cancelOrder, deleteOrder, createOrder, getProducts, trackOrder, updateOrderStatus, applyCoupon, confirmPayment } from "@/lib/api";
+import { ShoppingCart, Ban, Trash2, Plus, X, Search, ChevronLeft, ChevronRight, MapPin, ArrowRight, Tag, CheckCircle, CreditCard } from "lucide-react";
 import { OrderTracking } from "@/components/ui/order-tracking";
 
 interface OrderItem {
@@ -57,8 +57,11 @@ export default function OrdersPage() {
   interface TrackInfo { order_id: number; customer_name: string; current_status: string; delivery_city: string; total_price: string; payment_method: string; payment_status: string; timeline: TrackTimeline[]; }
   const [trackModal, setTrackModal] = useState(false);
   const [trackData, setTrackData] = useState<TrackInfo | null>(null);
-  const [qrModal, setQrModal] = useState(false);
-  const [qrData, setQrData] = useState<string | null>(null);
+  const [esewaModal, setEsewaModal] = useState(false);
+  const [esewaOrderId, setEsewaOrderId] = useState<number | null>(null);
+  const [esewaRef, setEsewaRef] = useState("");
+  const [esewaError, setEsewaError] = useState("");
+  const [esewaConfirming, setEsewaConfirming] = useState(false);
 
   const pageSize = 5;
   const totalPages = Math.ceil(count / pageSize);
@@ -133,17 +136,35 @@ export default function OrdersPage() {
     setTrackModal(true);
   };
 
-  const handleConfirmPayment = async (id: number) => {
-    if (!confirm("Confirm eSewa payment for this order?")) return;
-    await confirmPayment(id);
-    load();
+  const handleConfirmPayment = (id: number) => {
+    setEsewaOrderId(id);
+    setEsewaRef("");
+    setEsewaError("");
+    setEsewaModal(true);
   };
 
-  const handleQR = async (id: number) => {
-    const r = await getPaymentQR(id);
-    setQrData(r.data?.qr_code ?? r.data?.qr_url ?? JSON.stringify(r.data));
-    setQrModal(true);
+  const submitEsewaConfirm = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!esewaOrderId) return;
+    setEsewaConfirming(true);
+    setEsewaError("");
+    try {
+      await confirmPayment(esewaOrderId, esewaRef.trim() || undefined);
+      setEsewaModal(false);
+      setEsewaRef("");
+      setEsewaOrderId(null);
+      load();
+    } catch (err: unknown) {
+      const data = (err as { response?: { data?: Record<string, unknown> } })?.response?.data;
+      const msg = data
+        ? Object.values(data).flat().join(" ")
+        : "Failed to confirm payment. Check the transaction ID.";
+      setEsewaError(msg);
+    } finally {
+      setEsewaConfirming(false);
+    }
   };
+
 
   const getSubtotal = () => items.reduce((sum, item) => {
     const p = products.find((p) => String(p.id) === item.product);
@@ -264,7 +285,6 @@ export default function OrdersPage() {
                       <div style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
                         {([
                           { show: true, onClick: () => handleTrack(o.id), color: "#fff", bg: "#a78bfa", icon: <MapPin size={13} />, label: "Track" },
-                          { show: o.payment_method === "esewa" && o.status !== "cancelled", onClick: () => handleQR(o.id), color: "#fff", bg: "#34d399", icon: <QrCode size={13} />, label: "QR" },
                           { show: o.payment_method === "esewa" && (o.status === "pending" || o.status === "processing"), onClick: () => handleConfirmPayment(o.id), color: "#fff", bg: "#a78bfa", icon: <CreditCard size={13} />, label: "Confirm" },
                           { show: isAdmin && o.status !== "cancelled" && o.status !== "completed", onClick: () => handleUpdateStatus(o.id, o.status), color: "#fff", bg: "#60a5fa", icon: <ArrowRight size={13} />, label: "Advance" },
                           { show: o.status !== "cancelled", onClick: () => handleCancel(o.id), color: "#fff", bg: "#fbbf24", icon: <Ban size={13} />, label: "Cancel" },
@@ -491,22 +511,43 @@ export default function OrdersPage() {
         </div>
       )}
 
-      {/* QR Modal */}
-      {qrModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50" style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
-          <div className="w-full max-w-sm rounded-lg p-6 text-center" style={{ background: "var(--card)", border: "1px solid var(--border-strong)", boxShadow: "0 25px 80px rgba(0,0,0,0.6)" }}>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-medium flex items-center gap-2" style={{ color: "var(--text)" }}><QrCode size={16} color="#34d399" /> eSewa Payment QR</h2>
-              <button onClick={() => setQrModal(false)} style={{ color: "#9ca3af" }}><X size={18} /></button>
+      {/* eSewa confirm modal */}
+      {esewaModal && (
+        <div style={{ position: "fixed", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200, background: "rgba(0,0,0,0.35)", backdropFilter: "blur(16px)" }}>
+          <div style={{ width: "100%", maxWidth: "420px", borderRadius: "24px", padding: "28px", background: "var(--bg-elevated)", border: "1px solid var(--border)", boxShadow: "0 40px 80px rgba(0,0,0,0.18)" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
+              <h2 style={{ fontSize: "18px", fontWeight: 700, color: "var(--text)" }}>Confirm eSewa Payment</h2>
+              <button onClick={() => setEsewaModal(false)} style={{ width: "30px", height: "30px", borderRadius: "99px", border: "1px solid var(--border)", background: "var(--card-2)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "var(--text-2)" }}><X size={14} /></button>
             </div>
-            {qrData && qrData.startsWith("http") ? (
-              <img src={qrData} alt="Payment QR" className="mx-auto rounded" style={{ maxWidth: "250px" }} />
-            ) : (
-              <pre className="text-xs rounded p-3 text-left overflow-auto" style={{ background: "#1e1e1e", color: "#9ca3af" }}>{qrData}</pre>
-            )}
+            <form onSubmit={submitEsewaConfirm} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+              <p style={{ fontSize: "13px", color: "var(--text-2)", lineHeight: 1.5 }}>
+                Enter the eSewa transaction ID from your payment receipt to confirm this order.
+              </p>
+              <div>
+                <label style={{ display: "block", fontSize: "13px", fontWeight: 500, color: "var(--text-2)", marginBottom: "7px" }}>Transaction ID <span style={{ color: "var(--text-3)", fontWeight: 400 }}>(optional)</span></label>
+                <input
+                  value={esewaRef}
+                  onChange={(e) => setEsewaRef(e.target.value)}
+                  placeholder="e.g. 00C3B2D1A4E..."
+                  style={{ width: "100%", padding: "10px 14px", borderRadius: "10px", border: "1px solid var(--border)", fontSize: "14px", outline: "none", background: "var(--card-2)", color: "var(--text)", fontFamily: "monospace", boxSizing: "border-box" }}
+                />
+              </div>
+              {esewaError && (
+                <div style={{ padding: "10px 14px", borderRadius: "10px", fontSize: "13px", color: "var(--red)", background: "rgba(248,113,113,0.08)", border: "1px solid rgba(248,113,113,0.2)" }}>
+                  {esewaError}
+                </div>
+              )}
+              <div style={{ display: "flex", gap: "10px", paddingTop: "4px" }}>
+                <button type="button" onClick={() => setEsewaModal(false)} style={{ flex: 1, height: "44px", borderRadius: "99px", fontSize: "14px", fontWeight: 500, color: "var(--text)", border: "1px solid var(--border)", background: "var(--card-2)", cursor: "pointer" }}>Cancel</button>
+                <button type="submit" disabled={esewaConfirming} style={{ flex: 1, height: "44px", borderRadius: "99px", fontSize: "14px", fontWeight: 600, color: "#fff", border: "none", cursor: "pointer", background: esewaConfirming ? "#c7c7cc" : "rgba(0,113,227,0.85)", backdropFilter: "blur(12px)", transition: "all 0.2s" }}>
+                  {esewaConfirming ? "Confirming..." : "Confirm Payment"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
+
     </div>
   );
 }
