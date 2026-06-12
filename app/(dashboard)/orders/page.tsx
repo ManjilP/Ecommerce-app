@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
 import { getOrders, cancelOrder, deleteOrder, createOrder, getProducts, trackOrder, updateOrderStatus, applyCoupon, confirmPayment } from "@/lib/api";
 import { ShoppingCart, Ban, Trash2, Plus, X, Search, ChevronLeft, ChevronRight, MapPin, ArrowRight, Tag, CheckCircle, CreditCard } from "lucide-react";
@@ -67,13 +67,13 @@ export default function OrdersPage() {
   const totalPages = Math.ceil(count / pageSize);
 
   useEffect(() => {
-    setIsAdmin(localStorage.getItem("is_admin") === "true");
+    setIsAdmin(sessionStorage.getItem("is_admin") === "true");
   }, []);
 
   const CACHE_KEY = "orders_cache";
 
   const load = (showLoadingIfEmpty = false) => {
-    const cached = localStorage.getItem(CACHE_KEY);
+    const cached = sessionStorage.getItem(CACHE_KEY);
     if (cached) {
       const { orders: cachedOrders, count: cachedCount } = JSON.parse(cached);
       setOrders(cachedOrders);
@@ -88,7 +88,7 @@ export default function OrdersPage() {
         const freshCount = r.data.count ?? fresh.length;
         setOrders(fresh);
         setCount(freshCount);
-        localStorage.setItem(CACHE_KEY, JSON.stringify({ orders: fresh, count: freshCount }));
+        sessionStorage.setItem(CACHE_KEY, JSON.stringify({ orders: fresh, count: freshCount }));
       })
       .finally(() => setLoading(false));
   };
@@ -260,9 +260,9 @@ export default function OrdersPage() {
                         {o.items && o.items.length > 0 ? o.items.map((item) => (
                           <div key={item.id} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                             <span style={{ fontSize: "13px", fontWeight: 500, color: "var(--text)" }}>{item.product_name}</span>
-                            <span style={{ fontSize: "11px", padding: "1px 7px", borderRadius: "99px", background: "var(--card-2)", color: "var(--text-3)" }}>×{item.quantity}</span>
+                            <span style={{ fontSize: "11px", padding: "1px 7px", borderRadius: "99px", background: "var(--card-2)", color: "var(--text-3)" }}>Ã—{item.quantity}</span>
                           </div>
-                        )) : <span style={{ color: "var(--text-3)", fontSize: "13px" }}>—</span>}
+                        )) : <span style={{ color: "var(--text-3)", fontSize: "13px" }}>â€”</span>}
                       </div>
                     </td>
                     <td>
@@ -376,7 +376,7 @@ export default function OrdersPage() {
                           <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "10px" }}>
                             <select value={item.product} onChange={(e) => { updateItem(i, "product", e.target.value); setCouponResult(null); setCouponError(""); }} required>
                               <option value="">Select product...</option>
-                              {products.map((p) => <option key={p.id} value={p.id}>{p.name} — Rs. {parseFloat(p.price).toFixed(2)}</option>)}
+                              {products.map((p) => <option key={p.id} value={p.id}>{p.name} â€” Rs. {parseFloat(p.price).toFixed(2)}</option>)}
                             </select>
                             <input type="number" min={1} value={item.quantity} onChange={(e) => { updateItem(i, "quantity", parseInt(e.target.value)); setCouponResult(null); setCouponError(""); }} style={{ width: "80px" }} required />
                           </div>
@@ -551,3 +551,4 @@ export default function OrdersPage() {
     </div>
   );
 }
+

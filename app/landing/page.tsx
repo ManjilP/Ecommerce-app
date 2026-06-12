@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
 import { getProducts, addToWishlist, getWishlist, getUnreadNotificationCount, logout, createOrder, applyCoupon, getMe, getInventory } from "@/lib/api";
 import Link from "next/link";
@@ -58,13 +58,13 @@ export default function LandingPage() {
   const [couponApplying, setCouponApplying] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
+    const token = sessionStorage.getItem("access_token");
     setIsLoggedIn(!!token);
     if (token) {
       getMe().then((r) => {
         setUsername(r.data.username || "");
         setRole(r.data.role || "customer");
-      }).catch(() => setUsername(localStorage.getItem("username") ?? ""));
+      }).catch(() => setUsername(sessionStorage.getItem("username") ?? ""));
       getUnreadNotificationCount().then((r) => setUnreadCount(r.data?.count ?? 0)).catch(() => {});
     }
 
@@ -198,13 +198,13 @@ export default function LandingPage() {
   };
 
   const handleLogout = async () => {
-    const refresh = localStorage.getItem("refresh_token");
+    const refresh = sessionStorage.getItem("refresh_token");
     if (refresh) { try { await logout(refresh); } catch { } }
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-    localStorage.removeItem("is_admin");
-    localStorage.removeItem("orders_cache");
-    localStorage.removeItem("username");
+    sessionStorage.removeItem("access_token");
+    sessionStorage.removeItem("refresh_token");
+    sessionStorage.removeItem("is_admin");
+    sessionStorage.removeItem("orders_cache");
+    sessionStorage.removeItem("username");
     document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     router.push("/login");
   };
@@ -480,7 +480,7 @@ export default function LandingPage() {
                           <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "8px" }}>
                             <select value={item.product} onChange={e => { updateItem(i, "product", e.target.value); setCouponResult(null); }} required style={{ padding: "8px 12px", borderRadius: "8px", border: "1px solid var(--border)", fontSize: "14px", outline: "none", background: "var(--bg-elevated)", color: "var(--text)" }}>
                               <option value="">Select product...</option>
-                              {products.map(p => <option key={p.id} value={p.id}>{p.name} — Rs. {parseFloat(String(p.price)).toFixed(2)}</option>)}
+                              {products.map(p => <option key={p.id} value={p.id}>{p.name} â€” Rs. {parseFloat(String(p.price)).toFixed(2)}</option>)}
                             </select>
                             <input type="number" min={1} value={item.quantity} onChange={e => { updateItem(i, "quantity", parseInt(e.target.value)); setCouponResult(null); }} style={{ width: "72px", padding: "8px 10px", borderRadius: "8px", border: "1px solid var(--border)", fontSize: "14px", outline: "none", background: "var(--bg-elevated)", color: "var(--text)" }} required />
                           </div>
@@ -543,3 +543,4 @@ export default function LandingPage() {
     </div>
   );
 }
+

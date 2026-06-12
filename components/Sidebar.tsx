@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -39,23 +39,23 @@ export default function Sidebar() {
   const { theme, toggle } = useTheme();
 
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
+    const token = sessionStorage.getItem("access_token");
     if (!token) { router.push("/login"); return; }
     try {
       const payload = JSON.parse(atob(token.split(".")[1]));
       if (payload.exp && payload.exp * 1000 < Date.now()) {
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
-        localStorage.removeItem("is_admin");
-        localStorage.removeItem("orders_cache");
-        localStorage.removeItem("username");
+        sessionStorage.removeItem("access_token");
+        sessionStorage.removeItem("refresh_token");
+        sessionStorage.removeItem("is_admin");
+        sessionStorage.removeItem("orders_cache");
+        sessionStorage.removeItem("username");
         document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
         router.push("/login");
         return;
       }
     } catch { router.push("/login"); return; }
 
-    setIsAdmin(localStorage.getItem("is_admin") === "true");
+    setIsAdmin(sessionStorage.getItem("is_admin") === "true");
     getUnreadNotificationCount().then((r) => setUnreadCount(r.data?.count ?? 0)).catch(() => {});
     getMe().then((r) => {
       setUsername(r.data.username || "");
@@ -64,13 +64,13 @@ export default function Sidebar() {
   }, []);
 
   const handleLogout = async () => {
-    const refresh = localStorage.getItem("refresh_token");
+    const refresh = sessionStorage.getItem("refresh_token");
     if (refresh) { try { await logout(refresh); } catch { } }
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-    localStorage.removeItem("is_admin");
-    localStorage.removeItem("orders_cache");
-    localStorage.removeItem("username");
+    sessionStorage.removeItem("access_token");
+    sessionStorage.removeItem("refresh_token");
+    sessionStorage.removeItem("is_admin");
+    sessionStorage.removeItem("orders_cache");
+    sessionStorage.removeItem("username");
     document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     router.push("/login");
   };
@@ -194,3 +194,4 @@ export default function Sidebar() {
     </aside>
   );
 }
+

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { login } from "@/lib/api";
@@ -19,17 +19,17 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const { data } = await login(username, password);
-      localStorage.setItem("access_token", data.access);
-      localStorage.setItem("refresh_token", data.refresh);
-      localStorage.setItem("username", username);
-      localStorage.removeItem("orders_cache");
+      sessionStorage.setItem("access_token", data.access);
+      sessionStorage.setItem("refresh_token", data.refresh);
+      sessionStorage.setItem("username", username);
+      sessionStorage.removeItem("orders_cache");
       document.cookie = `access_token=${data.access}; path=/`;
       let isAdmin = false;
       try {
         const payload = JSON.parse(atob(data.access.split(".")[1]));
         isAdmin = !!(payload.is_staff || payload.is_superuser);
-        localStorage.setItem("is_admin", String(isAdmin));
-      } catch { localStorage.setItem("is_admin", "false"); }
+        sessionStorage.setItem("is_admin", String(isAdmin));
+      } catch { sessionStorage.setItem("is_admin", "false"); }
       router.push(isAdmin ? "/dashboard" : "/");
     } catch {
       setError("Invalid username or password.");
@@ -61,7 +61,7 @@ export default function LoginPage() {
           <p style={{ fontSize: "15px", color: "var(--text-2)", marginTop: "6px" }}>Inventory Manager</p>
         </div>
 
-        {/* Card — lighter shadow */}
+        {/* Card â€” lighter shadow */}
         <div style={{ borderRadius: "24px", padding: "28px", background: "var(--card)", border: "1px solid var(--border)", boxShadow: "0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)" }}>
           {error && (
             <div style={{ marginBottom: "20px", padding: "12px 16px", borderRadius: "12px", display: "flex", alignItems: "center", gap: "10px", background: "rgba(220,38,38,0.06)", border: "1px solid rgba(220,38,38,0.15)", color: "var(--red)", fontSize: "14px" }}>
@@ -79,7 +79,7 @@ export default function LoginPage() {
             <div>
               <label style={{ display: "block", fontSize: "13px", fontWeight: 500, color: "var(--text-2)", marginBottom: "8px" }}>Password</label>
               <div style={{ position: "relative" }}>
-                <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required style={{ paddingRight: "44px" }} />
+                <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required style={{ paddingRight: "44px" }} />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: "absolute", right: "14px", top: "50%", transform: "translateY(-50%)", color: "var(--text-3)", background: "none", border: "none", cursor: "pointer" }}>
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -111,3 +111,4 @@ export default function LoginPage() {
     </div>
   );
 }
+

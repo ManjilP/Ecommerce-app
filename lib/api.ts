@@ -1,4 +1,4 @@
-import axios from "axios";
+﻿import axios from "axios";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://192.168.18.218:8000";
 
@@ -8,7 +8,7 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("access_token");
+  const token = sessionStorage.getItem("access_token");
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
@@ -28,9 +28,9 @@ api.interceptors.response.use(
     const isAuthEndpoint = original.url?.includes("/auth/login") || original.url?.includes("/auth/register") || original.url?.includes("/auth/admin/login");
     if ((error.response?.status === 401 || error.response?.status === 403) && !original._retry && !isAuthEndpoint) {
       original._retry = true;
-      const refresh = localStorage.getItem("refresh_token");
+      const refresh = sessionStorage.getItem("refresh_token");
       if (!refresh) {
-        localStorage.removeItem("access_token");
+        sessionStorage.removeItem("access_token");
         window.location.href = "/login";
         return new Promise(() => { });
       }
@@ -47,14 +47,14 @@ api.interceptors.response.use(
       isRefreshing = true;
       try {
         const { data } = await axios.post(`${BASE_URL}/api/auth/token/refresh/`, { refresh });
-        localStorage.setItem("access_token", data.access);
-        if (data.refresh) localStorage.setItem("refresh_token", data.refresh);
+        sessionStorage.setItem("access_token", data.access);
+        if (data.refresh) sessionStorage.setItem("refresh_token", data.refresh);
         processQueue(data.access);
         original.headers.Authorization = `Bearer ${data.access}`;
         return api(original);
       } catch {
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
+        sessionStorage.removeItem("access_token");
+        sessionStorage.removeItem("refresh_token");
         window.location.href = "/login";
         return new Promise(() => { });
       } finally {
@@ -155,3 +155,4 @@ export const updateReview = (id: number, data: { rating: number; comment?: strin
 export const deleteReview = (id: number) => api.delete(`/api/reviews/${id}/`);
 
 export default api;
+

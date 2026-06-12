@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { register } from "@/lib/api";
@@ -19,10 +19,10 @@ export default function RegisterPage() {
     try {
       const { data } = await register(form.username, form.password, form.email);
       if (data.tokens) {
-        localStorage.setItem("access_token", data.tokens.access);
-        localStorage.setItem("refresh_token", data.tokens.refresh);
+        sessionStorage.setItem("access_token", data.tokens.access);
+        sessionStorage.setItem("refresh_token", data.tokens.refresh);
         document.cookie = `access_token=${data.tokens.access}; path=/`;
-        localStorage.setItem("is_admin", "false");
+        sessionStorage.setItem("is_admin", "false");
         router.push("/orders");
       } else {
         router.push("/login");
@@ -89,7 +89,7 @@ export default function RegisterPage() {
                   type={showPassword ? "text" : "password"}
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  placeholder="••••••••"
+                  placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                   required
                   minLength={8}
                   style={{ paddingRight: "40px" }}
@@ -122,3 +122,4 @@ export default function RegisterPage() {
     </div>
   );
 }
+

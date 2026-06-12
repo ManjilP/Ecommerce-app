@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState, useRef } from "react";
 import { getProducts, addToWishlist, getWishlist, createOrder, applyCoupon, getUnreadNotificationCount, logout, getMe, getInventory } from "@/lib/api";
 import Link from "next/link";
@@ -98,9 +98,9 @@ export default function Home() {
   const [couponApplying, setCouponApplying] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
+    const token = sessionStorage.getItem("access_token");
     setIsLoggedIn(!!token);
-    if (localStorage.getItem("is_admin") === "true") {
+    if (sessionStorage.getItem("is_admin") === "true") {
       router.replace("/dashboard");
       return;
     }
@@ -108,7 +108,7 @@ export default function Home() {
       getMe().then((r) => {
         setUsername(r.data.username || "");
         setRole(r.data.role || "customer");
-      }).catch(() => setUsername(localStorage.getItem("username") || ""));
+      }).catch(() => setUsername(sessionStorage.getItem("username") || ""));
     }
     getProducts()
       .then((r) => setProducts(Array.isArray(r.data) ? r.data : r.data.results ?? []))
@@ -131,13 +131,13 @@ export default function Home() {
   }, []);
 
   const handleLogout = async () => {
-    const refresh = localStorage.getItem("refresh_token");
+    const refresh = sessionStorage.getItem("refresh_token");
     if (refresh) { try { await logout(refresh); } catch { } }
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-    localStorage.removeItem("is_admin");
-    localStorage.removeItem("orders_cache");
-    localStorage.removeItem("username");
+    sessionStorage.removeItem("access_token");
+    sessionStorage.removeItem("refresh_token");
+    sessionStorage.removeItem("is_admin");
+    sessionStorage.removeItem("orders_cache");
+    sessionStorage.removeItem("username");
     document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     router.push("/login");
   };
@@ -218,7 +218,7 @@ export default function Home() {
       const data = (err as { response?: { data?: unknown } })?.response?.data;
       if (data && typeof data === "object") {
         const obj = data as Record<string, unknown>;
-        // Single "error" or "detail" key → show message directly
+        // Single "error" or "detail" key â†’ show message directly
         if (typeof obj.error === "string") {
           setOrderError(obj.error);
         } else if (typeof obj.detail === "string") {
@@ -501,7 +501,7 @@ export default function Home() {
                           <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "8px" }}>
                             <select value={item.product} onChange={e => { updateItem(i, "product", e.target.value); setCouponResult(null); }} required style={{ ...inputStyle, padding: "8px 12px" }}>
                               <option value="">Select product...</option>
-                              {products.map(p => <option key={p.id} value={p.id}>{p.name} — Rs. {parseFloat(String(p.price)).toFixed(2)}</option>)}
+                              {products.map(p => <option key={p.id} value={p.id}>{p.name} â€” Rs. {parseFloat(String(p.price)).toFixed(2)}</option>)}
                             </select>
                             <input type="number" min={1} value={item.quantity} onChange={e => { updateItem(i, "quantity", parseInt(e.target.value)); setCouponResult(null); }} style={{ ...inputStyle, width: "72px", padding: "8px 10px" }} required />
                           </div>
@@ -578,3 +578,4 @@ export default function Home() {
     </div>
   );
 }
+

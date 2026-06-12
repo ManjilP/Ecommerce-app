@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getProducts, getOrders, getInventory, getWarehouses } from "@/lib/api";
@@ -12,7 +12,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (localStorage.getItem("is_admin") !== "true") { router.replace("/orders"); return; }
+    if (sessionStorage.getItem("is_admin") !== "true") { router.replace("/orders"); return; }
     Promise.all([getProducts(), getOrders(), getInventory(), getWarehouses()])
       .then(([p, o, i, w]) => {
         const inventory = Array.isArray(i.data) ? i.data : i.data.results ?? [];
@@ -98,3 +98,4 @@ export default function AdminPage() {
     </div>
   );
 }
+
