@@ -39,6 +39,22 @@ export default function Sidebar() {
   const { theme, toggle } = useTheme();
 
   useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    if (!token) { router.push("/login"); return; }
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      if (payload.exp && payload.exp * 1000 < Date.now()) {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        localStorage.removeItem("is_admin");
+        localStorage.removeItem("orders_cache");
+        localStorage.removeItem("username");
+        document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        router.push("/login");
+        return;
+      }
+    } catch { router.push("/login"); return; }
+
     setIsAdmin(localStorage.getItem("is_admin") === "true");
     getUnreadNotificationCount().then((r) => setUnreadCount(r.data?.count ?? 0)).catch(() => {});
     getMe().then((r) => {
