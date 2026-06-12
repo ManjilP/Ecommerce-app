@@ -6,7 +6,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL!;
 export async function POST(req: NextRequest) {
   const { amount, orderId } = await req.json();
 
-  const response = await fetch("https://khalti.com/api/v2/epayment/initiate/", {
+  const response = await fetch("https://dev.khalti.com/api/v2/epayment/initiate/", {
     method: "POST",
     headers: {
       "Authorization": `Key ${SECRET_KEY}`,

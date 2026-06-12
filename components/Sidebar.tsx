@@ -85,7 +85,7 @@ export default function Sidebar() {
 
       {/* Logo + toggle */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 12px 16px" }}>
-        <Link href="/dashboard" style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none", overflow: "hidden" }}>
+        <Link href={isAdmin ? "/dashboard" : "/"} style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none", overflow: "hidden" }}>
           <img src="/logo.png" alt="logo" style={{ width: "32px", height: "32px", objectFit: "contain", flexShrink: 0 }} />
           {open && (
             <div style={{ whiteSpace: "nowrap" }}>

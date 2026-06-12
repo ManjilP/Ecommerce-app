@@ -21,6 +21,7 @@ export default function AdminLoginPage() {
       localStorage.setItem("access_token", data.access);
       localStorage.setItem("refresh_token", data.refresh);
       localStorage.setItem("is_admin", "true");
+      localStorage.removeItem("orders_cache");
       document.cookie = `access_token=${data.access}; path=/`;
       router.push("/dashboard");
     } catch {

@@ -6,7 +6,7 @@ const SECRET_KEY = process.env.KHALTI_SECRET_KEY!;
 export async function POST(req: NextRequest) {
   const { pidx, orderId } = await req.json();
 
-  const response = await fetch("https://khalti.com/api/v2/epayment/lookup/", {
+  const response = await fetch("https://dev.khalti.com/api/v2/epayment/lookup/", {
     method: "POST",
     headers: {
       "Authorization": `Key ${SECRET_KEY}`,

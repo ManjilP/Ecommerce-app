@@ -285,7 +285,7 @@ export default function OrdersPage() {
                       <div style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
                         {([
                           { show: true, onClick: () => handleTrack(o.id), color: "#fff", bg: "#a78bfa", icon: <MapPin size={13} />, label: "Track" },
-                          { show: o.payment_method === "esewa" && (o.status === "pending" || o.status === "processing"), onClick: () => handleConfirmPayment(o.id), color: "#fff", bg: "#a78bfa", icon: <CreditCard size={13} />, label: "Confirm" },
+                          { show: (!o.payment_method || o.payment_method === "cod") && o.status === "pending", onClick: () => handleConfirmPayment(o.id), color: "#fff", bg: "#a78bfa", icon: <CreditCard size={13} />, label: "Confirm" },
                           { show: isAdmin && o.status !== "cancelled" && o.status !== "completed", onClick: () => handleUpdateStatus(o.id, o.status), color: "#fff", bg: "#60a5fa", icon: <ArrowRight size={13} />, label: "Advance" },
                           { show: o.status !== "cancelled", onClick: () => handleCancel(o.id), color: "#fff", bg: "#fbbf24", icon: <Ban size={13} />, label: "Cancel" },
                           { show: true, onClick: () => handleDelete(o.id), color: "#fff", bg: "#f87171", icon: <Trash2 size={13} />, label: "Delete" },

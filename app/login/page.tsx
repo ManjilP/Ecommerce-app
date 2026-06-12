@@ -22,6 +22,7 @@ export default function LoginPage() {
       localStorage.setItem("access_token", data.access);
       localStorage.setItem("refresh_token", data.refresh);
       localStorage.setItem("username", username);
+      localStorage.removeItem("orders_cache");
       document.cookie = `access_token=${data.access}; path=/`;
       let isAdmin = false;
       try {
