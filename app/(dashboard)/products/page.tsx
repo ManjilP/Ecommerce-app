@@ -125,8 +125,10 @@ export default function ProductsPage() {
           <h1 style={{ fontSize: "32px", fontWeight: 700, letterSpacing: "-0.5px", color: "var(--text)", lineHeight: 1.1 }}>Products</h1>
           <p style={{ fontSize: "16px", color: "var(--text-2)", marginTop: "6px" }}>{count} total products</p>
         </div>
-        <button onClick={openCreate} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "0 24px", height: "48px", borderRadius: "14px", fontSize: "16px", fontWeight: 600, color: "#fff", background: "var(--accent)", border: "none", cursor: "pointer", boxShadow: "0 0 24px rgba(14,116,144,0.35)" }}>
-          <Plus size={18} /> Add Product
+        <button onClick={openCreate} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "0 20px", height: "40px", borderRadius: "4px", fontSize: "14px", fontWeight: 600, color: "rgba(0,113,227,1)", background: "transparent", border: "1.5px solid rgba(0,113,227,0.6)", cursor: "pointer", transition: "all 0.15s" }}
+          onMouseEnter={e => { e.currentTarget.style.background = "rgba(0,113,227,0.06)"; e.currentTarget.style.borderColor = "rgba(0,113,227,1)"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(0,113,227,0.6)"; }}>
+          <Plus size={15} /> Add Product
         </button>
       </div>
 

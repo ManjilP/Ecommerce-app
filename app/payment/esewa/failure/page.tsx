@@ -16,7 +16,7 @@ export default function EsewaFailurePage() {
           <button onClick={() => router.back()} style={{ width: "100%", height: "48px", borderRadius: "99px", fontSize: "15px", fontWeight: 600, color: "#fff", background: "#60BB46", border: "none", cursor: "pointer" }}>
             Try again
           </button>
-          <button onClick={() => router.push("/")} style={{ width: "100%", height: "44px", borderRadius: "99px", fontSize: "14px", color: "var(--text)", background: "var(--card-2)", border: "1px solid var(--border)", cursor: "pointer" }}>
+          <button onClick={() => router.push("/landing")} style={{ width: "100%", height: "44px", borderRadius: "99px", fontSize: "14px", color: "var(--text)", background: "var(--card-2)", border: "1px solid var(--border)", cursor: "pointer" }}>
             Back to shop
           </button>
         </div>

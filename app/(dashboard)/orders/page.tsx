@@ -1,8 +1,10 @@
-﻿"use client";
+﻿﻿"use client";
 import { useEffect, useState } from "react";
 import { getOrders, cancelOrder, deleteOrder, createOrder, getProducts, trackOrder, updateOrderStatus, applyCoupon, confirmPayment } from "@/lib/api";
 import { ShoppingCart, Ban, Trash2, Plus, X, Search, ChevronLeft, ChevronRight, MapPin, ArrowRight, Tag, CheckCircle, CreditCard } from "lucide-react";
 import { OrderTracking } from "@/components/ui/order-tracking";
+import EsewaPayment from "@/components/ui/esewa-payment";
+import KhaltiPayment from "@/components/ui/khalti-payment";
 
 interface OrderItem {
   id: number;
@@ -62,59 +64,96 @@ export default function OrdersPage() {
   const [esewaRef, setEsewaRef] = useState("");
   const [esewaError, setEsewaError] = useState("");
   const [esewaConfirming, setEsewaConfirming] = useState(false);
+  const [esewaPayModal, setEsewaPayModal] = useState(false);
+  const [esewaPayOrderId, setEsewaPayOrderId] = useState<number | null>(null);
+  const [esewaPayAmount, setEsewaPayAmount] = useState(0);
+  const [khaltiPayModal, setKhaltiPayModal] = useState(false);
+  const [khaltiPayOrderId, setKhaltiPayOrderId] = useState<number | null>(null);
+  const [khaltiPayAmount, setKhaltiPayAmount] = useState(0);
+  const [allOrders, setAllOrders] = useState<Order[]>([]);
 
-  const pageSize = 5;
-  const totalPages = Math.ceil(count / pageSize);
+  const PAGE_SIZE = 10;
 
   useEffect(() => {
-    setIsAdmin(sessionStorage.getItem("is_admin") === "true");
+    setIsAdmin(localStorage.getItem("is_admin") === "true");
   }, []);
 
   const CACHE_KEY = "orders_cache";
 
-  const load = (showLoadingIfEmpty = false) => {
-    const cached = sessionStorage.getItem(CACHE_KEY);
+  const fetchAll = () => {
+    const cached = localStorage.getItem(CACHE_KEY);
     if (cached) {
-      const { orders: cachedOrders, count: cachedCount } = JSON.parse(cached);
-      setOrders(cachedOrders);
-      setCount(cachedCount);
+      const parsed = JSON.parse(cached);
+      setAllOrders(parsed);
       setLoading(false);
-    } else if (showLoadingIfEmpty) {
+    } else {
       setLoading(true);
     }
     getOrders()
       .then((r) => {
         const fresh = Array.isArray(r.data) ? r.data : r.data.results ?? [];
-        const freshCount = r.data.count ?? fresh.length;
-        setOrders(fresh);
-        setCount(freshCount);
-        sessionStorage.setItem(CACHE_KEY, JSON.stringify({ orders: fresh, count: freshCount }));
+        setAllOrders(fresh);
+        localStorage.setItem(CACHE_KEY, JSON.stringify(fresh));
       })
       .finally(() => setLoading(false));
   };
 
+  const applyFilter = (all: Order[], s: string, p: number) => {
+    const filtered = s.trim()
+      ? all.filter(o =>
+          o.customer_name?.toLowerCase().includes(s.toLowerCase()) ||
+          o.delivery_city?.toLowerCase().includes(s.toLowerCase()) ||
+          o.status?.toLowerCase().includes(s.toLowerCase()) ||
+          String(o.id).includes(s.trim())
+        )
+      : all;
+    const start = (p - 1) * PAGE_SIZE;
+    setOrders(filtered.slice(start, start + PAGE_SIZE));
+    setCount(filtered.length);
+  };
+
   useEffect(() => {
-    load(true);
+    applyFilter(allOrders, search, page);
+  }, [allOrders, search, page]);
+
+  const load = () => {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      const fresh = JSON.parse(cached);
+      setAllOrders(fresh);
+    } else {
+      fetchAll();
+    }
+    fetchAll();
+  };
+
+  useEffect(() => {
+    fetchAll();
     getProducts().then((r) => setProducts(Array.isArray(r.data) ? r.data : r.data.results ?? []));
   }, []);
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    load();
+    setSearch(searchInput);
+    setPage(1);
   };
 
-  const goToPage = (p: number) => { setPage(p); load(); };
+  const goToPage = (p: number) => setPage(p);
+
+  const totalPages = Math.ceil(count / PAGE_SIZE);
 
   const handleCancel = async (id: number) => {
     if (!confirm("Cancel this order?")) return;
     await cancelOrder(id);
-    load();
+    localStorage.removeItem(CACHE_KEY);
+    fetchAll();
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm("Delete this order?")) return;
     await deleteOrder(id);
-    load();
+    localStorage.removeItem(CACHE_KEY);
+    fetchAll();
   };
 
   const nextStatus: Record<string, string> = {
@@ -127,7 +166,8 @@ export default function OrdersPage() {
     const next = nextStatus[currentStatus];
     if (!next) return;
     await updateOrderStatus(id, next);
-    load();
+    localStorage.removeItem(CACHE_KEY);
+    fetchAll();
   };
 
   const handleTrack = async (id: number) => {
@@ -153,7 +193,8 @@ export default function OrdersPage() {
       setEsewaModal(false);
       setEsewaRef("");
       setEsewaOrderId(null);
-      load();
+      localStorage.removeItem(CACHE_KEY);
+      fetchAll();
     } catch (err: unknown) {
       const data = (err as { response?: { data?: Record<string, unknown> } })?.response?.data;
       const msg = data
@@ -194,19 +235,28 @@ export default function OrdersPage() {
     setSaving(true);
     setError("");
     try {
-      await createOrder({
+      const res = await createOrder({
         customer_name: customerName,
         delivery_city: deliveryCity,
         payment_method: paymentMethod,
         items: items.map((i) => ({ product: parseInt(i.product), quantity: i.quantity })),
       });
+      const total = couponResult ? parseFloat(couponResult.final_amount) : getSubtotal();
       setModal(false);
-      setCustomerName("");
-      setDeliveryCity("");
-      setPaymentMethod("cod");
+      setCustomerName(""); setDeliveryCity(""); setPaymentMethod("cod");
       setItems([{ product: "", quantity: 1 }]);
       setCouponCode(""); setCouponResult(null); setCouponError("");
-      load();
+      localStorage.removeItem(CACHE_KEY);
+      fetchAll();
+      if (paymentMethod === "esewa") {
+        setEsewaPayOrderId(res.data.id);
+        setEsewaPayAmount(total);
+        setEsewaPayModal(true);
+      } else if (paymentMethod === "khalti") {
+        setKhaltiPayOrderId(res.data.id);
+        setKhaltiPayAmount(total);
+        setKhaltiPayModal(true);
+      }
     } catch (err: unknown) {
       const data = (err as { response?: { data?: unknown } })?.response?.data;
       setError(data ? JSON.stringify(data) : "Failed to create order.");
@@ -222,10 +272,10 @@ export default function OrdersPage() {
           <h1 style={{ fontSize: "32px", fontWeight: 700, letterSpacing: "-0.5px", color: "var(--text)", lineHeight: 1.1 }}>Orders</h1>
           <p style={{ fontSize: "16px", color: "var(--text-2)", marginTop: "6px" }}>{count} total orders</p>
         </div>
-        <button onClick={() => { setModal(true); setError(""); }} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "0 24px", height: "48px", borderRadius: "14px", fontSize: "16px", fontWeight: 600, color: "#fff", background: "rgba(0,113,227,0.85)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", border: "1px solid rgba(0,113,227,0.4)", boxShadow: "0 4px 24px rgba(0,113,227,0.3), inset 0 1px 0 rgba(255,255,255,0.2)", cursor: "pointer", transition: "all 0.2s" }}
-          onMouseEnter={e => { e.currentTarget.style.background = "rgba(0,113,227,1)"; e.currentTarget.style.boxShadow = "0 8px 32px rgba(0,113,227,0.4), inset 0 1px 0 rgba(255,255,255,0.2)"; }}
-          onMouseLeave={e => { e.currentTarget.style.background = "rgba(0,113,227,0.85)"; e.currentTarget.style.boxShadow = "0 4px 24px rgba(0,113,227,0.3), inset 0 1px 0 rgba(255,255,255,0.2)"; }}>
-          <Plus size={18} /> New Order
+        <button onClick={() => { setModal(true); setError(""); }} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "0 24px", height: "44px", borderRadius: "4px", fontSize: "15px", fontWeight: 600, color: "rgba(0,113,227,1)", background: "transparent", border: "1.5px solid rgba(0,113,227,0.6)", cursor: "pointer", transition: "all 0.15s" }}
+          onMouseEnter={e => { e.currentTarget.style.background = "rgba(0,113,227,0.06)"; e.currentTarget.style.borderColor = "rgba(0,113,227,1)"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(0,113,227,0.6)"; }}>
+          <Plus size={16} /> New Order
         </button>
       </div>
 
@@ -234,12 +284,12 @@ export default function OrdersPage() {
           <Search size={16} style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", color: "var(--text-3)" }} />
           <input value={searchInput} onChange={(e) => setSearchInput(e.target.value)} placeholder="Search by customer or status..." style={{ paddingLeft: "46px", height: "50px" }} />
         </div>
-        <button type="submit" style={{ padding: "0 24px", borderRadius: "14px", fontSize: "16px", fontWeight: 600, color: "#fff", background: "rgba(0,113,227,0.85)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", border: "1px solid rgba(0,113,227,0.4)", boxShadow: "0 4px 24px rgba(0,113,227,0.3), inset 0 1px 0 rgba(255,255,255,0.2)", cursor: "pointer", whiteSpace: "nowrap", transition: "all 0.2s" }}
-          onMouseEnter={e => { e.currentTarget.style.background = "rgba(0,113,227,1)"; e.currentTarget.style.boxShadow = "0 8px 32px rgba(0,113,227,0.4), inset 0 1px 0 rgba(255,255,255,0.2)"; }}
-          onMouseLeave={e => { e.currentTarget.style.background = "rgba(0,113,227,0.85)"; e.currentTarget.style.boxShadow = "0 4px 24px rgba(0,113,227,0.3), inset 0 1px 0 rgba(255,255,255,0.2)"; }}>Search</button>
-        {search && <button type="button" onClick={() => { setSearchInput(""); setSearch(""); setPage(1); load(); }} style={{ padding: "0 20px", borderRadius: "14px", fontSize: "16px", fontWeight: 500, color: "var(--text-2)", background: "rgba(255,255,255,0.15)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", border: "1px solid var(--border)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.3)", cursor: "pointer", transition: "all 0.2s" }}
-          onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.25)"}
-          onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.15)"}>Clear</button>}
+        <button type="submit" style={{ padding: "0 24px", height: "50px", borderRadius: "4px", fontSize: "15px", fontWeight: 600, color: "rgba(0,113,227,1)", background: "transparent", border: "1.5px solid rgba(0,113,227,0.6)", cursor: "pointer", whiteSpace: "nowrap", transition: "all 0.15s" }}
+          onMouseEnter={e => { e.currentTarget.style.background = "rgba(0,113,227,0.06)"; e.currentTarget.style.borderColor = "rgba(0,113,227,1)"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(0,113,227,0.6)"; }}>Search</button>
+        {search && <button type="button" onClick={() => { setSearchInput(""); setSearch(""); setPage(1); }} style={{ padding: "0 20px", height: "50px", borderRadius: "4px", fontSize: "15px", fontWeight: 500, color: "var(--text-2)", background: "transparent", border: "1.5px solid var(--border)", cursor: "pointer", transition: "all 0.15s" }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--text-3)"; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border)"; }}>Clear</button>}
       </form>
 
       {loading ? <p style={{ color: "var(--text-3)" }}>Loading...</p> : (
@@ -260,9 +310,9 @@ export default function OrdersPage() {
                         {o.items && o.items.length > 0 ? o.items.map((item) => (
                           <div key={item.id} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                             <span style={{ fontSize: "13px", fontWeight: 500, color: "var(--text)" }}>{item.product_name}</span>
-                            <span style={{ fontSize: "11px", padding: "1px 7px", borderRadius: "99px", background: "var(--card-2)", color: "var(--text-3)" }}>Ã—{item.quantity}</span>
+                            <span style={{ fontSize: "11px", padding: "1px 7px", borderRadius: "99px", background: "var(--card-2)", color: "var(--text-3)" }}>x{item.quantity}</span>
                           </div>
-                        )) : <span style={{ color: "var(--text-3)", fontSize: "13px" }}>â€”</span>}
+                        )) : <span style={{ color: "var(--text-3)", fontSize: "13px" }}>"”</span>}
                       </div>
                     </td>
                     <td>
@@ -291,9 +341,9 @@ export default function OrdersPage() {
                           { show: true, onClick: () => handleDelete(o.id), color: "#fff", bg: "#f87171", icon: <Trash2 size={13} />, label: "Delete" },
                         ] as { show: boolean; onClick: () => void; color: string; bg: string; icon: React.ReactNode; label: string }[]).filter(b => b.show).map((btn, i) => (
                           <button key={i} onClick={btn.onClick}
-                            style={{ display: "flex", alignItems: "center", gap: "5px", padding: "5px 12px", borderRadius: "99px", border: "none", background: btn.bg, color: btn.color, fontSize: "12px", fontWeight: 600, cursor: "pointer", transition: "all 0.15s", whiteSpace: "nowrap" }}
-                            onMouseEnter={e => { e.currentTarget.style.opacity = "0.85"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-                            onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}>
+                            style={{ display: "flex", alignItems: "center", gap: "5px", padding: "4px 10px", borderRadius: "6px", border: "none", background: btn.bg, color: btn.color, fontSize: "12px", fontWeight: 500, cursor: "pointer", transition: "opacity 0.15s", whiteSpace: "nowrap" }}
+                            onMouseEnter={e => { e.currentTarget.style.opacity = "0.8"; }}
+                            onMouseLeave={e => { e.currentTarget.style.opacity = "1"; }}>
                             {btn.icon}{btn.label}
                           </button>
                         ))}
@@ -349,6 +399,7 @@ export default function OrdersPage() {
                   <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
                     <option value="cod">Cash on Delivery</option>
                     <option value="esewa">eSewa</option>
+                    <option value="khalti">Khalti</option>
                   </select>
                 </div>
 
@@ -376,7 +427,7 @@ export default function OrdersPage() {
                           <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "10px" }}>
                             <select value={item.product} onChange={(e) => { updateItem(i, "product", e.target.value); setCouponResult(null); setCouponError(""); }} required>
                               <option value="">Select product...</option>
-                              {products.map((p) => <option key={p.id} value={p.id}>{p.name} â€” Rs. {parseFloat(p.price).toFixed(2)}</option>)}
+                              {products.map((p) => <option key={p.id} value={p.id}>{p.name} "” Rs. {parseFloat(p.price).toFixed(2)}</option>)}
                             </select>
                             <input type="number" min={1} value={item.quantity} onChange={(e) => { updateItem(i, "quantity", parseInt(e.target.value)); setCouponResult(null); setCouponError(""); }} style={{ width: "80px" }} required />
                           </div>
@@ -546,6 +597,22 @@ export default function OrdersPage() {
             </form>
           </div>
         </div>
+      )}
+
+      {esewaPayModal && esewaPayOrderId && (
+        <EsewaPayment
+          orderId={esewaPayOrderId}
+          amount={esewaPayAmount}
+          onClose={() => setEsewaPayModal(false)}
+        />
+      )}
+
+      {khaltiPayModal && khaltiPayOrderId && (
+        <KhaltiPayment
+          orderId={khaltiPayOrderId}
+          amount={khaltiPayAmount}
+          onClose={() => setKhaltiPayModal(false)}
+        />
       )}
 
     </div>

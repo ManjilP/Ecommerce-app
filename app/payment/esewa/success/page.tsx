@@ -65,7 +65,7 @@ function EsewaSuccessContent() {
           <XCircle size={56} style={{ margin: "0 auto 20px", color: "var(--red)" }} />
           <h1 style={{ fontSize: "22px", fontWeight: 700, color: "var(--text)", marginBottom: "8px" }}>Something went wrong</h1>
           <p style={{ fontSize: "14px", color: "var(--text-2)", marginBottom: "24px" }}>{errorMsg}</p>
-          <button onClick={() => router.push("/")} style={{ width: "100%", height: "48px", borderRadius: "99px", fontSize: "15px", fontWeight: 600, color: "var(--text)", background: "var(--card-2)", border: "1px solid var(--border)", cursor: "pointer" }}>
+          <button onClick={() => router.push("/landing")} style={{ width: "100%", height: "48px", borderRadius: "99px", fontSize: "15px", fontWeight: 600, color: "var(--text)", background: "var(--card-2)", border: "1px solid var(--border)", cursor: "pointer" }}>
             Back to shop
           </button>
         </>

@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import { getWishlist, removeFromWishlist, clearWishlist, addToWishlist, getProducts, createOrder, applyCoupon } from "@/lib/api";
 import { Heart, Trash2, X, Plus, Search, ImageIcon, ShoppingBag, Tag, CheckCircle } from "lucide-react";
+import EsewaPayment from "@/components/ui/esewa-payment";
+import KhaltiPayment from "@/components/ui/khalti-payment";
 
 interface WishlistItem {
   id: number;
@@ -40,6 +42,12 @@ export default function WishlistPage() {
   const [couponResult, setCouponResult] = useState<{ discount_amount: string; final_amount: string; message?: string } | null>(null);
   const [couponError, setCouponError] = useState("");
   const [couponApplying, setCouponApplying] = useState(false);
+  const [esewaModal, setEsewaModal] = useState(false);
+  const [esewaOrderId, setEsewaOrderId] = useState<number | null>(null);
+  const [esewaAmount, setEsewaAmount] = useState(0);
+  const [khaltiModal, setKhaltiModal] = useState(false);
+  const [khaltiOrderId, setKhaltiOrderId] = useState<number | null>(null);
+  const [khaltiAmount, setKhaltiAmount] = useState(0);
 
   const load = () => {
     setLoading(true);
@@ -87,17 +95,37 @@ export default function WishlistPage() {
     if (!orderItem) return;
     setOrderSaving(true); setOrderError("");
     try {
-      await createOrder({
+      const res = await createOrder({
         customer_name: customerName,
         delivery_city: deliveryCity,
         payment_method: paymentMethod,
         items: [{ product: orderItem.product_id, quantity }],
       });
-      setOrderSuccess(true);
-      setTimeout(() => closeOrderModal(), 2000);
+      const total = couponResult ? parseFloat(couponResult.final_amount) : getSubtotal();
+      if (paymentMethod === "esewa") {
+        setEsewaOrderId(res.data.id);
+        setEsewaAmount(total);
+        closeOrderModal();
+        setEsewaModal(true);
+      } else if (paymentMethod === "khalti") {
+        setKhaltiOrderId(res.data.id);
+        setKhaltiAmount(total);
+        closeOrderModal();
+        setKhaltiModal(true);
+      } else {
+        setOrderSuccess(true);
+        setTimeout(() => closeOrderModal(), 2000);
+      }
     } catch (err: unknown) {
       const data = (err as { response?: { data?: unknown } })?.response?.data;
-      setOrderError(data ? JSON.stringify(data) : "Failed to place order.");
+      if (data && typeof data === "object") {
+        const obj = data as Record<string, unknown>;
+        if (typeof obj.error === "string") setOrderError(obj.error);
+        else if (typeof obj.detail === "string") setOrderError(obj.detail);
+        else setOrderError(Object.entries(obj).map(([f, v]) => `${f}: ${Array.isArray(v) ? v.join(", ") : v}`).join("\n"));
+      } else {
+        setOrderError("Failed to place order.");
+      }
     } finally { setOrderSaving(false); }
   };
 
@@ -140,14 +168,16 @@ export default function WishlistPage() {
         </div>
         <div style={{ display: "flex", gap: "10px" }}>
           {items.length > 0 && (
-            <button onClick={handleClear} disabled={clearing} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "0 18px", height: "46px", borderRadius: "12px", fontSize: "15px", fontWeight: 500, color: "#f87171", background: "rgba(248,113,113,0.08)", border: "1px solid rgba(248,113,113,0.2)", cursor: "pointer" }}>
-              <X size={16} /> {clearing ? "Clearing..." : "Clear all"}
+            <button onClick={handleClear} disabled={clearing} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "0 16px", height: "40px", borderRadius: "4px", fontSize: "14px", fontWeight: 500, color: "#f87171", background: "transparent", border: "1.5px solid rgba(248,113,113,0.5)", cursor: clearing ? "not-allowed" : "pointer", transition: "all 0.15s" }}
+              onMouseEnter={e => { e.currentTarget.style.background = "rgba(248,113,113,0.06)"; e.currentTarget.style.borderColor = "#f87171"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(248,113,113,0.5)"; }}>
+              <X size={15} /> {clearing ? "Clearing..." : "Clear all"}
             </button>
           )}
-          <button onClick={openModal} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "0 24px", height: "46px", borderRadius: "14px", fontSize: "15px", fontWeight: 600, color: "#fff", background: "rgba(0,113,227,0.85)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", border: "1px solid rgba(0,113,227,0.4)", boxShadow: "0 4px 24px rgba(0,113,227,0.3), inset 0 1px 0 rgba(255,255,255,0.2)", cursor: "pointer", transition: "all 0.2s" }}
-            onMouseEnter={e => { e.currentTarget.style.background = "rgba(0,113,227,1)"; e.currentTarget.style.boxShadow = "0 8px 32px rgba(0,113,227,0.4), inset 0 1px 0 rgba(255,255,255,0.2)"; }}
-            onMouseLeave={e => { e.currentTarget.style.background = "rgba(0,113,227,0.85)"; e.currentTarget.style.boxShadow = "0 4px 24px rgba(0,113,227,0.3), inset 0 1px 0 rgba(255,255,255,0.2)"; }}>
-            <Plus size={18} /> Add Product
+          <button onClick={openModal} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "0 20px", height: "40px", borderRadius: "4px", fontSize: "14px", fontWeight: 600, color: "rgba(0,113,227,1)", background: "transparent", border: "1.5px solid rgba(0,113,227,0.6)", cursor: "pointer", transition: "all 0.15s" }}
+            onMouseEnter={e => { e.currentTarget.style.background = "rgba(0,113,227,0.06)"; e.currentTarget.style.borderColor = "rgba(0,113,227,1)"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(0,113,227,0.6)"; }}>
+            <Plus size={15} /> Add Product
           </button>
         </div>
       </div>
@@ -317,6 +347,7 @@ export default function WishlistPage() {
                     <select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)}>
                       <option value="cod">Cash on Delivery</option>
                       <option value="esewa">eSewa</option>
+                      <option value="khalti">Khalti</option>
                     </select>
                   </div>
                   <div>
@@ -376,6 +407,22 @@ export default function WishlistPage() {
             )}
           </div>
         </div>
+      )}
+
+      {esewaModal && esewaOrderId && (
+        <EsewaPayment
+          orderId={esewaOrderId}
+          amount={esewaAmount}
+          onClose={() => setEsewaModal(false)}
+        />
+      )}
+
+      {khaltiModal && khaltiOrderId && (
+        <KhaltiPayment
+          orderId={khaltiOrderId}
+          amount={khaltiAmount}
+          onClose={() => setKhaltiModal(false)}
+        />
       )}
     </div>
   );

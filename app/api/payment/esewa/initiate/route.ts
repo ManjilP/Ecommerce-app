@@ -6,6 +6,7 @@ const PRODUCT_CODE = process.env.ESEWA_PRODUCT_CODE!;
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL!;
 
 export async function POST(req: NextRequest) {
+  try {
     const { amount, orderId } = await req.json();
 
     const transaction_uuid = `${orderId}-${Date.now()}`;
@@ -15,16 +16,20 @@ export async function POST(req: NextRequest) {
     const signature = crypto.createHmac("sha256", SECRET_KEY).update(message).digest("base64");
 
     return NextResponse.json({
-        amount: total_amount,
-        tax_amount: "0",
-        total_amount,
-        transaction_uuid,
-        product_code: PRODUCT_CODE,
-        product_service_charge: "0",
-        product_delivery_charge: "0",
-        success_url: `${BASE_URL}/payment/esewa/success`,
-        failure_url: `${BASE_URL}/payment/esewa/failure`,
-        signed_field_names: "total_amount,transaction_uuid,product_code",
-        signature,
+      amount: total_amount,
+      tax_amount: "0",
+      total_amount,
+      transaction_uuid,
+      product_code: PRODUCT_CODE,
+      product_service_charge: "0",
+      product_delivery_charge: "0",
+      success_url: `${BASE_URL}/payment/esewa/success`,
+      failure_url: `${BASE_URL}/payment/esewa/failure`,
+      signed_field_names: "total_amount,transaction_uuid,product_code",
+      signature,
     });
+  } catch (err) {
+    console.error("eSewa initiate error:", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 }

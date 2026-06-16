@@ -8,7 +8,7 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = sessionStorage.getItem("access_token");
+  const token = localStorage.getItem("access_token");
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
@@ -28,9 +28,9 @@ api.interceptors.response.use(
     const isAuthEndpoint = original.url?.includes("/auth/login") || original.url?.includes("/auth/register") || original.url?.includes("/auth/admin/login");
     if ((error.response?.status === 401 || error.response?.status === 403) && !original._retry && !isAuthEndpoint) {
       original._retry = true;
-      const refresh = sessionStorage.getItem("refresh_token");
+      const refresh = localStorage.getItem("refresh_token");
       if (!refresh) {
-        sessionStorage.removeItem("access_token");
+        localStorage.removeItem("access_token");
         window.location.href = "/login";
         return new Promise(() => { });
       }
@@ -47,14 +47,14 @@ api.interceptors.response.use(
       isRefreshing = true;
       try {
         const { data } = await axios.post(`${BASE_URL}/api/auth/token/refresh/`, { refresh });
-        sessionStorage.setItem("access_token", data.access);
-        if (data.refresh) sessionStorage.setItem("refresh_token", data.refresh);
+        localStorage.setItem("access_token", data.access);
+        if (data.refresh) localStorage.setItem("refresh_token", data.refresh);
         processQueue(data.access);
         original.headers.Authorization = `Bearer ${data.access}`;
         return api(original);
       } catch {
-        sessionStorage.removeItem("access_token");
-        sessionStorage.removeItem("refresh_token");
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
         window.location.href = "/login";
         return new Promise(() => { });
       } finally {
@@ -72,8 +72,8 @@ export const login = (username: string, password: string) =>
 export const adminLogin = (username: string, password: string) =>
   api.post("/api/auth/admin/login/", { username, password });
 
-export const register = (username: string, password: string, email: string) =>
-  api.post("/api/auth/register/", { username, password, email });
+export const register = (username: string, password: string, email: string, city?: string) =>
+  api.post("/api/auth/register/", { username, password, email, ...(city ? { city } : {}) });
 
 // Products
 export const getProducts = () => api.get("/api/products/");
@@ -85,7 +85,7 @@ export const uploadProductImage = (id: number, file: File) => { const fd = new F
 export const fetchProductImage = (id: number) => api.post(`/api/products/${id}/fetch-image/`);
 
 // Orders
-export const getOrders = () => api.get("/api/orders/");
+export const getOrders = (params?: { search?: string; page?: number }) => api.get("/api/orders/", { params });
 export const getOrder = (id: number) => api.get(`/api/orders/${id}/`);
 export const createOrder = (data: unknown) => api.post("/api/orders/", data);
 export const updateOrder = (id: number, data: unknown) => api.put(`/api/orders/${id}/`, data);

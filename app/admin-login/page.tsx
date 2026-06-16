@@ -1,4 +1,4 @@
-﻿"use client";
+﻿﻿"use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { adminLogin } from "@/lib/api";
@@ -18,10 +18,10 @@ export default function AdminLoginPage() {
     setLoading(true);
     try {
       const { data } = await adminLogin(username, password);
-      sessionStorage.setItem("access_token", data.access);
-      sessionStorage.setItem("refresh_token", data.refresh);
-      sessionStorage.setItem("is_admin", "true");
-      sessionStorage.removeItem("orders_cache");
+      localStorage.setItem("access_token", data.access);
+      localStorage.setItem("refresh_token", data.refresh);
+      localStorage.setItem("is_admin", "true");
+      localStorage.removeItem("orders_cache");
       document.cookie = `access_token=${data.access}; path=/`;
       router.push("/dashboard");
     } catch {
@@ -62,7 +62,7 @@ export default function AdminLoginPage() {
             </div>
             <div>
               <label style={{ display: "block", fontSize: "13px", fontWeight: 500, color: "var(--text-2)", marginBottom: "8px" }}>Password</label>
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required />
+              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
             </div>
             <button
               type="submit"

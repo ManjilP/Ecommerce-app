@@ -1,4 +1,4 @@
-﻿"use client";
+﻿﻿"use client";
 import { useEffect, useState } from "react";
 import { getProducts, getOrders, getInventory, getTopProducts, getSalesChart } from "@/lib/api";
 import { Package, ShoppingCart, Warehouse, TrendingUp, ArrowUpRight, Activity } from "lucide-react";
@@ -37,7 +37,7 @@ export default function DashboardPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (sessionStorage.getItem("is_admin") !== "true") {
+    if (localStorage.getItem("is_admin") !== "true") {
       router.replace("/orders");
       return;
     }
@@ -81,7 +81,7 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-4 gap-4">
 
-        {/* Orders â€” 2 cols */}
+        {/* Orders "” 2 cols */}
         <BentoCard
           className="col-span-2 flex flex-col justify-between"
           style={{ minHeight: "190px", background: "var(--bento-orders-bg)", borderColor: "var(--bento-orders-border)" }}
@@ -138,7 +138,7 @@ export default function DashboardPage() {
           </div>
         </BentoCard>
 
-        {/* Sparkline â€” 2 cols */}
+        {/* Sparkline "” 2 cols */}
         <BentoCard className="col-span-2" style={{ minHeight: "200px" }}>
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -205,7 +205,7 @@ export default function DashboardPage() {
           ) : <p style={{ fontSize: "14px", color: "var(--text-3)" }}>No data yet.</p>}
         </BentoCard>
 
-        {/* Recent Orders â€” 2 cols */}
+        {/* Recent Orders "” 2 cols */}
         <BentoCard className="col-span-2" style={{ minHeight: "200px" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
             <p style={{ fontSize: "16px", fontWeight: 600, color: "var(--text)" }}>Recent Orders</p>

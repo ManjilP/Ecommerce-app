@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import {
   LayoutDashboard, Package, ShoppingCart, Warehouse,
   Building2, BarChart2, LogOut, ShieldCheck, KeyRound,
-  Ticket, Bell, Heart, Star, ChevronLeft, ChevronRight,
+  Ticket, Bell, Heart, Star,
 } from "lucide-react";
 import { getUnreadNotificationCount, logout, getMe } from "@/lib/api";
 import { useTheme } from "@/components/ThemeProvider";
@@ -39,23 +39,23 @@ export default function Sidebar() {
   const { theme, toggle } = useTheme();
 
   useEffect(() => {
-    const token = sessionStorage.getItem("access_token");
+    const token = localStorage.getItem("access_token");
     if (!token) { router.push("/login"); return; }
     try {
       const payload = JSON.parse(atob(token.split(".")[1]));
       if (payload.exp && payload.exp * 1000 < Date.now()) {
-        sessionStorage.removeItem("access_token");
-        sessionStorage.removeItem("refresh_token");
-        sessionStorage.removeItem("is_admin");
-        sessionStorage.removeItem("orders_cache");
-        sessionStorage.removeItem("username");
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        localStorage.removeItem("is_admin");
+        localStorage.removeItem("orders_cache");
+        localStorage.removeItem("username");
         document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
         router.push("/login");
         return;
       }
     } catch { router.push("/login"); return; }
 
-    setIsAdmin(sessionStorage.getItem("is_admin") === "true");
+    setIsAdmin(localStorage.getItem("is_admin") === "true");
     getUnreadNotificationCount().then((r) => setUnreadCount(r.data?.count ?? 0)).catch(() => {});
     getMe().then((r) => {
       setUsername(r.data.username || "");
@@ -64,13 +64,13 @@ export default function Sidebar() {
   }, []);
 
   const handleLogout = async () => {
-    const refresh = sessionStorage.getItem("refresh_token");
+    const refresh = localStorage.getItem("refresh_token");
     if (refresh) { try { await logout(refresh); } catch { } }
-    sessionStorage.removeItem("access_token");
-    sessionStorage.removeItem("refresh_token");
-    sessionStorage.removeItem("is_admin");
-    sessionStorage.removeItem("orders_cache");
-    sessionStorage.removeItem("username");
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("is_admin");
+    localStorage.removeItem("orders_cache");
+    localStorage.removeItem("username");
     document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     router.push("/login");
   };
@@ -110,8 +110,38 @@ export default function Sidebar() {
             </div>
           )}
         </Link>
-        <button onClick={() => setOpen(!open)} style={{ width: "28px", height: "28px", borderRadius: "8px", border: "1px solid var(--border)", background: "var(--card-2)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "var(--text-2)", flexShrink: 0 }}>
-          {open ? <ChevronLeft size={15} /> : <ChevronRight size={15} />}
+        <button
+          className="group"
+          onClick={() => setOpen(!open)}
+          aria-expanded={open}
+          aria-label={open ? "Close menu" : "Open menu"}
+          style={{ width: "28px", height: "28px", borderRadius: "8px", border: "1px solid var(--border)", background: "var(--card-2)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "var(--text-2)", flexShrink: 0 }}
+        >
+          <svg
+            className="pointer-events-none"
+            width={14}
+            height={14}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M4 12L20 12"
+              className="origin-center -translate-y-[7px] transition-all duration-300 [transition-timing-function:cubic-bezier(.5,.85,.25,1.1)] group-aria-expanded:translate-x-0 group-aria-expanded:translate-y-0 group-aria-expanded:rotate-[315deg]"
+            />
+            <path
+              d="M4 12H20"
+              className="origin-center transition-all duration-300 [transition-timing-function:cubic-bezier(.5,.85,.25,1.8)] group-aria-expanded:rotate-45"
+            />
+            <path
+              d="M4 12H20"
+              className="origin-center translate-y-[7px] transition-all duration-300 [transition-timing-function:cubic-bezier(.5,.85,.25,1.1)] group-aria-expanded:translate-y-0 group-aria-expanded:rotate-[135deg]"
+            />
+          </svg>
         </button>
       </div>
 
