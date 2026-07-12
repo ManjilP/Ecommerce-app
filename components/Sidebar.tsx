@@ -7,7 +7,9 @@ import {
   Building2, BarChart2, LogOut, ShieldCheck, KeyRound,
   Ticket, Bell, Heart, Star,
 } from "lucide-react";
-import { getUnreadNotificationCount, logout, getMe } from "@/lib/api";
+import { logout, getMe } from "@/lib/api";
+import { useNotificationStream } from "@/hooks/useNotificationStream";
+
 import { useTheme } from "@/components/ThemeProvider";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 
@@ -28,35 +30,36 @@ const userNav = [
   { href: "/notifications", label: "Notifications", icon: Bell },
 ];
 
+
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [isAdmin, setIsAdmin] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
   const [username, setUsername] = useState("");
   const [role, setRole] = useState("");
   const [open, setOpen] = useState(true);
-  const { theme, toggle } = useTheme();
+  const { theme } = useTheme();
+  const { unreadCount } = useNotificationStream();
 
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
+    const token = sessionStorage.getItem("access_token");
     if (!token) { router.push("/login"); return; }
     try {
       const payload = JSON.parse(atob(token.split(".")[1]));
       if (payload.exp && payload.exp * 1000 < Date.now()) {
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
-        localStorage.removeItem("is_admin");
-        localStorage.removeItem("orders_cache");
-        localStorage.removeItem("username");
+        sessionStorage.removeItem("access_token");
+        sessionStorage.removeItem("refresh_token");
+        sessionStorage.removeItem("is_admin");
+        sessionStorage.removeItem("orders_cache");
+        sessionStorage.removeItem("username");
         document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
         router.push("/login");
         return;
       }
     } catch { router.push("/login"); return; }
 
-    setIsAdmin(localStorage.getItem("is_admin") === "true");
-    getUnreadNotificationCount().then((r) => setUnreadCount(r.data?.count ?? 0)).catch(() => {});
+    setIsAdmin(sessionStorage.getItem("is_admin") === "true");
+    
     getMe().then((r) => {
       setUsername(r.data.username || "");
       setRole(r.data.role || "customer");
@@ -64,13 +67,13 @@ export default function Sidebar() {
   }, []);
 
   const handleLogout = async () => {
-    const refresh = localStorage.getItem("refresh_token");
+    const refresh = sessionStorage.getItem("refresh_token");
     if (refresh) { try { await logout(refresh); } catch { } }
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-    localStorage.removeItem("is_admin");
-    localStorage.removeItem("orders_cache");
-    localStorage.removeItem("username");
+    sessionStorage.removeItem("access_token");
+    sessionStorage.removeItem("refresh_token");
+    sessionStorage.removeItem("is_admin");
+    sessionStorage.removeItem("orders_cache");
+    sessionStorage.removeItem("username");
     document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     router.push("/login");
   };
@@ -105,8 +108,8 @@ export default function Sidebar() {
           <img src="/logo.png" alt="logo" style={{ width: "32px", height: "32px", objectFit: "contain", flexShrink: 0 }} />
           {open && (
             <div style={{ whiteSpace: "nowrap" }}>
-              <div style={{ fontSize: "16px", fontWeight: 700, color: "var(--text)", lineHeight: 1.2 }}>ShopHub</div>
-              <div style={{ fontSize: "13px", color: "var(--text-3)", lineHeight: 1.2 }}>Store</div>
+              <div style={{ fontSize: "16px", fontWeight: 700, color: "var(--text)", lineHeight: 1.2 }}>Shop.</div>
+              <div style={{ fontSize: "13px", color: "var(--text-3)", lineHeight: 1.2 }}>Vendor Panel</div>
             </div>
           )}
         </Link>
@@ -171,7 +174,7 @@ export default function Sidebar() {
         {isAdmin && (
           <Link href="/admin" style={{ ...itemStyle(pathname === "/admin"), color: pathname === "/admin" ? "var(--text)" : "#f59e0b" }}>
             <ShieldCheck size={20} strokeWidth={1.7} />
-            {open && <span>Admin</span>}
+            {open && <span>Vendor</span>}
           </Link>
         )}
       </nav>

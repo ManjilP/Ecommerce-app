@@ -16,7 +16,7 @@ interface Review {
 interface Product { id: number; name: string; }
 
 const ratingLabels: Record<number, string> = { 1: "Very Bad", 2: "Bad", 3: "Average", 4: "Good", 5: "Excellent" };
-const ratingColor: Record<number, string> = { 1: "#f87171", 2: "#fb923c", 3: "#fbbf24", 4: "#34d399", 5: "#0e7490" };
+const ratingColor: Record<number, string> = { 1: "#f87171", 2: "#fb923c", 3: "#fbbf24", 4: "#34d399", 5: "#10b981" };
 
 function StarRating({ value, onChange, readonly = false }: { value: number; onChange?: (v: number) => void; readonly?: boolean }) {
   const [hover, setHover] = useState(0);

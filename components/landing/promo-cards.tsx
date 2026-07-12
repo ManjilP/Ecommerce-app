@@ -1,0 +1,87 @@
+'use client'
+
+import { motion } from 'framer-motion'
+import { ArrowRight } from 'lucide-react'
+
+const promos = [
+  {
+    title: 'Up to 30% Off',
+    subtitle: 'Vitamins & Supplements',
+    description: 'Stock up on daily essentials and save big this season.',
+    cta: 'Shop Now',
+    featured: true,
+  },
+  {
+    title: 'Free Delivery',
+    subtitle: 'On orders over NPR 500',
+    description: 'Delivered to your doorstep at no extra cost.',
+    cta: 'Order Now',
+    featured: false,
+  },
+  {
+    title: 'New Arrivals',
+    subtitle: 'Skincare & Baby Care',
+    description: 'The latest certified products for your family.',
+    cta: 'Explore',
+    featured: false,
+  },
+]
+
+export default function PromoCards() {
+  return (
+    <section className="max-w-7xl mx-auto px-4 pb-14">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {promos.map((promo, i) => (
+          <motion.div
+            key={promo.title}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: i * 0.08 }}
+            className={`group rounded-2xl p-7 flex flex-col justify-between border transition-all duration-200 hover:shadow-md ${
+              promo.featured
+                ? 'bg-primary border-primary'
+                : 'bg-card border-border'
+            }`}
+            style={{ minHeight: '230px' }}
+          >
+            <div>
+              <span
+                className={`inline-block text-[11px] font-semibold tracking-wide uppercase mb-4 px-2.5 py-1 rounded-full ${
+                  promo.featured
+                    ? 'bg-white/15 text-white'
+                    : 'bg-accent text-accent-foreground'
+                }`}
+              >
+                {promo.subtitle}
+              </span>
+
+              <h3
+                className={`text-2xl font-bold leading-tight mb-2 ${
+                  promo.featured ? 'text-white' : 'text-foreground'
+                }`}
+              >
+                {promo.title}
+              </h3>
+
+              <p className={`text-sm leading-relaxed ${promo.featured ? 'text-white/75' : 'text-muted-foreground'}`}>
+                {promo.description}
+              </p>
+            </div>
+
+            <button
+              className={`flex items-center gap-2 text-sm font-semibold mt-6 w-fit px-5 py-2.5 rounded-xl transition-colors ${
+                promo.featured
+                  ? 'bg-white text-primary hover:bg-white/90'
+                  : 'bg-primary text-primary-foreground hover:bg-emerald-700'
+              }`}
+            >
+              {promo.cta}
+              <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
+            </button>
+          </motion.div>
+        ))}
+      </div>
+    </section>
+  )
+}

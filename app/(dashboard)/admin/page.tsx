@@ -1,8 +1,8 @@
 ﻿"use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getProducts, getOrders, getInventory, getWarehouses, trackOrder, cancelOrder, deleteOrder, updateOrderStatus } from "@/lib/api";
-import { Package, ShoppingCart, Warehouse, Building2, AlertTriangle, ArrowUpRight, MapPin, Ban, Trash2, ArrowRight, X } from "lucide-react";
+import { getProducts, getOrders, getWarehouses, trackOrder, cancelOrder, deleteOrder, updateOrderStatus } from "@/lib/api";
+import { Package, ShoppingCart, Warehouse, Building2, ArrowUpRight, MapPin, Ban, Trash2, ArrowRight, X } from "lucide-react";
 import Link from "next/link";
 import { OrderTracking } from "@/components/ui/order-tracking";
 
@@ -22,7 +22,6 @@ const statusColor: Record<string, string> = {
 export default function AdminPage() {
   const router = useRouter();
   const [stats, setStats] = useState({ products: 0, orders: 0, inventory: 0, warehouses: 0 });
-  const [lowStock, setLowStock] = useState<{ stock_status: string; id: number; product_name: string; warehouse_name: string; quantity: number }[]>([]);
   const [recentOrders, setRecentOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [trackModal, setTrackModal] = useState(false);
@@ -36,47 +35,44 @@ export default function AdminPage() {
     setTrackModal(true);
   };
 
-  const handleCancel = async (id: number) => {
-    if (!confirm("Cancel this order?")) return;
-    await cancelOrder(id);
+  const reload = async () => {
     const o = await getOrders();
     const orders: Order[] = Array.isArray(o.data) ? o.data : o.data.results ?? [];
     setRecentOrders(orders.slice(0, 10));
     setStats(s => ({ ...s, orders: o.data.count ?? orders.length }));
   };
 
+  const handleCancel = async (id: number) => {
+    if (!confirm("Cancel this order?")) return;
+    await cancelOrder(id); await reload();
+  };
+
   const handleDelete = async (id: number) => {
     if (!confirm("Delete this order?")) return;
-    await deleteOrder(id);
-    const o = await getOrders();
-    const orders: Order[] = Array.isArray(o.data) ? o.data : o.data.results ?? [];
-    setRecentOrders(orders.slice(0, 10));
-    setStats(s => ({ ...s, orders: o.data.count ?? orders.length }));
+    await deleteOrder(id); await reload();
   };
 
   const handleAdvance = async (id: number, currentStatus: string) => {
     const next = nextStatus[currentStatus];
     if (!next) return;
-    await updateOrderStatus(id, next);
-    const o = await getOrders();
-    const orders: Order[] = Array.isArray(o.data) ? o.data : o.data.results ?? [];
-    setRecentOrders(orders.slice(0, 10));
+    await updateOrderStatus(id, next); await reload();
   };
 
   useEffect(() => {
-    if (localStorage.getItem("is_admin") !== "true") { router.replace("/orders"); return; }
-    Promise.all([getProducts(), getOrders(), getInventory(), getWarehouses()])
-      .then(([p, o, i, w]) => {
-        const inventory = Array.isArray(i.data) ? i.data : i.data.results ?? [];
-        const orders: Order[] = Array.isArray(o.data) ? o.data : o.data.results ?? [];
+    if (sessionStorage.getItem("is_admin") !== "true") { router.replace("/orders"); return; }
+    Promise.allSettled([getProducts(), getOrders(), getWarehouses()])
+      .then(([p, o, w]) => {
+        const pData = p.status === "fulfilled" ? p.value.data : null;
+        const oData = o.status === "fulfilled" ? o.value.data : null;
+        const wData = w.status === "fulfilled" ? w.value.data : null;
+        const orders: Order[] = oData ? (Array.isArray(oData) ? oData : oData.results ?? []) : [];
         setStats({
-          products: p.data.count ?? (Array.isArray(p.data) ? p.data.length : 0),
-          orders: o.data.count ?? orders.length,
-          inventory: i.data.count ?? inventory.length,
-          warehouses: w.data.count ?? (Array.isArray(w.data) ? w.data.length : 0),
+          products: pData ? (pData.count ?? (Array.isArray(pData) ? pData.length : 0)) : 0,
+          orders: oData ? (oData.count ?? orders.length) : 0,
+          inventory: 0,
+          warehouses: wData ? (wData.count ?? (Array.isArray(wData) ? wData.length : 0)) : 0,
         });
         setRecentOrders(orders.slice(0, 10));
-        setLowStock(inventory.filter((item: { stock_status: string }) => item.stock_status === "low_stock" || item.stock_status === "out_of_stock"));
       })
       .finally(() => setLoading(false));
   }, [router]);
@@ -177,36 +173,7 @@ export default function AdminPage() {
         )}
       </div>
 
-      <div style={{ borderRadius: "20px", padding: "24px", background: "var(--card)", border: "1px solid var(--border)" }}>
-        <h2 style={{ fontSize: "18px", fontWeight: 600, color: "var(--text)", marginBottom: "20px", display: "flex", alignItems: "center", gap: "10px" }}>
-          <AlertTriangle size={18} color="#fb923c" /> Stock Alerts
-        </h2>
-        {lowStock.length === 0 ? (
-          <p style={{ fontSize: "15px", color: "var(--text-3)" }}>All stock levels are healthy.</p>
-        ) : (
-          <div style={{ borderRadius: "12px", overflow: "hidden", border: "1px solid var(--border)" }}>
-            <table>
-              <thead>
-                <tr>{["Product", "Warehouse", "Qty", "Status"].map((h) => <th key={h}>{h}</th>)}</tr>
-              </thead>
-              <tbody>
-                {lowStock.map((item) => (
-                  <tr key={item.id}>
-                    <td style={{ color: "var(--text)", fontWeight: 500 }}>{item.product_name}</td>
-                    <td style={{ color: "var(--text-2)" }}>{item.warehouse_name}</td>
-                    <td style={{ color: "var(--text)", fontWeight: 600 }}>{item.quantity}</td>
-                    <td>
-                      <span style={{ padding: "4px 12px", borderRadius: "99px", fontSize: "13px", fontWeight: 500, background: item.stock_status === "out_of_stock" ? "rgba(248,113,113,0.12)" : "rgba(251,146,60,0.12)", color: item.stock_status === "out_of_stock" ? "#f87171" : "#fb923c" }}>
-                        {item.stock_status.replace(/_/g, " ")}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      {/* ponytail: stock alerts removed — lowStock never loaded from backend, always empty */}
 
       {trackModal && trackData && (
         <div style={{ position: "fixed", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50, background: "rgba(0,0,0,0.35)", backdropFilter: "blur(16px)" }}>

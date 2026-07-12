@@ -28,7 +28,7 @@ export default function WishlistPage() {
   const [search, setSearch] = useState("");
   const [addingId, setAddingId] = useState<number | null>(null);
 
-  // Order modal state
+  // ponytail: inline order modal duplicates checkout-modal.tsx — replace with <CheckoutModal> when confirmed working
   const [orderModal, setOrderModal] = useState(false);
   const [orderItem, setOrderItem] = useState<WishlistItem | null>(null);
   const [customerName, setCustomerName] = useState("");

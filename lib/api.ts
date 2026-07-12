@@ -7,9 +7,40 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("access_token");
+const isTokenExpired = (token: string) => {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.exp * 1000 < Date.now();
+  } catch {
+    return true;
+  }
+};
+
+api.interceptors.request.use(async (config) => {
+  let token = sessionStorage.getItem("access_token");
+  const refresh = sessionStorage.getItem("refresh_token");
+
+  if (token && isTokenExpired(token) && refresh) {
+    try {
+      const { data } = await axios.post(`${BASE_URL}/api/auth/token/refresh/`, { refresh });
+      token = data.access;
+      sessionStorage.setItem("access_token", data.access);
+      if (data.refresh) sessionStorage.setItem("refresh_token", data.refresh);
+    } catch {
+      sessionStorage.removeItem("access_token");
+      sessionStorage.removeItem("refresh_token");
+      window.location.href = "/login";
+      return config;
+    }
+  }
+
   if (token) config.headers.Authorization = `Bearer ${token}`;
+
+  const tenantSlug =
+    sessionStorage.getItem("tenant_slug") ||
+    process.env.NEXT_PUBLIC_TENANT_SLUG;
+  if (tenantSlug) config.headers["X-Tenant-Slug"] = tenantSlug;
+
   return config;
 });
 
@@ -26,11 +57,11 @@ api.interceptors.response.use(
   async (error) => {
     const original = error.config;
     const isAuthEndpoint = original.url?.includes("/auth/login") || original.url?.includes("/auth/register") || original.url?.includes("/auth/admin/login");
-    if ((error.response?.status === 401 || error.response?.status === 403) && !original._retry && !isAuthEndpoint) {
+    if (error.response?.status === 401 && !original._retry && !isAuthEndpoint) {
       original._retry = true;
-      const refresh = localStorage.getItem("refresh_token");
+      const refresh = sessionStorage.getItem("refresh_token");
       if (!refresh) {
-        localStorage.removeItem("access_token");
+        sessionStorage.removeItem("access_token");
         window.location.href = "/login";
         return new Promise(() => { });
       }
@@ -47,14 +78,14 @@ api.interceptors.response.use(
       isRefreshing = true;
       try {
         const { data } = await axios.post(`${BASE_URL}/api/auth/token/refresh/`, { refresh });
-        localStorage.setItem("access_token", data.access);
-        if (data.refresh) localStorage.setItem("refresh_token", data.refresh);
+        sessionStorage.setItem("access_token", data.access);
+        if (data.refresh) sessionStorage.setItem("refresh_token", data.refresh);
         processQueue(data.access);
         original.headers.Authorization = `Bearer ${data.access}`;
         return api(original);
       } catch {
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
+        sessionStorage.removeItem("access_token");
+        sessionStorage.removeItem("refresh_token");
         window.location.href = "/login";
         return new Promise(() => { });
       } finally {
@@ -72,6 +103,10 @@ export const login = (username: string, password: string) =>
 export const adminLogin = (username: string, password: string) =>
   api.post("/api/auth/admin/login/", { username, password });
 
+export const vendorLogin = (username: string, password: string) =>
+  api.post("/api/auth/vendor/login/", { username, password });
+
+
 export const register = (username: string, password: string, email: string, city?: string) =>
   api.post("/api/auth/register/", { username, password, email, ...(city ? { city } : {}) });
 
@@ -86,15 +121,20 @@ export const fetchProductImage = (id: number) => api.post(`/api/products/${id}/f
 
 // Orders
 export const getOrders = (params?: { search?: string; page?: number }) => api.get("/api/orders/", { params });
-export const getOrder = (id: number) => api.get(`/api/orders/${id}/`);
 export const createOrder = (data: unknown) => api.post("/api/orders/", data);
-export const updateOrder = (id: number, data: unknown) => api.put(`/api/orders/${id}/`, data);
 export const deleteOrder = (id: number) => api.delete(`/api/orders/${id}/`);
 export const cancelOrder = (id: number) => api.post(`/api/orders/${id}/cancel/`);
 export const confirmPayment = (id: number, transaction_id?: string) => api.post(`/api/orders/${id}/confirm-payment/`, transaction_id ? { transaction_id } : {});
 export const trackOrder = (id: number) => api.get(`/api/orders/${id}/track/`);
-export const getPaymentQR = (id: number) => api.get(`/api/orders/${id}/payment-qr/`);
 export const updateOrderStatus = (id: number, status: string) => api.patch(`/api/orders/${id}/update-status/`, { status });
+
+// Vendor Orders (admin panel)
+export const getVendorOrders = (params?: { search?: string; page?: number }) => api.get("/api/vendor/orders/", { params });
+export const updateVendorOrderStatus = (id: number, status: string) => api.patch(`/api/vendor/orders/${id}/update-status/`, { status });
+export const deleteVendorOrder = (id: number) => api.delete(`/api/vendor/orders/${id}/`);
+
+// Vendor Products (admin panel)
+export const getVendorProducts = () => api.get("/api/vendor/products/");
 
 // Inventory
 export const getInventory = () => api.get("/api/inventory/");
@@ -140,6 +180,9 @@ export const getRevenueByCity = (days = 30) => api.get(`/api/reports/revenue-by-
 export const getTopProducts = (days = 30) => api.get(`/api/reports/top-products/?days=${days}`);
 export const getTopCustomers = (days = 30) => api.get(`/api/reports/top-customers/?days=${days}`);
 export const getCouponUsage = () => api.get("/api/reports/coupon-usage/");
+
+// Tenants
+export const getTenantMe = () => api.get("/api/tenants/me/");
 
 // Auth
 export const logout = (refresh: string) => api.post("/api/auth/logout/", { refresh });

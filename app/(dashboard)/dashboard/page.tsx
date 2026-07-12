@@ -1,6 +1,6 @@
 ﻿﻿"use client";
 import { useEffect, useState } from "react";
-import { getProducts, getOrders, getInventory, getTopProducts, getSalesChart } from "@/lib/api";
+import { getProducts, getOrders, getTopProducts, getSalesChart } from "@/lib/api";
 import { Package, ShoppingCart, Warehouse, TrendingUp, ArrowUpRight, Activity } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -37,25 +37,27 @@ export default function DashboardPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (localStorage.getItem("is_admin") !== "true") {
+    if (sessionStorage.getItem("is_admin") !== "true") {
       router.replace("/orders");
       return;
     }
-    Promise.all([
-      getProducts(), getOrders(), getInventory(), getTopProducts(30), getSalesChart("daily", 14),
-    ]).then(([p, o, i, tp, sc]) => {
-      const orders: Order[] = Array.isArray(o.data) ? o.data : o.data.results ?? [];
+    Promise.allSettled([
+      getProducts(), getOrders(), getTopProducts(30), getSalesChart("daily", 14),
+    ]).then(([p, o, tp, sc]) => {
+      const oData = o.status === "fulfilled" ? o.value.data : null;
+      const pData = p.status === "fulfilled" ? p.value.data : null;
+      const orders: Order[] = oData ? (Array.isArray(oData) ? oData : oData.results ?? []) : [];
       const revenue = orders.reduce((s, ord) => s + parseFloat(ord.total_price || "0"), 0);
       setStats({
-        products: Array.isArray(p.data) ? p.data.length : p.data.count ?? 0,
-        orders: Array.isArray(o.data) ? o.data.length : o.data.count ?? 0,
-        inventory: Array.isArray(i.data) ? i.data.length : i.data.count ?? 0,
+        products: pData ? (Array.isArray(pData) ? pData.length : pData.count ?? 0) : 0,
+        orders: oData ? (Array.isArray(oData) ? oData.length : oData.count ?? 0) : 0,
+        inventory: 0,
         revenue,
       });
       setRecentOrders(orders.slice(0, 5));
-      setTopProducts((Array.isArray(tp.data) ? tp.data : tp.data.results ?? []).slice(0, 5));
-      setSalesData((Array.isArray(sc.data) ? sc.data : sc.data.results ?? []).slice(-10));
-    }).catch(() => {}).finally(() => setLoading(false));
+      if (tp.status === "fulfilled") setTopProducts((Array.isArray(tp.value.data) ? tp.value.data : tp.value.data.results ?? []).slice(0, 5));
+      if (sc.status === "fulfilled") setSalesData((Array.isArray(sc.value.data) ? sc.value.data : sc.value.data.results ?? []).slice(-10));
+    }).finally(() => setLoading(false));
   }, []);
 
   const maxRevenue = Math.max(...salesData.map((s) => s.total_revenue), 1);

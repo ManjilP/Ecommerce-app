@@ -1,29 +1,29 @@
 @import "tailwindcss";
 
 * {
-  font-family: var(--font-raleway), 'Raleway', sans-serif;
+  font-family: var(--font-cormorant), 'Cormorant Garamond', serif;
 }
 
 /* ── Light mode (default) ── */
 :root {
-  --bg: #f5f5f7;
+  --bg: #f5f0e6;
   --bg-elevated: #ffffff;
   --card: #ffffff;
-  --card-2: #f0f0f2;
-  --border: rgba(0,0,0,0.08);
-  --border-strong: rgba(0,0,0,0.12);
-  --text: #1d1d1f;
+  --card-2: #f4f4f5;
+  --border: rgba(0,0,0,0.07);
+  --border-strong: rgba(0,0,0,0.11);
+  --text: #18181b;
   --text-2: rgba(0,0,0,0.55);
   --text-3: rgba(0,0,0,0.35);
-  --accent: #0e7490;
-  --accent-glow: rgba(14,116,144,0.15);
-  --green: #059669;
+  --accent: #10b981;
+  --accent-glow: rgba(16,185,129,0.16);
+  --green: #10b981;
   --red: #dc2626;
   --orange: #ea580c;
   --purple: #7c3aed;
   --yellow: #d97706;
-  --blue: #2563eb;
-  --card-shadow: 0 1px 4px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.05);
+  --blue: #4f46e5;
+  --card-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06);
 
   /* Bento card gradients */
   --bento-orders-bg: linear-gradient(145deg,#e0f2fe,#bae6fd);
@@ -51,8 +51,8 @@
   --text: #f5f5f5;
   --text-2: rgba(255,255,255,0.6);
   --text-3: rgba(255,255,255,0.35);
-  --accent: #0e7490;
-  --accent-glow: rgba(14,116,144,0.22);
+  --accent: #34d399;
+  --accent-glow: rgba(52,211,153,0.2);
   --green: #34d399;
   --red: #f87171;
   --orange: #fb923c;
@@ -76,8 +76,26 @@
 }
 
 @theme inline {
-  --color-background: var(--bg);
-  --font-sans: var(--font-geist-sans);
+  --color-background: #f5f0e6;
+  --font-sans: var(--font-cormorant);
+  --font-heading: var(--font-cormorant);
+  --color-foreground: #18181b;
+  --color-card: #ffffff;
+  --color-card-foreground: #18181b;
+  --color-primary: #059669;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #4f46e5;
+  --color-secondary-foreground: #ffffff;
+  --color-muted: #f4f4f5;
+  --color-muted-foreground: #71717a;
+  --color-accent: #ecfdf5;
+  --color-accent-foreground: #065f46;
+  --color-destructive: #dc2626;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #e4e4e7;
+  --color-input: #f4f4f5;
+  --color-ring: #10b981;
+  --radius: 1rem;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -87,13 +105,19 @@ html { font-size: 16px; }
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
-  font-size: 16px;
+  font-family: var(--font-cormorant), 'Cormorant Garamond', serif;
+  font-size: 17px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   margin: 0;
   padding: 0;
   transition: background 0.2s, color 0.2s;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-cormorant), 'Cormorant Garamond', serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 input, select, textarea {

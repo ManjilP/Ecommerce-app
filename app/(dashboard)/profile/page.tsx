@@ -49,12 +49,12 @@ export default function ProfilePage() {
 
       {/* Avatar + name card */}
       <div style={{ borderRadius: "20px", padding: "28px", background: "var(--card)", border: "1px solid var(--border)", boxShadow: "var(--card-shadow)", marginBottom: "16px", display: "flex", alignItems: "center", gap: "20px" }}>
-        <div style={{ width: "72px", height: "72px", borderRadius: "99px", background: `linear-gradient(135deg, var(--accent), rgba(14,116,144,0.5))`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+        <div style={{ width: "72px", height: "72px", borderRadius: "99px", background: `linear-gradient(135deg, var(--accent), rgba(16,185,129,0.5))`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
           <span style={{ fontSize: "26px", fontWeight: 700, color: "#fff" }}>{initials}</span>
         </div>
         <div>
           <h2 style={{ fontSize: "22px", fontWeight: 700, color: "var(--text)", marginBottom: "4px" }}>{user.username}</h2>
-          <span style={{ fontSize: "13px", fontWeight: 600, padding: "3px 12px", borderRadius: "99px", background: user.role === "admin" ? "rgba(245,158,11,0.12)" : "rgba(14,116,144,0.12)", color: user.role === "admin" ? "#f59e0b" : "var(--accent)" }}>
+          <span style={{ fontSize: "13px", fontWeight: 600, padding: "3px 12px", borderRadius: "99px", background: user.role === "admin" ? "rgba(245,158,11,0.12)" : "rgba(16,185,129,0.12)", color: user.role === "admin" ? "#f59e0b" : "var(--accent)" }}>
             {user.role === "admin" ? "Administrator" : "Customer"}
           </span>
         </div>
@@ -77,7 +77,7 @@ export default function ProfilePage() {
           onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--accent)")}
           onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
         >
-          <div style={{ width: "38px", height: "38px", borderRadius: "10px", background: "rgba(14,116,144,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ width: "38px", height: "38px", borderRadius: "10px", background: "rgba(16,185,129,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <KeyRound size={17} color="var(--accent)" />
           </div>
           <div>

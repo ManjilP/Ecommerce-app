@@ -1,7 +1,7 @@
 ﻿﻿"use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { adminLogin } from "@/lib/api";
+import { vendorLogin } from "@/lib/api";
 import { ShieldCheck, AlertCircle, LogIn } from "lucide-react";
 import Link from "next/link";
 
@@ -17,11 +17,13 @@ export default function AdminLoginPage() {
     setError("");
     setLoading(true);
     try {
-      const { data } = await adminLogin(username, password);
-      localStorage.setItem("access_token", data.access);
-      localStorage.setItem("refresh_token", data.refresh);
-      localStorage.setItem("is_admin", "true");
-      localStorage.removeItem("orders_cache");
+      const { data } = await vendorLogin(username, password);
+      sessionStorage.setItem("access_token", data.access);
+      sessionStorage.setItem("refresh_token", data.refresh);
+      sessionStorage.setItem("is_admin", "true");
+      sessionStorage.setItem("username", username);
+      if (data.store?.slug) sessionStorage.setItem("tenant_slug", data.store.slug);
+      sessionStorage.removeItem("orders_cache");
       document.cookie = `access_token=${data.access}; path=/`;
       router.push("/dashboard");
     } catch {
@@ -43,8 +45,8 @@ export default function AdminLoginPage() {
           <div style={{ width: "52px", height: "52px", borderRadius: "16px", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "20px", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.25)" }}>
             <ShieldCheck size={24} color="#f59e0b" />
           </div>
-          <h1 style={{ fontSize: "26px", fontWeight: 700, color: "var(--text)", letterSpacing: "-0.3px" }}>Admin Portal</h1>
-          <p style={{ fontSize: "15px", color: "var(--text-2)", marginTop: "6px" }}>Restricted to admin accounts only</p>
+          <h1 style={{ fontSize: "26px", fontWeight: 700, color: "var(--text)", letterSpacing: "-0.3px" }}>Vendor Portal</h1>
+          <p style={{ fontSize: "15px", color: "var(--text-2)", marginTop: "6px" }}>Sign in to your vendor account</p>
         </div>
 
         <div style={{ borderRadius: "24px", padding: "28px", background: "var(--card)", border: "1px solid rgba(245,158,11,0.2)", boxShadow: "0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)" }}>
@@ -70,13 +72,13 @@ export default function AdminLoginPage() {
               style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", height: "50px", borderRadius: "14px", fontSize: "16px", fontWeight: 600, color: "#fff", background: loading ? "rgba(217,119,6,0.6)" : "#d97706", border: "none", cursor: "pointer", marginTop: "8px", boxShadow: loading ? "none" : "0 0 24px rgba(217,119,6,0.3)" }}
             >
               <LogIn size={18} />
-              {loading ? "Signing in..." : "Admin Sign In"}
+              {loading ? "Signing in..." : "Vendor Sign In"}
             </button>
           </form>
 
           <p style={{ textAlign: "center", marginTop: "20px", fontSize: "14px", color: "var(--text-3)" }}>
-            Not an admin?{" "}
-            <Link href="/login" style={{ color: "var(--accent)", fontWeight: 500 }}>User login</Link>
+            Not a vendor?{" "}
+            <Link href="/login" style={{ color: "var(--accent)", fontWeight: 500 }}>Customer login</Link>
           </p>
         </div>
       </div>

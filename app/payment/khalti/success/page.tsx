@@ -3,7 +3,9 @@
 import { Suspense } from "react"
 import { useEffect, useState } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
-import { CheckCircle, XCircle, Loader2, ArrowRight } from "lucide-react"
+import { motion } from "framer-motion"
+import { CheckCircle, XCircle, Loader2, ArrowRight, Package } from "lucide-react"
+import Image from "next/image"
 
 function KhaltiSuccessContent() {
   const searchParams = useSearchParams()
@@ -23,7 +25,7 @@ function KhaltiSuccessContent() {
       return
     }
 
-    const token = localStorage.getItem("access_token") ?? ""
+    const token = sessionStorage.getItem("access_token") ?? ""
     fetch("/api/payment/khalti/verify", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
@@ -39,59 +41,76 @@ function KhaltiSuccessContent() {
           setState("error")
         }
       })
-      .catch(() => {
-        setState("success")
-      })
+      .catch(() => { setState("success") })
   }, [searchParams])
 
   return (
-    <div style={{ width: "100%", maxWidth: "440px", borderRadius: "24px", padding: "40px 32px", background: "var(--bg-elevated)", border: "1px solid var(--border)", textAlign: "center" }}>
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+      className="w-full max-w-md bg-white rounded-3xl shadow-xl border border-border p-10 text-center"
+    >
+      {/* Khalti logo */}
+      <div className="flex justify-center mb-6">
+        <div className="w-14 h-14 rounded-2xl bg-white border border-border shadow-sm flex items-center justify-center p-1.5">
+          <Image src="/khalti.png" alt="Khalti" width={44} height={44} className="object-contain" />
+        </div>
+      </div>
 
       {state === "verifying" && (
         <>
-          <Loader2 size={48} style={{ margin: "0 auto 20px", color: "#5C2D91", animation: "spin 1s linear infinite" }} />
-          <h1 style={{ fontSize: "22px", fontWeight: 700, color: "var(--text)" }}>Verifying payment…</h1>
+          <Loader2 size={40} className="mx-auto mb-4 text-purple-600 animate-spin" />
+          <h1 className="font-heading text-2xl font-bold text-foreground">Verifying payment…</h1>
+          <p className="text-sm text-muted-foreground mt-2">Please wait while we confirm your Khalti payment.</p>
         </>
       )}
 
       {state === "success" && (
         <>
-          <CheckCircle size={56} style={{ margin: "0 auto 20px", color: "var(--green)" }} />
-          <h1 style={{ fontSize: "24px", fontWeight: 700, color: "var(--text)", marginBottom: "8px" }}>Payment successful!</h1>
-          <p style={{ fontSize: "14px", color: "var(--text-2)", marginBottom: "24px" }}>Your Khalti payment is confirmed.</p>
+          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200, delay: 0.1 }}>
+            <CheckCircle size={52} className="mx-auto mb-4 text-primary" />
+          </motion.div>
+          <h1 className="font-heading text-2xl font-bold text-foreground mb-2">Payment successful!</h1>
+          <p className="text-sm text-muted-foreground mb-6">Your Khalti payment has been confirmed.</p>
           {transactionId && (
-            <div style={{ padding: "12px 16px", borderRadius: "12px", background: "var(--card-2)", border: "1px solid var(--border)", marginBottom: "24px" }}>
-              <p style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-3)", textTransform: "uppercase", marginBottom: "4px" }}>Transaction ID</p>
-              <p style={{ fontSize: "14px", fontWeight: 600, color: "var(--text)", fontFamily: "monospace" }}>{transactionId}</p>
+            <div className="bg-muted rounded-2xl p-4 mb-6 text-left">
+              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">Transaction ID</p>
+              <p className="text-sm font-semibold text-foreground font-mono">{transactionId}</p>
             </div>
           )}
-          <button onClick={() => router.push("/orders")} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", width: "100%", height: "48px", borderRadius: "99px", fontSize: "15px", fontWeight: 600, color: "#fff", background: "#5C2D91", border: "none", cursor: "pointer" }}>
-            View my orders <ArrowRight size={16} />
+          <button
+            onClick={() => router.push("/my-orders")}
+            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:bg-green-700 transition-colors"
+          >
+            <Package size={16} /> View my orders <ArrowRight size={15} />
           </button>
         </>
       )}
 
       {state === "error" && (
         <>
-          <XCircle size={56} style={{ margin: "0 auto 20px", color: "var(--red)" }} />
-          <h1 style={{ fontSize: "22px", fontWeight: 700, color: "var(--text)", marginBottom: "8px" }}>Something went wrong</h1>
-          <p style={{ fontSize: "14px", color: "var(--text-2)", marginBottom: "24px" }}>{errorMsg}</p>
-          <button onClick={() => router.push("/landing")} style={{ width: "100%", height: "48px", borderRadius: "99px", fontSize: "15px", fontWeight: 600, color: "var(--text)", background: "var(--card-2)", border: "1px solid var(--border)", cursor: "pointer" }}>
+          <XCircle size={52} className="mx-auto mb-4 text-destructive" />
+          <h1 className="font-heading text-2xl font-bold text-foreground mb-2">Something went wrong</h1>
+          <p className="text-sm text-muted-foreground mb-6">{errorMsg}</p>
+          <button
+            onClick={() => router.push("/landing")}
+            className="w-full py-3.5 rounded-xl border border-border bg-muted text-foreground font-semibold text-sm hover:bg-border transition-colors"
+          >
             Back to shop
           </button>
         </>
       )}
-    </div>
+    </motion.div>
   )
 }
 
 export default function KhaltiSuccessPage() {
   return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg)", padding: "24px" }}>
-      <Suspense fallback={<Loader2 size={48} style={{ color: "#5C2D91", animation: "spin 1s linear infinite" }} />}>
+    <div className="min-h-screen bg-background flex items-center justify-center p-6">
+      <Suspense fallback={<Loader2 size={40} className="text-purple-600 animate-spin" />}>
         <KhaltiSuccessContent />
       </Suspense>
-      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
     </div>
   )
 }

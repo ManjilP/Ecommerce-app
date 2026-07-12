@@ -9,11 +9,12 @@ interface Product {
   sku: string;
   category: string;
   price: number | string;
+  description?: string;
   image?: string;
   created_at: string;
 }
 
-const emptyForm = { name: "", sku: "", category: "", price: "" };
+const emptyForm = { name: "", sku: "", category: "", price: "", description: "" };
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -58,7 +59,7 @@ export default function ProductsPage() {
   const openCreate = () => { setEditing(null); setForm(emptyForm); setSaveError(""); setModal(true); };
   const openEdit = (p: Product) => {
     setEditing(p);
-    setForm({ name: p.name, sku: p.sku, category: p.category, price: String(p.price) });
+    setForm({ name: p.name, sku: p.sku, category: p.category, price: String(p.price), description: p.description ?? "" });
     setSaveError("");
     setModal(true);
   };
@@ -68,7 +69,7 @@ export default function ProductsPage() {
     setSaving(true);
     setSaveError("");
     try {
-      const payload = { name: form.name, sku: form.sku, category: form.category, price: parseFloat(form.price) };
+      const payload = { name: form.name, sku: form.sku, category: form.category, price: parseFloat(form.price), description: form.description || undefined };
       if (editing) await updateProduct(editing.id, payload);
       else await createProduct(payload);
       setModal(false);
@@ -197,21 +198,39 @@ export default function ProductsPage() {
       )}
 
       {modal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50" style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
-          <div className="w-full max-w-md rounded-2xl p-6" style={{ background: "var(--card)", border: "1px solid var(--border-strong)", boxShadow: "0 25px 80px rgba(0,0,0,0.6)" }}>
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="font-semibold" style={{ color: "var(--text)" }}>{editing ? "Edit Product" : "Add Product"}</h2>
-              <button onClick={() => setModal(false)} className="p-1.5 rounded-lg hover:bg-white/5" style={{ color: "var(--text-2)" }}><X size={16} /></button>
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-md bg-card border border-border shadow-xl rounded-3xl p-7">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-heading text-xl font-bold text-foreground">{editing ? "Edit Product" : "Add Product"}</h2>
+              <button onClick={() => setModal(false)} className="p-2 rounded-xl hover:bg-accent text-muted-foreground transition-colors"><X size={18} /></button>
             </div>
-            <form onSubmit={handleSave} className="space-y-3">
-              {saveError && <div className="text-sm rounded p-3" style={{ background: "rgba(248,113,113,0.08)", color: "#f87171", border: "1px solid rgba(248,113,113,0.2)" }}>{saveError}</div>}
-              <div><label className="block text-sm mb-1" style={{ color: "#9ca3af" }}>Name</label><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></div>
-              <div><label className="block text-sm mb-1" style={{ color: "#9ca3af" }}>SKU</label><input value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} placeholder="e.g. PROD-001" required /></div>
-              <div><label className="block text-sm mb-1" style={{ color: "#9ca3af" }}>Category</label><input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="e.g. Electronics" required /></div>
-              <div><label className="block text-sm mb-1" style={{ color: "#9ca3af" }}>Price</label><input type="number" step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required /></div>
-              <div className="flex gap-2 pt-2">
-                <button type="button" onClick={() => setModal(false)} className="flex-1 py-2 rounded-md text-sm" style={{ background: "var(--card-2)", color: "var(--text-2)" }}>Cancel</button>
-                <button type="submit" disabled={saving} className="flex-1 py-2 rounded-md text-sm text-white" style={{ background: "#0e7490" }}>{saving ? "Saving..." : "Save"}</button>
+            <form onSubmit={handleSave} className="space-y-4">
+              {saveError && <div className="text-sm rounded-xl p-3 bg-red-50 border border-red-200 text-red-600">{saveError}</div>}
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Name</label>
+                <input className="w-full px-4 py-3 bg-accent/30 border border-border rounded-xl text-sm outline-none focus:border-primary/50 transition-colors text-foreground" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">SKU</label>
+                <input className="w-full px-4 py-3 bg-accent/30 border border-border rounded-xl text-sm outline-none focus:border-primary/50 transition-colors text-foreground" value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} placeholder="e.g. PROD-001" required />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Category</label>
+                <input className="w-full px-4 py-3 bg-accent/30 border border-border rounded-xl text-sm outline-none focus:border-primary/50 transition-colors text-foreground" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="e.g. Medicine" required />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Price (Rs.)</label>
+                <input type="number" step="0.01" className="w-full px-4 py-3 bg-accent/30 border border-border rounded-xl text-sm outline-none focus:border-primary/50 transition-colors text-foreground" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Description <span className="font-normal">(optional)</span></label>
+                <textarea className="w-full px-4 py-3 bg-accent/30 border border-border rounded-xl text-sm outline-none focus:border-primary/50 transition-colors resize-y text-foreground" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Short product description..." rows={2} />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button type="button" onClick={() => setModal(false)} className="flex-1 py-3.5 rounded-xl text-sm font-semibold bg-transparent border-2 border-border text-foreground hover:bg-accent transition-colors">Cancel</button>
+                <button type="submit" disabled={saving} className="flex-1 py-3.5 rounded-xl text-sm font-semibold bg-primary text-primary-foreground hover:bg-emerald-700 transition-all disabled:opacity-70 flex items-center justify-center">
+                  {saving ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : "Save"}
+                </button>
               </div>
             </form>
           </div>

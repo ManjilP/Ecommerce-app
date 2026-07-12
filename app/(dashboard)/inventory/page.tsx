@@ -32,13 +32,14 @@ export default function InventoryPage() {
     setLoading(true);
     getInventory()
       .then((r) => setItems(Array.isArray(r.data) ? r.data : r.data.results ?? []))
+      .catch(() => {})
       .finally(() => setLoading(false));
   };
 
   useEffect(() => {
     load();
-    getProducts().then((r) => setProducts(Array.isArray(r.data) ? r.data : r.data.results ?? []));
-    getWarehouses().then((r) => setWarehouses(Array.isArray(r.data) ? r.data : r.data.results ?? []));
+    getProducts().then((r) => setProducts(Array.isArray(r.data) ? r.data : r.data.results ?? [])).catch(() => {});
+    getWarehouses().then((r) => setWarehouses(Array.isArray(r.data) ? r.data : r.data.results ?? [])).catch(() => {});
   }, []);
 
   const openCreate = () => { setEditing(null); setForm(emptyForm); setSaveError(""); setModal(true); };

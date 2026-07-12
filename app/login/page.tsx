@@ -1,206 +1,337 @@
-﻿﻿"use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { login } from "@/lib/api";
-import { Eye, EyeOff, AlertCircle, MapPin, X } from "lucide-react";
-import Link from "next/link";
-import { useGoogleLogin } from "@react-oauth/google";
+'use client'
 
-export default function LoginPage() {
-  const router = useRouter();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
-  const [cityPopup, setCityPopup] = useState(false);
-  const [cityInput, setCityInput] = useState("");
-  const [pendingGoogleToken, setPendingGoogleToken] = useState("");
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
+import { Eye, EyeOff, Lock, User, AlertCircle } from 'lucide-react'
+import { login, register } from '@/lib/api'
+import { useGoogleLogin } from '@react-oauth/google'
 
-  const finishGoogleLogin = async (accessToken: string, city: string) => {
-    setGoogleLoading(true);
-    setError("");
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/google/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ access_token: accessToken, city }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error("Google login failed");
-      localStorage.setItem("access_token", data.access);
-      localStorage.setItem("refresh_token", data.refresh);
-      localStorage.removeItem("orders_cache");
-      if (city) localStorage.setItem("delivery_city", city);
-      document.cookie = `access_token=${data.access}; path=/`;
-      try {
-        const payload = JSON.parse(atob(data.access.split(".")[1]));
-        const isAdmin = !!(payload.is_staff || payload.is_superuser);
-        localStorage.setItem("is_admin", String(isAdmin));
-        router.push(isAdmin ? "/dashboard" : "/landing");
-      } catch {
-        localStorage.setItem("is_admin", "false");
-        router.push("/");
-      }
-    } catch {
-      setError("Google login failed. Please try again.");
-    } finally {
-      setGoogleLoading(false);
-      setCityPopup(false);
-    }
-  };
+type Tab = 'login' | 'register'
 
-  const handleGoogleLogin = useGoogleLogin({
-    onSuccess: (tokenResponse) => {
-      setPendingGoogleToken(tokenResponse.access_token);
-      setCityInput("");
-      setCityPopup(true);
-    },
-    onError: () => setError("Google login failed. Please try again."),
-  });
-
-  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-    try {
-      const { data } = await login(username, password);
-      localStorage.setItem("access_token", data.access);
-      localStorage.setItem("refresh_token", data.refresh);
-      localStorage.setItem("username", username);
-      localStorage.removeItem("orders_cache");
-      document.cookie = `access_token=${data.access}; path=/`;
-      let isAdmin = false;
-      try {
-        const payload = JSON.parse(atob(data.access.split(".")[1]));
-        isAdmin = !!(payload.is_staff || payload.is_superuser);
-        localStorage.setItem("is_admin", String(isAdmin));
-      } catch { localStorage.setItem("is_admin", "false"); }
-      router.push(isAdmin ? "/dashboard" : "/landing");
-    } catch {
-      setError("Invalid username or password.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg)", position: "relative", overflow: "hidden" }}>
-
-      {/* Background blobs */}
-      <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
-        <div style={{ position: "absolute", top: "-10%", right: "-5%", width: "500px", height: "500px", borderRadius: "99px", background: "radial-gradient(circle, rgba(14,116,144,0.12) 0%, transparent 70%)", filter: "blur(40px)" }} />
-        <div style={{ position: "absolute", bottom: "-10%", left: "-5%", width: "450px", height: "450px", borderRadius: "99px", background: "radial-gradient(circle, rgba(124,58,237,0.09) 0%, transparent 70%)", filter: "blur(40px)" }} />
-        <div style={{ position: "absolute", top: "40%", left: "30%", width: "300px", height: "300px", borderRadius: "99px", background: "radial-gradient(circle, rgba(52,211,153,0.06) 0%, transparent 70%)", filter: "blur(50px)" }} />
-      </div>
-
-      <div style={{ width: "100%", maxWidth: "380px", padding: "0 20px", position: "relative" }}>
-
-        {/* Logo */}
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: "36px" }}>
-          <div style={{ width: "56px", height: "56px", borderRadius: "18px", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "20px", background: "linear-gradient(135deg, rgba(14,116,144,0.15), rgba(14,116,144,0.05))", border: "1px solid rgba(14,116,144,0.2)" }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0e7490" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>
-            </svg>
-          </div>
-          <h1 style={{ fontSize: "28px", fontWeight: 700, color: "var(--text)", letterSpacing: "-0.5px" }}>Sign in</h1>
-          <p style={{ fontSize: "15px", color: "var(--text-2)", marginTop: "6px" }}>Inventory Manager</p>
-        </div>
-
-        {/* Card "” lighter shadow */}
-        <div style={{ borderRadius: "24px", padding: "28px", background: "var(--card)", border: "1px solid var(--border)", boxShadow: "0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)" }}>
-          {error && (
-            <div style={{ marginBottom: "20px", padding: "12px 16px", borderRadius: "12px", display: "flex", alignItems: "center", gap: "10px", background: "rgba(220,38,38,0.06)", border: "1px solid rgba(220,38,38,0.15)", color: "var(--red)", fontSize: "14px" }}>
-              <AlertCircle size={15} style={{ flexShrink: 0 }} />
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
-            <div>
-              <label style={{ display: "block", fontSize: "13px", fontWeight: 500, color: "var(--text-2)", marginBottom: "8px" }}>Username</label>
-              <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Enter your username" required />
-            </div>
-
-            <div>
-              <label style={{ display: "block", fontSize: "13px", fontWeight: 500, color: "var(--text-2)", marginBottom: "8px" }}>Password</label>
-              <div style={{ position: "relative" }}>
-                <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required style={{ paddingRight: "44px" }} />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: "absolute", right: "14px", top: "50%", transform: "translateY(-50%)", color: "var(--text-3)", background: "none", border: "none", cursor: "pointer" }}>
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
-            </div>
-
-            <button type="submit" disabled={loading} style={{ height: "50px", borderRadius: "99px", fontSize: "16px", fontWeight: 600, color: "#fff", background: loading ? "#c7c7cc" : "rgba(0,113,227,0.85)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", border: "1px solid rgba(0,113,227,0.4)", boxShadow: loading ? "none" : "0 4px 24px rgba(0,113,227,0.3), inset 0 1px 0 rgba(255,255,255,0.2)", cursor: loading ? "not-allowed" : "pointer", marginTop: "4px", transition: "all 0.2s" }}
-              onMouseEnter={e => { if (!loading) { e.currentTarget.style.background = "rgba(0,113,227,1)"; e.currentTarget.style.boxShadow = "0 8px 32px rgba(0,113,227,0.4), inset 0 1px 0 rgba(255,255,255,0.2)"; } }}
-              onMouseLeave={e => { if (!loading) { e.currentTarget.style.background = "rgba(0,113,227,0.85)"; e.currentTarget.style.boxShadow = "0 4px 24px rgba(0,113,227,0.3), inset 0 1px 0 rgba(255,255,255,0.2)"; } }}>
-              {loading ? "Signing in..." : "Sign in"}
-            </button>
-          </form>
-        </div>
-
-        <div style={{ marginTop: "16px", display: "flex", alignItems: "center", gap: "12px" }}>
-          <div style={{ flex: 1, height: "1px", background: "var(--border)" }} />
-          <span style={{ fontSize: "13px", color: "var(--text-3)" }}>or</span>
-          <div style={{ flex: 1, height: "1px", background: "var(--border)" }} />
-        </div>
-
-        <button
-          onClick={() => handleGoogleLogin()}
-          disabled={googleLoading}
-          style={{ marginTop: "12px", width: "100%", height: "50px", borderRadius: "99px", fontSize: "15px", fontWeight: 600, color: "var(--text)", background: "var(--card)", border: "1px solid var(--border)", cursor: googleLoading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", transition: "all 0.2s", opacity: googleLoading ? 0.7 : 1 }}
-          onMouseEnter={e => { if (!googleLoading) e.currentTarget.style.background = "var(--card-2)"; }}
-          onMouseLeave={e => { if (!googleLoading) e.currentTarget.style.background = "var(--card)"; }}
-        >
-          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-          {googleLoading ? "Signing in..." : "Continue with Google"}
-        </button>
-
-        <div style={{ marginTop: "20px", display: "flex", flexDirection: "column", gap: "8px", textAlign: "center" }}>
-          <p style={{ fontSize: "14px", color: "var(--text-3)" }}>
-            No account?{" "}
-            <Link href="/register" style={{ fontWeight: 600, color: "var(--text-2)", textDecoration: "none" }}>Create one</Link>
-          </p>
-          <p style={{ fontSize: "14px", color: "var(--text-3)" }}>
-            <Link href="/forgot-password" style={{ fontWeight: 600, color: "var(--accent)", textDecoration: "none" }}>Forgot password?</Link>
-          </p>
-          <p style={{ fontSize: "14px", color: "var(--text-3)" }}>
-            Admin?{" "}
-            <Link href="/admin-login" style={{ fontWeight: 600, color: "#f59e0b", textDecoration: "none" }}>Admin login</Link>
-          </p>
-        </div>
-      </div>
-      {cityPopup && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.4)", backdropFilter: "blur(16px)" }}>
-          <div style={{ width: "100%", maxWidth: "380px", borderRadius: "24px", padding: "32px 28px", background: "var(--card)", border: "1px solid var(--border)", boxShadow: "0 40px 80px rgba(0,0,0,0.25)", margin: "0 16px" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
-              <div style={{ width: "40px", height: "40px", borderRadius: "12px", background: "rgba(0,113,227,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <MapPin size={20} color="#0071E3" />
-              </div>
-              <button onClick={() => { setCityPopup(false); finishGoogleLogin(pendingGoogleToken, ""); }} style={{ width: "28px", height: "28px", borderRadius: "99px", border: "1px solid var(--border)", background: "var(--card-2)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "var(--text-3)" }}><X size={14} /></button>
-            </div>
-            <h2 style={{ fontSize: "18px", fontWeight: 700, color: "var(--text)", marginBottom: "6px", marginTop: "16px" }}>Set delivery location</h2>
-            <p style={{ fontSize: "13px", color: "var(--text-2)", marginBottom: "20px" }}>Which city do you want your orders delivered to?</p>
-            <input
-              value={cityInput}
-              onChange={e => setCityInput(e.target.value)}
-              placeholder="e.g. Kathmandu"
-              autoFocus
-              onKeyDown={e => { if (e.key === "Enter" && cityInput.trim()) finishGoogleLogin(pendingGoogleToken, cityInput.trim()); }}
-              style={{ width: "100%", padding: "10px 14px", borderRadius: "10px", border: "1px solid var(--border)", fontSize: "14px", background: "var(--card-2)", color: "var(--text)", outline: "none", boxSizing: "border-box", marginBottom: "12px" }}
-            />
-            <button
-              onClick={() => finishGoogleLogin(pendingGoogleToken, cityInput.trim())}
-              disabled={googleLoading}
-              style={{ width: "100%", height: "46px", borderRadius: "99px", fontSize: "15px", fontWeight: 600, color: "#fff", background: googleLoading ? "#c7c7cc" : "rgba(0,113,227,0.85)", border: "none", cursor: googleLoading ? "not-allowed" : "pointer", transition: "all 0.2s" }}>
-              {googleLoading ? "Signing in..." : "Continue"}
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+interface FieldError {
+  username?: string
+  password?: string
+  confirmPassword?: string
+  email?: string
+  general?: string
 }
 
+export default function LoginPage() {
+  const router = useRouter()
+  const [tab, setTab] = useState<Tab>('login')
+
+  // Login
+  const [loginUsername, setLoginUsername] = useState('')
+  const [loginPassword, setLoginPassword] = useState('')
+  const [showLoginPass, setShowLoginPass] = useState(false)
+  const [loginErrors, setLoginErrors] = useState<FieldError>({})
+  const [loginLoading, setLoginLoading] = useState(false)
+
+  // Register
+  const [regUsername, setRegUsername] = useState('')
+  const [regEmail, setRegEmail] = useState('')
+  const [regPassword, setRegPassword] = useState('')
+  const [regConfirm, setRegConfirm] = useState('')
+  const [showRegPass, setShowRegPass] = useState(false)
+  const [showRegConfirm, setShowRegConfirm] = useState(false)
+  const [regErrors, setRegErrors] = useState<FieldError>({})
+  const [regLoading, setRegLoading] = useState(false)
+
+  useEffect(() => {
+    const token = sessionStorage.getItem('access_token')
+    if (token) {
+      const isAdmin = sessionStorage.getItem('is_admin') === 'true'
+      router.replace(isAdmin ? '/dashboard' : '/landing')
+    }
+  }, [router])
+
+  const validateLogin = () => {
+    const e: FieldError = {}
+    if (!loginUsername.trim()) e.username = 'Username is required'
+    if (!loginPassword) e.password = 'Password is required'
+    return e
+  }
+
+  const validateRegister = () => {
+    const e: FieldError = {}
+    if (!regUsername.trim()) e.username = 'Username is required'
+    if (!regEmail.trim()) e.email = 'Email is required'
+    else if (!/\S+@\S+\.\S+/.test(regEmail)) e.email = 'Enter a valid email'
+    if (!regPassword) e.password = 'Password is required'
+    else if (regPassword.length < 8) e.password = 'Password must be at least 8 characters'
+    if (regConfirm !== regPassword) e.confirmPassword = 'Passwords do not match'
+    return e
+  }
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const errs = validateLogin()
+    if (Object.keys(errs).length) { setLoginErrors(errs); return }
+    setLoginErrors({})
+    setLoginLoading(true)
+    try {
+      const res = await login(loginUsername.trim(), loginPassword)
+      sessionStorage.setItem('access_token', res.data.access)
+      sessionStorage.setItem('refresh_token', res.data.refresh)
+      sessionStorage.setItem('username', loginUsername.trim())
+      // Decode JWT to check admin status without extra API call
+      let isAdmin = res.data.is_admin ?? res.data.is_staff ?? false
+      try {
+        const payload = JSON.parse(atob(res.data.access.split('.')[1]))
+        isAdmin = payload.is_admin ?? payload.is_staff ?? payload.role === 'admin' ?? isAdmin
+      } catch {}
+      sessionStorage.setItem('is_admin', String(isAdmin))
+      router.replace(isAdmin ? '/dashboard' : '/landing')
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { detail?: string; non_field_errors?: string[] } } }
+      const msg = e.response?.data?.detail
+        ?? e.response?.data?.non_field_errors?.[0]
+        ?? 'Invalid username or password'
+      setLoginErrors({ general: msg })
+    } finally {
+      setLoginLoading(false)
+    }
+  }
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const errs = validateRegister()
+    if (Object.keys(errs).length) { setRegErrors(errs); return }
+    setRegErrors({})
+    setRegLoading(true)
+    try {
+      await register(regUsername.trim(), regPassword, regEmail.trim())
+      const res = await login(regUsername.trim(), regPassword)
+      sessionStorage.setItem('access_token', res.data.access)
+      sessionStorage.setItem('refresh_token', res.data.refresh)
+      sessionStorage.setItem('username', regUsername.trim())
+      sessionStorage.setItem('is_admin', 'false')
+      router.replace('/landing')
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: Record<string, string[]> } }
+      const data = e.response?.data ?? {}
+      const msg = Object.values(data).flat()[0] ?? 'Registration failed. Please try again.'
+      setRegErrors({ general: msg })
+    } finally {
+      setRegLoading(false)
+    }
+  }
+
+  const googleLogin = useGoogleLogin({
+    onSuccess: () => {
+      setLoginErrors({ general: 'Google login coming soon. Please use username/password.' })
+    },
+    onError: () => setLoginErrors({ general: 'Google login failed.' }),
+  })
+
+  const inputStyle = (err?: string): React.CSSProperties => ({
+    width: '100%',
+    paddingLeft: '40px',
+    paddingRight: '16px',
+    paddingTop: '12px',
+    paddingBottom: '12px',
+    background: err ? '#fff1f2' : '#f0f5f0',
+    border: `1px solid ${err ? '#fca5a5' : '#d4e8d4'}`,
+    borderRadius: '12px',
+    fontSize: '14px',
+    outline: 'none',
+    fontFamily: 'inherit',
+  })
+
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-emerald-100 rounded-full opacity-40 blur-3xl" />
+        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-indigo-100 rounded-full opacity-30 blur-3xl" />
+      </div>
+
+      <div className="relative w-full max-w-md">
+        <div className="text-center mb-8">
+          <Link href="/landing">
+            <span className="font-heading text-3xl font-bold text-foreground">
+              Shop<span className="text-primary">.</span>
+            </span>
+          </Link>
+          <p className="text-sm text-muted-foreground mt-1">Nepal&apos;s Trusted Online Pharmacy</p>
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="bg-white rounded-3xl border border-border shadow-lg overflow-hidden"
+        >
+          <div className="flex border-b border-border">
+            {(['login', 'register'] as Tab[]).map((t) => (
+              <button
+                key={t}
+                onClick={() => setTab(t)}
+                className={`flex-1 py-4 text-sm font-semibold capitalize transition-all ${
+                  tab === t
+                    ? 'text-primary border-b-2 border-primary bg-accent/30'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+
+          <div className="p-7">
+            {tab === 'login' && (
+              <motion.form
+                key="login"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.25 }}
+                onSubmit={handleLogin}
+                className="space-y-4"
+              >
+                {loginErrors.general && (
+                  <div className="flex items-center gap-2 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">
+                    <AlertCircle size={14} />
+                    {loginErrors.general}
+                  </div>
+                )}
+
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Username</label>
+                  <div className="relative">
+                    <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <input type="text" value={loginUsername} onChange={(e) => setLoginUsername(e.target.value)} placeholder="your_username" style={inputStyle(loginErrors.username)} />
+                  </div>
+                  {loginErrors.username && <p className="flex items-center gap-1 text-xs text-red-500 mt-1"><AlertCircle size={11} /> {loginErrors.username}</p>}
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Password</label>
+                  <div className="relative">
+                    <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <input type={showLoginPass ? 'text' : 'password'} value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} placeholder="••••••••" style={{ ...inputStyle(loginErrors.password), paddingRight: '40px' }} />
+                    <button type="button" onClick={() => setShowLoginPass(!showLoginPass)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                      {showLoginPass ? <EyeOff size={15} /> : <Eye size={15} />}
+                    </button>
+                  </div>
+                  {loginErrors.password && <p className="flex items-center gap-1 text-xs text-red-500 mt-1"><AlertCircle size={11} /> {loginErrors.password}</p>}
+                </div>
+
+                <button type="submit" disabled={loginLoading} className="w-full py-3.5 bg-primary text-primary-foreground rounded-xl font-semibold text-sm hover:bg-emerald-700 transition-all disabled:opacity-70 flex items-center justify-center gap-2">
+                  {loginLoading ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'Login'}
+                </button>
+
+                <div className="relative flex items-center gap-3">
+                  <div className="flex-1 h-px bg-border" />
+                  <span className="text-xs text-muted-foreground">or continue with</span>
+                  <div className="flex-1 h-px bg-border" />
+                </div>
+
+                <button type="button" onClick={() => googleLogin()} className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl border border-border bg-white text-sm font-medium text-foreground hover:bg-card transition-all">
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                  </svg>
+                  Continue with Google
+                </button>
+
+                <div className="text-center pt-1">
+                  <Link href="/admin-login" className="text-xs text-amber-600 font-medium hover:underline">Vendor login →</Link>
+                </div>
+              </motion.form>
+            )}
+
+            {tab === 'register' && (
+              <motion.form
+                key="register"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.25 }}
+                onSubmit={handleRegister}
+                className="space-y-4"
+              >
+                {regErrors.general && (
+                  <div className="flex items-center gap-2 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">
+                    <AlertCircle size={14} />
+                    {regErrors.general}
+                  </div>
+                )}
+
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Username</label>
+                  <div className="relative">
+                    <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <input type="text" value={regUsername} onChange={(e) => setRegUsername(e.target.value)} placeholder="ram_sharma" style={inputStyle(regErrors.username)} />
+                  </div>
+                  {regErrors.username && <p className="flex items-center gap-1 text-xs text-red-500 mt-1"><AlertCircle size={11} /> {regErrors.username}</p>}
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Email Address</label>
+                  <div className="relative">
+                    <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <input type="email" value={regEmail} onChange={(e) => setRegEmail(e.target.value)} placeholder="ram@example.com" style={inputStyle(regErrors.email)} />
+                  </div>
+                  {regErrors.email && <p className="flex items-center gap-1 text-xs text-red-500 mt-1"><AlertCircle size={11} /> {regErrors.email}</p>}
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Password</label>
+                  <div className="relative">
+                    <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <input type={showRegPass ? 'text' : 'password'} value={regPassword} onChange={(e) => setRegPassword(e.target.value)} placeholder="Min. 8 characters" style={{ ...inputStyle(regErrors.password), paddingRight: '40px' }} />
+                    <button type="button" onClick={() => setShowRegPass(!showRegPass)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                      {showRegPass ? <EyeOff size={15} /> : <Eye size={15} />}
+                    </button>
+                  </div>
+                  {regErrors.password && <p className="flex items-center gap-1 text-xs text-red-500 mt-1"><AlertCircle size={11} /> {regErrors.password}</p>}
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Confirm Password</label>
+                  <div className="relative">
+                    <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <input type={showRegConfirm ? 'text' : 'password'} value={regConfirm} onChange={(e) => setRegConfirm(e.target.value)} placeholder="Repeat password" style={{ ...inputStyle(regErrors.confirmPassword), paddingRight: '40px' }} />
+                    <button type="button" onClick={() => setShowRegConfirm(!showRegConfirm)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                      {showRegConfirm ? <EyeOff size={15} /> : <Eye size={15} />}
+                    </button>
+                  </div>
+                  {regErrors.confirmPassword && <p className="flex items-center gap-1 text-xs text-red-500 mt-1"><AlertCircle size={11} /> {regErrors.confirmPassword}</p>}
+                </div>
+
+                <button type="submit" disabled={regLoading} className="w-full py-3.5 bg-primary text-primary-foreground rounded-xl font-semibold text-sm hover:bg-emerald-700 transition-all disabled:opacity-70 flex items-center justify-center gap-2">
+                  {regLoading ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'Create Account'}
+                </button>
+
+                <div className="relative flex items-center gap-3">
+                  <div className="flex-1 h-px bg-border" />
+                  <span className="text-xs text-muted-foreground">or</span>
+                  <div className="flex-1 h-px bg-border" />
+                </div>
+
+                <button type="button" onClick={() => googleLogin()} className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl border border-border bg-white text-sm font-medium text-foreground hover:bg-card transition-all">
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                  </svg>
+                  Sign up with Google
+                </button>
+              </motion.form>
+            )}
+          </div>
+        </motion.div>
+
+        <p className="text-center text-xs text-muted-foreground mt-6">
+          By continuing, you agree to our{' '}
+          <Link href="#" className="text-primary hover:underline">Terms of Service</Link>
+          {' '}and{' '}
+          <Link href="#" className="text-primary hover:underline">Privacy Policy</Link>.
+        </p>
+      </div>
+    </div>
+  )
+}

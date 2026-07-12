@@ -1,6 +1,6 @@
 ﻿﻿"use client";
 import { useEffect, useState } from "react";
-import { getOrders, cancelOrder, deleteOrder, createOrder, getProducts, trackOrder, updateOrderStatus, applyCoupon, confirmPayment } from "@/lib/api";
+import { getVendorOrders, getOrders, deleteVendorOrder, updateVendorOrderStatus, createOrder, getVendorProducts, getProducts, trackOrder, confirmPayment, applyCoupon, cancelOrder } from "@/lib/api";
 import { ShoppingCart, Ban, Trash2, Plus, X, Search, ChevronLeft, ChevronRight, MapPin, ArrowRight, Tag, CheckCircle, CreditCard } from "lucide-react";
 import { OrderTracking } from "@/components/ui/order-tracking";
 import EsewaPayment from "@/components/ui/esewa-payment";
@@ -31,7 +31,7 @@ const statusColor: Record<string, string> = {
   pending: "#d97706",
   completed: "#059669",
   cancelled: "#dc2626",
-  processing: "#0e7490",
+  processing: "#10b981",
   shipped: "#7c3aed",
 };
 
@@ -75,26 +75,24 @@ export default function OrdersPage() {
   const PAGE_SIZE = 10;
 
   useEffect(() => {
-    setIsAdmin(localStorage.getItem("is_admin") === "true");
+    setIsAdmin(sessionStorage.getItem("is_admin") === "true");
   }, []);
 
   const CACHE_KEY = "orders_cache";
 
+  const setFresh = (r: { data: Order[] | { results?: Order[] } }) => {
+    const fresh = Array.isArray(r.data) ? r.data : r.data.results ?? [];
+    setAllOrders(fresh);
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify(fresh));
+  };
+
   const fetchAll = () => {
-    const cached = localStorage.getItem(CACHE_KEY);
-    if (cached) {
-      const parsed = JSON.parse(cached);
-      setAllOrders(parsed);
-      setLoading(false);
-    } else {
-      setLoading(true);
-    }
-    getOrders()
-      .then((r) => {
-        const fresh = Array.isArray(r.data) ? r.data : r.data.results ?? [];
-        setAllOrders(fresh);
-        localStorage.setItem(CACHE_KEY, JSON.stringify(fresh));
-      })
+    const cached = sessionStorage.getItem(CACHE_KEY);
+    if (cached) { setAllOrders(JSON.parse(cached)); setLoading(false); }
+    else setLoading(true);
+    getVendorOrders()
+      .then(setFresh)
+      .catch(() => getOrders().then(setFresh))
       .finally(() => setLoading(false));
   };
 
@@ -116,16 +114,7 @@ export default function OrdersPage() {
     applyFilter(allOrders, search, page);
   }, [allOrders, search, page]);
 
-  const load = () => {
-    const cached = localStorage.getItem(CACHE_KEY);
-    if (cached) {
-      const fresh = JSON.parse(cached);
-      setAllOrders(fresh);
-    } else {
-      fetchAll();
-    }
-    fetchAll();
-  };
+  const load = () => fetchAll();
 
   useEffect(() => {
     fetchAll();
@@ -145,14 +134,14 @@ export default function OrdersPage() {
   const handleCancel = async (id: number) => {
     if (!confirm("Cancel this order?")) return;
     await cancelOrder(id);
-    localStorage.removeItem(CACHE_KEY);
+    sessionStorage.removeItem(CACHE_KEY);
     fetchAll();
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm("Delete this order?")) return;
-    await deleteOrder(id);
-    localStorage.removeItem(CACHE_KEY);
+    await deleteVendorOrder(id).catch(() => null);
+    sessionStorage.removeItem(CACHE_KEY);
     fetchAll();
   };
 
@@ -165,8 +154,8 @@ export default function OrdersPage() {
   const handleUpdateStatus = async (id: number, currentStatus: string) => {
     const next = nextStatus[currentStatus];
     if (!next) return;
-    await updateOrderStatus(id, next);
-    localStorage.removeItem(CACHE_KEY);
+    await updateVendorOrderStatus(id, next).catch(() => null);
+    sessionStorage.removeItem(CACHE_KEY);
     fetchAll();
   };
 
@@ -193,7 +182,7 @@ export default function OrdersPage() {
       setEsewaModal(false);
       setEsewaRef("");
       setEsewaOrderId(null);
-      localStorage.removeItem(CACHE_KEY);
+      sessionStorage.removeItem(CACHE_KEY);
       fetchAll();
     } catch (err: unknown) {
       const data = (err as { response?: { data?: Record<string, unknown> } })?.response?.data;
@@ -246,7 +235,7 @@ export default function OrdersPage() {
       setCustomerName(""); setDeliveryCity(""); setPaymentMethod("cod");
       setItems([{ product: "", quantity: 1 }]);
       setCouponCode(""); setCouponResult(null); setCouponError("");
-      localStorage.removeItem(CACHE_KEY);
+      sessionStorage.removeItem(CACHE_KEY);
       fetchAll();
       if (paymentMethod === "esewa") {
         setEsewaPayOrderId(res.data.id);
