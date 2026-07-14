@@ -1,7 +1,9 @@
 "use client"
 
 import { useState, useRef } from "react"
-import { X, Upload, Loader2, FileImage, CheckCircle } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
+import { FileImage, Upload, X, CheckCircle2, Loader2 } from "lucide-react"
 import { uploadPrescription } from "@/lib/api"
 
 interface Props {
@@ -9,6 +11,9 @@ interface Props {
   onDone: () => void
   onClose: () => void
 }
+
+const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/gif"]
+const MAX_SIZE = 5 * 1024 * 1024
 
 export default function PrescriptionUpload({ orderId, onDone, onClose }: Props) {
   const [file, setFile] = useState<File | null>(null)
@@ -19,16 +24,22 @@ export default function PrescriptionUpload({ orderId, onDone, onClose }: Props) 
 
   const handleFileChange = (f: File | null) => {
     setError("")
-    if (!f) { setFile(null); return }
-    if (!["image/jpeg", "image/png", "image/gif"].includes(f.type)) {
+    if (!f) return
+    if (!ACCEPTED_TYPES.includes(f.type)) {
       setError("Only JPEG, PNG, or GIF images are allowed.")
       return
     }
-    if (f.size > 5 * 1024 * 1024) {
+    if (f.size > MAX_SIZE) {
       setError("Image must be under 5MB.")
       return
     }
     setFile(f)
+  }
+
+  const handleRemove = () => {
+    setFile(null)
+    setError("")
+    if (inputRef.current) inputRef.current.value = ""
   }
 
   const handleUpload = async () => {
@@ -51,68 +62,98 @@ export default function PrescriptionUpload({ orderId, onDone, onClose }: Props) 
   }
 
   return (
-    <div style={{ position: "fixed", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 300, background: "rgba(0,0,0,0.45)", backdropFilter: "blur(16px)" }}>
-      <div style={{ width: "100%", maxWidth: "420px", borderRadius: "24px", padding: "28px", background: "var(--bg-elevated)", border: "1px solid var(--border)" }}>
-
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
-          <div>
-            <h2 style={{ fontSize: "17px", fontWeight: 700, color: "var(--text)" }}>Prescription required</h2>
-            <p style={{ fontSize: "12px", color: "var(--text-3)", marginTop: "2px" }}>Order #{orderId} contains a prescription-only item</p>
+    <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/45 backdrop-blur-md p-4">
+      <div className="sm:mx-auto sm:max-w-lg flex items-center justify-center p-8 w-full max-w-lg rounded-2xl bg-card border border-border shadow-2xl">
+        <div className="w-full">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-foreground">Prescription required</h3>
+              <p className="text-sm text-muted-foreground mt-0.5">Order #{orderId} contains a prescription-only item</p>
+            </div>
+            <Button type="button" variant="ghost" size="icon" onClick={onClose} aria-label="Close" className="h-8 w-8 shrink-0">
+              <X className="size-4" />
+            </Button>
           </div>
-          <button onClick={onClose} style={{ width: "30px", height: "30px", borderRadius: "99px", border: "1px solid var(--border)", background: "var(--card-2)", cursor: "pointer", color: "var(--text-2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <X size={14} />
-          </button>
+
+          {success ? (
+            <div className="flex flex-col items-center gap-3 py-10">
+              <CheckCircle2 className="h-10 w-10 text-primary" aria-hidden={true} />
+              <p className="text-sm font-medium text-foreground">Prescription uploaded</p>
+            </div>
+          ) : !file ? (
+            <>
+              <div className="mt-4 flex justify-center space-x-4 rounded-md border border-dashed border-input px-6 py-10">
+                <div className="sm:flex sm:items-center sm:gap-x-3">
+                  <Upload
+                    className="mx-auto h-8 w-8 text-muted-foreground sm:mx-0 sm:h-6 sm:w-6"
+                    aria-hidden={true}
+                  />
+                  <div className="mt-4 flex text-sm leading-6 text-foreground sm:mt-0">
+                    <Label
+                      htmlFor="prescription-upload-input"
+                      className="relative cursor-pointer rounded-sm pl-1 font-medium text-primary hover:underline hover:underline-offset-4"
+                    >
+                      <span> Drag and drop or choose file to upload </span>
+                      <input
+                        ref={inputRef}
+                        id="prescription-upload-input"
+                        name="prescription-upload-input"
+                        type="file"
+                        accept="image/jpeg,image/png,image/gif"
+                        className="sr-only"
+                        onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
+                      />
+                    </Label>
+                  </div>
+                </div>
+              </div>
+              <p className="mt-2 flex items-center justify-between text-xs leading-5 text-muted-foreground">
+                Recommended max. size: 5 MB, Accepted file types: JPEG, PNG, GIF.
+              </p>
+            </>
+          ) : (
+            <div className="relative mt-8 rounded-lg bg-muted p-3">
+              <div className="absolute right-1 top-1">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-sm p-2 text-muted-foreground hover:text-foreground"
+                  aria-label="Remove"
+                  onClick={handleRemove}
+                >
+                  <X className="size-4 shrink-0" aria-hidden={true} />
+                </Button>
+              </div>
+              <div className="flex items-center space-x-2.5">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-sm bg-background shadow-sm ring-1 ring-inset ring-input">
+                  <FileImage className="size-5 text-foreground" aria-hidden={true} />
+                </span>
+                <div className="w-full min-w-0">
+                  <p className="text-xs font-medium text-foreground truncate">{file.name}</p>
+                  <p className="mt-0.5 flex justify-between text-xs text-muted-foreground">
+                    <span>{file.size >= 1024 * 1024 ? `${(file.size / (1024 * 1024)).toFixed(1)} MB` : `${(file.size / 1024).toFixed(0)} KB`}</span>
+                    <span>{uploading ? "Uploading…" : "Ready"}</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {error && <p className="mt-3 text-xs text-destructive">{error}</p>}
+
+          {!success && (
+            <div className="mt-8 flex items-center justify-end space-x-3">
+              <Button type="button" variant="outline" onClick={onClose}>
+                I&apos;ll upload later
+              </Button>
+              <Button type="button" variant="default" disabled={!file || uploading} onClick={handleUpload}>
+                {uploading ? <Loader2 className="size-4 animate-spin" /> : "Upload"}
+              </Button>
+            </div>
+          )}
         </div>
-
-        {success ? (
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "24px 0", gap: "10px" }}>
-            <CheckCircle size={40} className="text-primary" />
-            <p style={{ fontSize: "14px", fontWeight: 600, color: "var(--text)" }}>Prescription uploaded</p>
-          </div>
-        ) : (
-          <>
-            <input
-              ref={inputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/gif"
-              onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
-              style={{ display: "none" }}
-            />
-
-            <button
-              onClick={() => inputRef.current?.click()}
-              style={{ width: "100%", padding: "24px", borderRadius: "16px", border: "1.5px dashed var(--border-strong)", background: "var(--card-2)", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}
-            >
-              <FileImage size={24} color="var(--text-3)" />
-              <span style={{ fontSize: "13px", fontWeight: 500, color: "var(--text-2)" }}>
-                {file ? file.name : "Choose prescription image"}
-              </span>
-              <span style={{ fontSize: "11px", color: "var(--text-3)" }}>JPEG, PNG, or GIF — max 5MB</span>
-            </button>
-
-            {error && (
-              <p style={{ color: "var(--red)", fontSize: "13px", textAlign: "center", marginTop: "14px" }}>{error}</p>
-            )}
-
-            <button
-              onClick={handleUpload}
-              disabled={!file || uploading}
-              style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", width: "100%", height: "48px", borderRadius: "99px", fontSize: "14px", fontWeight: 700, color: "#fff", background: !file || uploading ? "var(--border-strong)" : "var(--accent)", border: "none", cursor: !file || uploading ? "not-allowed" : "pointer", marginTop: "16px" }}
-            >
-              {uploading ? <Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} /> : <Upload size={16} />}
-              {uploading ? "Uploading…" : "Upload prescription"}
-            </button>
-
-            <button
-              onClick={onClose}
-              style={{ width: "100%", textAlign: "center", marginTop: "10px", fontSize: "12px", color: "var(--text-3)", background: "none", border: "none", cursor: "pointer" }}
-            >
-              I'll upload this later from My Orders
-            </button>
-          </>
-        )}
       </div>
-      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
     </div>
   )
 }

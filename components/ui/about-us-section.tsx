@@ -19,7 +19,7 @@ import {
   Zap,
   TrendingUp,
 } from "lucide-react"
-import { motion, useScroll, useTransform, useInView, useSpring } from "framer-motion"
+import { motion, useScroll, useTransform, useInView, useSpring, type Easing } from "framer-motion"
 
 export default function AboutUsSection() {
   const [isVisible, setIsVisible] = useState(false)
@@ -56,7 +56,7 @@ export default function AboutUsSection() {
     visible: {
       y: 0,
       opacity: 1,
-      transition: { duration: 0.6, ease: "easeOut" },
+      transition: { duration: 0.6, ease: "easeOut" as Easing },
     },
   }
 
@@ -217,7 +217,7 @@ interface ServiceItemProps {
   description: string
   variants: {
     hidden: { opacity: number; y?: number }
-    visible: { opacity: number; y?: number; transition: { duration: number; ease: string } }
+    visible: { opacity: number; y?: number; transition: { duration: number; ease: Easing } }
   }
   delay: number
   direction: "left" | "right"

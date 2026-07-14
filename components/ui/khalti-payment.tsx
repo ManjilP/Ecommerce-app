@@ -28,8 +28,8 @@ export default function KhaltiPayment({ orderId, amount, onClose }: Props) {
       if (!res.ok || !data.payment_url) throw new Error("Failed to initiate payment")
 
       window.location.href = data.payment_url
-    } catch (e: any) {
-      setError(e.message)
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Failed to initiate payment")
       setLoading(false)
     }
   }

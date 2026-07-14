@@ -5,24 +5,24 @@ import { ArrowRight } from 'lucide-react'
 
 const promos = [
   {
-    title: 'Up to 30% Off',
-    subtitle: 'Vitamins & Supplements',
-    description: 'Stock up on daily essentials and save big this season.',
+    title: 'Free Delivery',
+    subtitle: 'On every order',
+    description: 'Delivered to your doorstep at no extra cost, no minimum order.',
     cta: 'Shop Now',
     featured: true,
   },
   {
-    title: 'Free Delivery',
-    subtitle: 'On orders over NPR 500',
-    description: 'Delivered to your doorstep at no extra cost.',
-    cta: 'Order Now',
+    title: 'eSewa, Khalti & COD',
+    subtitle: 'Pay your way',
+    description: 'Checkout with eSewa, Khalti, or cash on delivery — whichever works for you.',
+    cta: 'Start Checkout',
     featured: false,
   },
   {
-    title: 'New Arrivals',
-    subtitle: 'Skincare & Baby Care',
-    description: 'The latest certified products for your family.',
-    cta: 'Explore',
+    title: 'Prescription Uploads',
+    subtitle: 'For Rx medicines',
+    description: 'Ordering a prescription-only item? Upload it securely during checkout.',
+    cta: 'Browse Products',
     featured: false,
   },
 ]
@@ -69,7 +69,8 @@ export default function PromoCards() {
               </p>
             </div>
 
-            <button
+            <a
+              href="#products"
               className={`flex items-center gap-2 text-sm font-semibold mt-6 w-fit px-5 py-2.5 rounded-xl transition-colors ${
                 promo.featured
                   ? 'bg-white text-primary hover:bg-white/90'
@@ -78,7 +79,7 @@ export default function PromoCards() {
             >
               {promo.cta}
               <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
-            </button>
+            </a>
           </motion.div>
         ))}
       </div>

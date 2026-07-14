@@ -46,7 +46,7 @@ function ProductGridContent({ onProductsLoaded, activeCategory = 'All', onCatego
 
   return (
     <>
-      <section id="products" className="max-w-7xl mx-auto px-4 py-16">
+      <section id="products" className="max-w-7xl mx-auto px-4 py-16 scroll-mt-28">
         {/* Section header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
           <div>

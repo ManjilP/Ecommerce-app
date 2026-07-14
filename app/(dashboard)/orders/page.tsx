@@ -303,7 +303,7 @@ export default function OrdersPage() {
                             <span style={{ fontSize: "13px", fontWeight: 500, color: "var(--text)" }}>{item.product_name}</span>
                             <span style={{ fontSize: "11px", padding: "1px 7px", borderRadius: "99px", background: "var(--card-2)", color: "var(--text-3)" }}>x{item.quantity}</span>
                           </div>
-                        )) : <span style={{ color: "var(--text-3)", fontSize: "13px" }}>"”</span>}
+                        )) : <span style={{ color: "var(--text-3)", fontSize: "13px" }}>—</span>}
                       </div>
                     </td>
                     <td>
@@ -428,7 +428,7 @@ export default function OrdersPage() {
                           <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "10px" }}>
                             <select value={item.product} onChange={(e) => { updateItem(i, "product", e.target.value); setCouponResult(null); setCouponError(""); }} required>
                               <option value="">Select product...</option>
-                              {products.map((p) => <option key={p.id} value={p.id}>{p.name} "” Rs. {parseFloat(p.price).toFixed(2)}</option>)}
+                              {products.map((p) => <option key={p.id} value={p.id}>{p.name} — Rs. {parseFloat(p.price).toFixed(2)}</option>)}
                             </select>
                             <input type="number" min={1} value={item.quantity} onChange={(e) => { updateItem(i, "quantity", parseInt(e.target.value)); setCouponResult(null); setCouponError(""); }} style={{ width: "80px" }} required />
                           </div>

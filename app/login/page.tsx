@@ -93,7 +93,9 @@ function LoginPageContent() {
       let isAdmin = res.data.is_admin ?? res.data.is_staff ?? false
       try {
         const payload = JSON.parse(atob(res.data.access.split('.')[1]))
-        isAdmin = payload.is_admin ?? payload.is_staff ?? payload.role === 'admin' ?? isAdmin
+        if (payload.is_admin !== undefined) isAdmin = payload.is_admin
+        else if (payload.is_staff !== undefined) isAdmin = payload.is_staff
+        else if (payload.role !== undefined) isAdmin = payload.role === 'admin'
       } catch {}
       sessionStorage.setItem('is_admin', String(isAdmin))
       router.replace(isAdmin ? '/dashboard' : '/landing')
