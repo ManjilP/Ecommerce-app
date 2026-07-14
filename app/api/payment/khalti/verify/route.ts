@@ -5,7 +5,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 
 export async function POST(req: NextRequest) {
   try {
-    const { pidx, orderId } = await req.json();
+    const { pidx, orderId, tenantSlug } = await req.json();
     const authHeader = req.headers.get("Authorization") ?? "";
 
     const response = await fetch("https://dev.khalti.com/api/v2/epayment/lookup/", {
@@ -28,6 +28,7 @@ export async function POST(req: NextRequest) {
       headers: {
         "Authorization": authHeader,
         "Content-Type": "application/json",
+        "X-Tenant-Slug": tenantSlug ?? "",
       },
       body: JSON.stringify({ transaction_id: data.transaction_id }),
     });

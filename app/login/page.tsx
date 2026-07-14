@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Eye, EyeOff, Lock, User, AlertCircle } from 'lucide-react'
-import { login, register } from '@/lib/api'
+import { login, register, isTokenExpired } from '@/lib/api'
 import { useGoogleLogin } from '@react-oauth/google'
 
 type Tab = 'login' | 'register'
@@ -19,8 +19,17 @@ interface FieldError {
 }
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginPageContent />
+    </Suspense>
+  )
+}
+
+function LoginPageContent() {
   const router = useRouter()
-  const [tab, setTab] = useState<Tab>('login')
+  const searchParams = useSearchParams()
+  const [tab, setTab] = useState<Tab>(searchParams.get('tab') === 'register' ? 'register' : 'login')
 
   // Login
   const [loginUsername, setLoginUsername] = useState('')
@@ -41,10 +50,14 @@ export default function LoginPage() {
 
   useEffect(() => {
     const token = sessionStorage.getItem('access_token')
-    if (token) {
-      const isAdmin = sessionStorage.getItem('is_admin') === 'true'
-      router.replace(isAdmin ? '/dashboard' : '/landing')
+    if (!token) return
+    if (isTokenExpired(token)) {
+      sessionStorage.removeItem('access_token')
+      sessionStorage.removeItem('refresh_token')
+      return
     }
+    const isAdmin = sessionStorage.getItem('is_admin') === 'true'
+    router.replace(isAdmin ? '/dashboard' : '/landing')
   }, [router])
 
   const validateLogin = () => {

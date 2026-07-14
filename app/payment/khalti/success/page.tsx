@@ -26,10 +26,11 @@ function KhaltiSuccessContent() {
     }
 
     const token = sessionStorage.getItem("access_token") ?? ""
+    const tenantSlug = sessionStorage.getItem("tenant_slug") ?? process.env.NEXT_PUBLIC_TENANT_SLUG ?? ""
     fetch("/api/payment/khalti/verify", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-      body: JSON.stringify({ pidx, orderId }),
+      body: JSON.stringify({ pidx, orderId, tenantSlug }),
     })
       .then(res => res.json())
       .then(data => {
@@ -41,7 +42,10 @@ function KhaltiSuccessContent() {
           setState("error")
         }
       })
-      .catch(() => { setState("success") })
+      .catch(() => {
+        setErrorMsg(`Payment received (pidx ${pidx}) but we couldn't confirm your order automatically. Please contact support with this reference.`)
+        setState("error")
+      })
   }, [searchParams])
 
   return (

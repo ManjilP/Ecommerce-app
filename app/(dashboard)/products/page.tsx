@@ -11,10 +11,11 @@ interface Product {
   price: number | string;
   description?: string;
   image?: string;
+  requires_prescription?: boolean;
   created_at: string;
 }
 
-const emptyForm = { name: "", sku: "", category: "", price: "", description: "" };
+const emptyForm = { name: "", sku: "", category: "", price: "", description: "", requires_prescription: false };
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -59,7 +60,7 @@ export default function ProductsPage() {
   const openCreate = () => { setEditing(null); setForm(emptyForm); setSaveError(""); setModal(true); };
   const openEdit = (p: Product) => {
     setEditing(p);
-    setForm({ name: p.name, sku: p.sku, category: p.category, price: String(p.price), description: p.description ?? "" });
+    setForm({ name: p.name, sku: p.sku, category: p.category, price: String(p.price), description: p.description ?? "", requires_prescription: p.requires_prescription ?? false });
     setSaveError("");
     setModal(true);
   };
@@ -69,7 +70,7 @@ export default function ProductsPage() {
     setSaving(true);
     setSaveError("");
     try {
-      const payload = { name: form.name, sku: form.sku, category: form.category, price: parseFloat(form.price), description: form.description || undefined };
+      const payload = { name: form.name, sku: form.sku, category: form.category, price: parseFloat(form.price), description: form.description || undefined, requires_prescription: form.requires_prescription };
       if (editing) await updateProduct(editing.id, payload);
       else await createProduct(payload);
       setModal(false);
@@ -155,7 +156,7 @@ export default function ProductsPage() {
                 {paginatedProducts.map((p) => (
                   <tr key={p.id}>
                     <td>
-                      {p.image ? (
+                      {p.image && /^(https?:\/\/|\/)/.test(p.image) ? (
                         <img src={p.image} alt={p.name} className="w-9 h-9 rounded-xl object-cover" />
                       ) : (
                         <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "var(--card-2)" }}>
@@ -164,7 +165,14 @@ export default function ProductsPage() {
                       )}
                     </td>
                     <td className="font-mono text-xs" style={{ color: "var(--text-3)" }}>{p.sku}</td>
-                    <td className="font-medium" style={{ color: "var(--text)" }}>{p.name}</td>
+                    <td className="font-medium" style={{ color: "var(--text)" }}>
+                      <div className="flex items-center gap-2">
+                        {p.name}
+                        {p.requires_prescription && (
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold" style={{ background: "#d9770618", color: "#d97706" }}>Rx</span>
+                        )}
+                      </div>
+                    </td>
                     <td style={{ color: "var(--text-2)" }}>{p.category}</td>
                     <td className="font-semibold" style={{ color: "#34d399" }}>Rs. {parseFloat(String(p.price)).toFixed(2)}</td>
                     <td>
@@ -226,6 +234,10 @@ export default function ProductsPage() {
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Description <span className="font-normal">(optional)</span></label>
                 <textarea className="w-full px-4 py-3 bg-accent/30 border border-border rounded-xl text-sm outline-none focus:border-primary/50 transition-colors resize-y text-foreground" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Short product description..." rows={2} />
               </div>
+              <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                <input type="checkbox" checked={form.requires_prescription} onChange={(e) => setForm({ ...form, requires_prescription: e.target.checked })} className="w-4 h-4 accent-primary cursor-pointer" />
+                <span className="text-sm font-medium text-foreground">Requires prescription</span>
+              </label>
               <div className="flex gap-3 pt-4">
                 <button type="button" onClick={() => setModal(false)} className="flex-1 py-3.5 rounded-xl text-sm font-semibold bg-transparent border-2 border-border text-foreground hover:bg-accent transition-colors">Cancel</button>
                 <button type="submit" disabled={saving} className="flex-1 py-3.5 rounded-xl text-sm font-semibold bg-primary text-primary-foreground hover:bg-emerald-700 transition-all disabled:opacity-70 flex items-center justify-center">

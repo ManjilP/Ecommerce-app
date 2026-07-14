@@ -7,7 +7,7 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-const isTokenExpired = (token: string) => {
+export const isTokenExpired = (token: string) => {
   try {
     const payload = JSON.parse(atob(token.split(".")[1]));
     return payload.exp * 1000 < Date.now();
@@ -128,6 +128,10 @@ export const confirmPayment = (id: number, transaction_id?: string) => api.post(
 export const trackOrder = (id: number) => api.get(`/api/orders/${id}/track/`);
 export const updateOrderStatus = (id: number, status: string) => api.patch(`/api/orders/${id}/update-status/`, { status });
 
+// Prescriptions
+export const getPrescriptionStatus = (id: number) => api.get(`/api/orders/${id}/prescription-status/`);
+export const uploadPrescription = (id: number, image: File) => { const fd = new FormData(); fd.append("image", image); return api.post(`/api/orders/${id}/upload-prescription/`, fd, { headers: { "Content-Type": "multipart/form-data" } }); };
+
 // Vendor Orders (admin panel)
 export const getVendorOrders = (params?: { search?: string; page?: number }) => api.get("/api/vendor/orders/", { params });
 export const updateVendorOrderStatus = (id: number, status: string) => api.patch(`/api/vendor/orders/${id}/update-status/`, { status });
@@ -153,6 +157,19 @@ export const deleteWarehouse = (id: number) => api.delete(`/api/warehouses/${id}
 // Reports
 export const getInventorySummary = () => api.get("/api/reports/inventory-summary/");
 
+// Contact
+export const submitContactMessage = (data: { first_name: string; last_name: string; email: string; subject: string; message: string }) =>
+  api.post("/api/contact/", data);
+
+// Cart
+export const getCart = () => api.get("/api/cart/");
+export const addToCart = (product: number, quantity: number) => api.post("/api/cart/add/", { product, quantity });
+export const updateCartItem = (id: number, quantity: number) => api.patch(`/api/cart/item/${id}/`, { quantity });
+export const removeCartItem = (id: number) => api.delete(`/api/cart/item/${id}/delete/`);
+export const clearCart = () => api.delete("/api/cart/clear/");
+export const checkoutCart = (data: { customer_name: string; payment_method: "COD" | "ESEWA" | "KHALTI"; delivery_city?: string }) =>
+  api.post("/api/cart/checkout/", data);
+
 // Coupons
 export const getCoupons = () => api.get("/api/coupons/");
 export const applyCoupon = (code: string, order_amount: string) => api.post("/api/coupons/apply/", { code, order_amount });
@@ -162,8 +179,8 @@ export const deleteCoupon = (id: number) => api.delete(`/api/coupons/${id}/`);
 
 // Notifications
 export const getNotifications = () => api.get("/api/notifications/");
-export const markNotificationRead = (id: number) => api.patch(`/api/notifications/${id}/read/`);
-export const markAllNotificationsRead = () => api.post("/api/notifications/mark-all-read/");
+export const markNotificationRead = (id: number) => api.patch(`/api/notifications/${id}/read/`, { is_read: true });
+export const markAllNotificationsRead = () => api.post("/api/notifications/mark-all-read/", { is_read: true });
 export const getUnreadNotificationCount = () => api.get("/api/notifications/unread-count/");
 export const deleteNotification = (id: number) => api.delete(`/api/notifications/${id}/`);
 export const clearAllNotifications = async (ids: number[]) => Promise.all(ids.map((id) => api.delete(`/api/notifications/${id}/`)));

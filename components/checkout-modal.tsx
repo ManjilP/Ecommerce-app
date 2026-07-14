@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Plus, Trash2, CheckCircle, Loader2, Tag } from 'lucide-react'
 import { createOrder, applyCoupon } from '@/lib/api'
 import EsewaPayment from '@/components/ui/esewa-payment'
 import KhaltiPayment from '@/components/ui/khalti-payment'
+import PrescriptionUpload from '@/components/ui/prescription-upload'
 import type { RealProduct } from '@/components/product-card'
 
 interface CartItem {
@@ -19,18 +20,31 @@ export interface CheckoutModalProps {
   onClose: () => void
   products?: RealProduct[]
   initialProductId?: number
+  initialItems?: CartItem[]
+  onPlaced?: () => void
 }
 
 const nepaliCities = ['Kathmandu', 'Pokhara', 'Lalitpur']
 
 type PaymentMethod = 'esewa' | 'khalti' | 'cod'
 
-export default function CheckoutModal({ open, onClose, products = [], initialProductId }: CheckoutModalProps) {
+const defaultItems = (products: RealProduct[], initialProductId?: number): CartItem[] => [
+  { productId: initialProductId ?? (products[0]?.id ?? 0), quantity: 1 },
+]
+
+export default function CheckoutModal({ open, onClose, products = [], initialProductId, initialItems, onPlaced }: CheckoutModalProps) {
   const [name, setName] = useState('')
   const [city, setCity] = useState('')
-  const [items, setItems] = useState<CartItem[]>([
-    { productId: initialProductId ?? (products[0]?.id ?? 0), quantity: 1 },
-  ])
+  const [items, setItems] = useState<CartItem[]>(
+    initialItems && initialItems.length > 0 ? initialItems : defaultItems(products, initialProductId)
+  )
+
+  useEffect(() => {
+    if (open) {
+      setItems(initialItems && initialItems.length > 0 ? initialItems : defaultItems(products, initialProductId))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open])
   const [coupon, setCoupon] = useState('')
   const [couponApplied, setCouponApplied] = useState(false)
   const [couponDiscount, setCouponDiscount] = useState(0)
@@ -41,6 +55,7 @@ export default function CheckoutModal({ open, onClose, products = [], initialPro
   const [error, setError] = useState('')
   const [esewaOrder, setEsewaOrder] = useState<{ id: number; amount: number } | null>(null)
   const [khaltiOrder, setKhaltiOrder] = useState<{ id: number; amount: number } | null>(null)
+  const [prescriptionOrder, setPrescriptionOrder] = useState<{ id: number; amount: number } | null>(null)
 
   const getProduct = (id: number) => products.find((p) => p.id === id)
 
@@ -86,6 +101,20 @@ export default function CheckoutModal({ open, onClose, products = [], initialPro
     setItems((prev) => [...prev, { productId: firstProduct.id, quantity: 1 }])
   }
 
+  const proceedToPayment = (orderId: number, orderTotal: number) => {
+    if (payment === 'esewa') {
+      setEsewaOrder({ id: orderId, amount: orderTotal })
+    } else if (payment === 'khalti') {
+      setKhaltiOrder({ id: orderId, amount: orderTotal })
+    } else {
+      setSuccess(true)
+      setTimeout(() => {
+        setSuccess(false)
+        handleClose()
+      }, 2200)
+    }
+  }
+
   const handlePlace = async () => {
     if (!name.trim() || !city) return
     setLoading(true)
@@ -101,19 +130,20 @@ export default function CheckoutModal({ open, onClose, products = [], initialPro
         ...(couponApplied ? { coupon_code: coupon.trim() } : {}),
       }
       const res = await createOrder(orderData)
-      const orderId: number = res.data.id
-      const orderTotal: number = parseFloat(res.data.total_amount ?? total.toString())
+      const createdOrder = res.data.orders?.[0] ?? res.data.order ?? res.data
+      const orderId: number = createdOrder?.id ?? createdOrder?.order_id ?? createdOrder?.pk
+      if (!orderId) {
+        console.error('createOrder response did not contain a recognizable order ID:', res.data)
+        setError('Order was placed but the server did not return an order ID, so payment cannot be started. Please check your orders page or contact support.')
+        return
+      }
+      const orderTotal: number = parseFloat(createdOrder.total_price ?? createdOrder.total_amount ?? total.toString())
+      onPlaced?.()
 
-      if (payment === 'esewa') {
-        setEsewaOrder({ id: orderId, amount: orderTotal })
-      } else if (payment === 'khalti') {
-        setKhaltiOrder({ id: orderId, amount: orderTotal })
+      if (createdOrder.requires_prescription) {
+        setPrescriptionOrder({ id: orderId, amount: orderTotal })
       } else {
-        setSuccess(true)
-        setTimeout(() => {
-          setSuccess(false)
-          handleClose()
-        }, 2200)
+        proceedToPayment(orderId, orderTotal)
       }
     } catch (e: unknown) {
       const err = e as { response?: { data?: Record<string, unknown>; status?: number }; message?: string }
@@ -401,6 +431,23 @@ export default function CheckoutModal({ open, onClose, products = [], initialPro
           </div>
         )}
       </AnimatePresence>
+
+      {/* Prescription upload modal */}
+      {prescriptionOrder && (
+        <PrescriptionUpload
+          orderId={prescriptionOrder.id}
+          onDone={() => {
+            const p = prescriptionOrder
+            setPrescriptionOrder(null)
+            if (p) proceedToPayment(p.id, p.amount)
+          }}
+          onClose={() => {
+            const p = prescriptionOrder
+            setPrescriptionOrder(null)
+            if (p) proceedToPayment(p.id, p.amount)
+          }}
+        />
+      )}
 
       {/* eSewa payment modal */}
       {esewaOrder && (

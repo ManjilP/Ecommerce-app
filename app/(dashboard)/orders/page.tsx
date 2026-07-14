@@ -23,6 +23,8 @@ interface Order {
   total_price: string;
   created_at: string;
   items: OrderItem[];
+  requires_prescription?: boolean;
+  prescription_status?: string | null;
 }
 
 interface Product { id: number; name: string; price: string; }
@@ -316,7 +318,17 @@ export default function OrdersPage() {
                       </span>
                     </td>
                     <td>
-                      <span className="px-2 py-0.5 rounded-lg text-xs font-mono" style={{ background: "var(--card-2)", color: "var(--text-2)" }}>{o.payment_method ?? "cod"}</span>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "4px", alignItems: "flex-start" }}>
+                        <span className="px-2 py-0.5 rounded-lg text-xs font-mono" style={{ background: "var(--card-2)", color: "var(--text-2)" }}>{o.payment_method ?? "cod"}</span>
+                        {o.requires_prescription && (
+                          <span className="px-2 py-0.5 rounded-lg text-xs font-medium" style={{
+                            background: o.prescription_status === "approved" ? "#05966918" : o.prescription_status === "rejected" ? "#dc262618" : "#d9770618",
+                            color: o.prescription_status === "approved" ? "#059669" : o.prescription_status === "rejected" ? "#dc2626" : "#d97706",
+                          }}>
+                            Rx: {o.prescription_status ?? "not uploaded"}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="font-semibold" style={{ color: "#34d399" }}>Rs. {parseFloat(o.total_price).toFixed(2)}</td>
                     <td style={{ color: "var(--text-3)" }}>{new Date(o.created_at).toLocaleDateString()}</td>

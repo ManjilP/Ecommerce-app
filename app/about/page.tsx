@@ -1,7 +1,20 @@
+'use client'
+
+import Navbar from '@/components/navbar'
+import SecondaryNav from '@/components/secondary-nav'
+import Footer from '@/components/footer'
+import AboutUsSection from '@/components/ui/about-us-section'
+import { GridBackground } from '@/components/ui/grid-background'
+
 export default function AboutPage() {
   return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <p style={{ color: "#6b7280" }}>About Us — design coming soon</p>
-    </div>
-  );
+    <GridBackground className="min-h-screen flex flex-col bg-background">
+      <Navbar />
+      <SecondaryNav />
+      <main className="flex-1 pt-28">
+        <AboutUsSection />
+      </main>
+      <Footer />
+    </GridBackground>
+  )
 }

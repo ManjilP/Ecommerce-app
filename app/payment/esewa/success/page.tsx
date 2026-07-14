@@ -20,13 +20,16 @@ function EsewaSuccessContent() {
     if (!encodedData) { setErrorMsg("No payment data received."); setState("error"); return }
 
     try {
-      const decoded = JSON.parse(Buffer.from(encodedData, "base64").toString("utf-8"))
+      const decoded = JSON.parse(atob(encodedData))
       const txId = decoded.transaction_code
       const orderId = decoded.transaction_uuid?.split("-")[0]
       setTransactionId(txId)
       confirmPayment(Number(orderId), txId)
         .then(() => setState("success"))
-        .catch(() => setState("success"))
+        .catch(() => {
+          setErrorMsg(`Payment received (transaction ${txId}) but we couldn't confirm your order automatically. Please contact support with this transaction ID.`)
+          setState("error")
+        })
     } catch {
       setErrorMsg("Failed to read payment response.")
       setState("error")

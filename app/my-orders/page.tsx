@@ -42,6 +42,7 @@ interface Order {
   payment?: string
   city?: string
   total_amount?: string | number
+  total_price?: string | number
   total?: number
   created_at?: string
   date?: string
@@ -60,7 +61,7 @@ function getItemPrice(item: OrderItem): number {
 }
 
 function getOrderTotal(order: Order): number {
-  const t = order.total_amount ?? order.total ?? 0
+  const t = order.total_price ?? order.total_amount ?? order.total ?? 0
   return typeof t === 'string' ? parseFloat(t) : t
 }
 

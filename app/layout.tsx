@@ -1,16 +1,10 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { CartProvider } from "@/hooks/useCart";
+import { ProductsProvider } from "@/hooks/useProducts";
+import { WishlistProvider } from "@/hooks/useWishlist";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-
-const cormorant = Cormorant_Garamond({
-  variable: "--font-cormorant",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  style: ["normal", "italic"],
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "Shop. — Nepal's Trusted Online Pharmacy",
@@ -19,10 +13,16 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={cormorant.variable}>
+    <html lang="en">
       <body>
         <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
-          <ThemeProvider>{children}</ThemeProvider>
+          <ThemeProvider>
+            <ProductsProvider>
+              <WishlistProvider>
+                <CartProvider>{children}</CartProvider>
+              </WishlistProvider>
+            </ProductsProvider>
+          </ThemeProvider>
         </GoogleOAuthProvider>
       </body>
     </html>

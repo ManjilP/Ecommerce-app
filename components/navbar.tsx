@@ -9,9 +9,11 @@ import {
   ShoppingCart, LogOut, Package, Star, Settings,
 } from 'lucide-react'
 import { categories } from '@/lib/pharmacy-data'
-import { getMe, getUnreadNotificationCount, getWishlist, logout, getProducts } from '@/lib/api'
-import CheckoutModal from '@/components/checkout-modal'
-import type { RealProduct } from '@/components/product-card'
+import { getMe, getUnreadNotificationCount, logout } from '@/lib/api'
+import CartDrawer from '@/components/cart-drawer'
+import { useCart } from '@/hooks/useCart'
+import { useProducts } from '@/hooks/useProducts'
+import { useWishlist } from '@/hooks/useWishlist'
 
 interface UserInfo {
   username: string
@@ -22,9 +24,10 @@ interface UserInfo {
 
 export default function Navbar() {
   const router = useRouter()
+  const { count: cartCount } = useCart()
+  const { products } = useProducts()
+  const { count: wishlistCount } = useWishlist()
   const [searchQuery, setSearchQuery] = useState('')
-  const [productNames, setProductNames] = useState<string[]>([])
-  const [allProducts, setAllProducts] = useState<RealProduct[]>([])
   const [suggestions, setSuggestions] = useState<string[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [cartOpen, setCartOpen] = useState(false)
@@ -33,17 +36,8 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [user, setUser] = useState<UserInfo | null>(null)
   const [notifCount, setNotifCount] = useState(0)
-  const [wishlistCount, setWishlistCount] = useState(0)
 
   useEffect(() => {
-    getProducts()
-      .then((res) => {
-        const items: RealProduct[] = Array.isArray(res.data) ? res.data : res.data.results ?? []
-        setAllProducts(items)
-        setProductNames(items.map((p) => p.name))
-      })
-      .catch(() => {})
-
     const token = sessionStorage.getItem('access_token')
     if (!token) return
 
@@ -51,26 +45,31 @@ export default function Navbar() {
     getUnreadNotificationCount()
       .then((res) => setNotifCount(res.data.unread_count ?? res.data.count ?? 0))
       .catch(() => {})
-    getWishlist()
-      .then((res) => {
-        const items = Array.isArray(res.data) ? res.data : res.data.results ?? []
-        setWishlistCount(items.length)
-      })
-      .catch(() => {})
   }, [])
 
   const handleSearchChange = (val: string) => {
     setSearchQuery(val)
     if (val.trim().length < 1) { setSuggestions([]); setShowSuggestions(false); return }
-    const filtered = productNames.filter(n => n.toLowerCase().includes(val.toLowerCase())).slice(0, 8)
+    const filtered = products
+      .map((p) => p.name)
+      .filter(n => n.toLowerCase().includes(val.toLowerCase()))
+      .slice(0, 8)
     setSuggestions(filtered)
     setShowSuggestions(filtered.length > 0)
+  }
+
+  const handleSearchSubmit = () => {
+    if (searchQuery.trim()) {
+      setShowSuggestions(false)
+      router.push(`/landing?search=${encodeURIComponent(searchQuery)}#products`)
+    }
   }
 
   const handleSearchSelect = (name: string) => {
     setSearchQuery(name)
     setSuggestions([])
     setShowSuggestions(false)
+    router.push(`/landing?search=${encodeURIComponent(name)}#products`)
   }
 
   useEffect(() => {
@@ -116,27 +115,50 @@ export default function Navbar() {
           </Link>
 
           {/* Search bar — desktop */}
-          <div ref={searchRef} className="hidden md:flex flex-1 max-w-2xl mx-auto items-stretch rounded-xl border border-border bg-card overflow-hidden shadow-sm hover:shadow-md transition-shadow" style={{ position: 'relative' }}>
+          <div ref={searchRef} className="hidden md:flex flex-1 max-w-2xl mx-auto relative group">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-muted-foreground group-focus-within:text-primary transition-colors">
+              <Search size={18} />
+            </div>
             <input
               type="text"
               placeholder="Search medicines, health products..."
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
               onFocus={() => searchQuery && setShowSuggestions(suggestions.length > 0)}
-              style={{ flex: 1, padding: '10px 16px', background: '#ffffff', color: '#1a1a1a', fontSize: '14px', border: 'none', outline: 'none' }}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit()}
+              className="w-full bg-muted/50 border border-border text-foreground text-sm rounded-full !pl-12 pr-24 py-3 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 focus:bg-background transition-all shadow-sm hover:shadow-md"
             />
-            <button className="px-5 py-2.5 bg-primary text-primary-foreground text-sm font-medium hover:bg-emerald-700 transition-colors flex items-center gap-2">
-              <Search size={16} /><span>Search</span>
-            </button>
+            <div className="absolute inset-y-0 right-1.5 flex items-center gap-1">
+              {searchQuery && (
+                <button 
+                  onClick={() => { setSearchQuery(''); setShowSuggestions(false); router.push('/landing#products'); }} 
+                  className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-full transition-colors"
+                >
+                  <X size={16} />
+                </button>
+              )}
+              <button 
+                onClick={handleSearchSubmit} 
+                className="px-4 py-1.5 bg-primary text-primary-foreground text-sm font-semibold rounded-full hover:bg-emerald-600 transition-all hover:scale-105 shadow-sm hover:shadow-primary/25"
+              >
+                Search
+              </button>
+            </div>
+            
             {showSuggestions && (
-              <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50, background: '#fff', border: '1px solid #d4e8d4', borderTop: 'none', borderRadius: '0 0 12px 12px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)', maxHeight: '280px', overflowY: 'auto' }}>
-                {suggestions.map((name) => (
-                  <button key={name} onMouseDown={() => handleSearchSelect(name)} style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%', padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', color: '#1a1a1a', textAlign: 'left' }}
-                    onMouseEnter={e => e.currentTarget.style.background = '#f0f7f0'}
-                    onMouseLeave={e => e.currentTarget.style.background = 'none'}>
-                    <Search size={13} style={{ color: '#16a34a', flexShrink: 0 }} />{name}
-                  </button>
-                ))}
+              <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-background border border-border/60 rounded-2xl shadow-xl overflow-hidden backdrop-blur-xl">
+                <div className="max-h-[280px] overflow-y-auto py-2 custom-scrollbar">
+                  {suggestions.map((name) => (
+                    <button 
+                      key={name} 
+                      onMouseDown={() => handleSearchSelect(name)} 
+                      className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-foreground hover:bg-primary/10 transition-colors text-left group/item"
+                    >
+                      <Search size={14} className="text-muted-foreground group-hover/item:text-primary transition-colors flex-shrink-0" />
+                      <span className="font-medium group-hover/item:text-primary transition-colors">{name}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -228,9 +250,14 @@ export default function Navbar() {
               )}
             </Link>
 
-            {/* Cart icon (opens checkout) */}
-            <button onClick={() => setCartOpen(true)} className="hidden md:flex p-2 rounded-xl hover:bg-muted transition-colors">
+            {/* Cart */}
+            <button onClick={() => setCartOpen(true)} className="hidden md:flex p-2 rounded-xl hover:bg-muted transition-colors relative">
               <ShoppingCart size={20} className="text-foreground" />
+              {cartCount > 0 && (
+                <span className="absolute top-1 right-1 w-4 h-4 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                  {cartCount > 9 ? '9+' : cartCount}
+                </span>
+              )}
             </button>
 
             {/* Mobile menu toggle */}
@@ -244,31 +271,54 @@ export default function Navbar() {
         </div>
 
         {/* Mobile search */}
-        <div className="md:hidden px-4 pb-3" style={{ position: 'relative' }}>
-          <div className="flex items-stretch rounded-xl border border-border bg-card overflow-hidden">
+        <div className="md:hidden px-4 pb-4">
+          <div className="relative group">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground group-focus-within:text-primary transition-colors">
+              <Search size={16} />
+            </div>
             <input
               type="text"
               placeholder="Search medicines..."
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
               onFocus={() => searchQuery && setShowSuggestions(suggestions.length > 0)}
-              style={{ flex: 1, padding: '10px 16px', background: '#ffffff', fontSize: '14px', border: 'none', outline: 'none' }}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit()}
+              className="w-full bg-muted/50 border border-border text-foreground text-sm rounded-full !pl-11 pr-20 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 focus:bg-background transition-all shadow-sm"
             />
-            <button className="px-4 py-2.5 bg-primary text-primary-foreground">
-              <Search size={16} />
-            </button>
-          </div>
-          {showSuggestions && (
-            <div style={{ position: 'absolute', top: '100%', left: '16px', right: '16px', zIndex: 50, background: '#fff', border: '1px solid #d4e8d4', borderRadius: '0 0 12px 12px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)', maxHeight: '220px', overflowY: 'auto' }}>
-              {suggestions.map((name) => (
-                <button key={name} onMouseDown={() => handleSearchSelect(name)} style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%', padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', color: '#1a1a1a', textAlign: 'left' }}
-                  onMouseEnter={e => e.currentTarget.style.background = '#f0f7f0'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'none'}>
-                  <Search size={13} style={{ color: '#16a34a', flexShrink: 0 }} />{name}
+            <div className="absolute inset-y-0 right-1 flex items-center gap-0.5">
+              {searchQuery && (
+                <button 
+                  onClick={() => { setSearchQuery(''); setShowSuggestions(false); router.push('/landing#products'); }} 
+                  className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-full transition-colors"
+                >
+                  <X size={14} />
                 </button>
-              ))}
+              )}
+              <button 
+                onClick={handleSearchSubmit} 
+                className="p-1.5 mr-1 bg-primary text-primary-foreground rounded-full hover:bg-emerald-600 transition-all shadow-sm"
+              >
+                <Search size={14} />
+              </button>
             </div>
-          )}
+            
+            {showSuggestions && (
+              <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-background border border-border/60 rounded-2xl shadow-xl overflow-hidden">
+                <div className="max-h-[220px] overflow-y-auto py-1">
+                  {suggestions.map((name) => (
+                    <button 
+                      key={name} 
+                      onMouseDown={() => handleSearchSelect(name)} 
+                      className="flex items-center gap-2.5 w-full px-4 py-3 text-sm text-foreground hover:bg-primary/10 transition-colors text-left group/item"
+                    >
+                      <Search size={14} className="text-muted-foreground group-hover/item:text-primary transition-colors flex-shrink-0" />
+                      <span className="font-medium group-hover/item:text-primary">{name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </nav>
 
@@ -317,11 +367,7 @@ export default function Navbar() {
         <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
       )}
 
-      <CheckoutModal
-        open={cartOpen}
-        onClose={() => setCartOpen(false)}
-        products={allProducts}
-      />
+      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
     </>
   )
 }

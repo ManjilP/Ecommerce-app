@@ -7,8 +7,7 @@ import {
   Building2, BarChart2, LogOut, ShieldCheck, KeyRound,
   Ticket, Bell, Heart, Star,
 } from "lucide-react";
-import { logout, getMe } from "@/lib/api";
-import { useNotificationStream } from "@/hooks/useNotificationStream";
+import { logout, getMe, getUnreadNotificationCount } from "@/lib/api";
 
 import { useTheme } from "@/components/ThemeProvider";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -39,11 +38,14 @@ export default function Sidebar() {
   const [role, setRole] = useState("");
   const [open, setOpen] = useState(true);
   const { theme } = useTheme();
-  const { unreadCount } = useNotificationStream();
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     const token = sessionStorage.getItem("access_token");
     if (!token) { router.push("/login"); return; }
+    getUnreadNotificationCount()
+      .then((res) => setUnreadCount(res.data.unread_count ?? res.data.count ?? 0))
+      .catch(() => {});
     try {
       const payload = JSON.parse(atob(token.split(".")[1]));
       if (payload.exp && payload.exp * 1000 < Date.now()) {

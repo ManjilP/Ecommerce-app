@@ -8,8 +8,6 @@ import Footer from '@/components/footer'
 import HeroSection from '@/components/landing/hero-section'
 import PromoCards from '@/components/landing/promo-cards'
 import ProductGridSection from '@/components/landing/product-grid-section'
-import AboutSection from '@/components/landing/about-section'
-import ContactSection from '@/components/landing/contact-section'
 import { GridBackground } from '@/components/ui/grid-background'
 
 export default function LandingPage() {
@@ -31,8 +29,6 @@ export default function LandingPage() {
         <HeroSection />
         <PromoCards />
         <ProductGridSection activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
-        <AboutSection />
-        <ContactSection />
       </main>
       <Footer />
     </GridBackground>

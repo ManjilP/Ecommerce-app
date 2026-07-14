@@ -7,6 +7,7 @@ import Navbar from '@/components/navbar'
 import SecondaryNav from '@/components/secondary-nav'
 import Footer from '@/components/footer'
 import { getNotifications, markNotificationRead, markAllNotificationsRead } from '@/lib/api'
+import { GridBackground } from '@/components/ui/grid-background'
 
 interface Notification {
   id: number
@@ -77,7 +78,7 @@ export default function MyNotificationsPage() {
   const unreadCount = notifs.filter((n) => !isRead(n)).length
 
   return (
-    <div className="min-h-screen bg-background">
+    <GridBackground className="min-h-screen bg-background">
       <Navbar />
       <SecondaryNav />
       <div className="pt-28 max-w-2xl mx-auto px-4 py-10 relative z-10">
@@ -172,6 +173,6 @@ export default function MyNotificationsPage() {
         )}
       </div>
       <Footer />
-    </div>
+    </GridBackground>
   )
 }

@@ -1,10 +1,9 @@
 export const categories = [
   'Medicines',
-  'Vitamins',
+  'Supplements',
   'Skincare',
   'Baby Care',
   'Health Devices',
-  'Supplements',
   'Personal Care',
 ]
 

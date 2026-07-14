@@ -23,8 +23,10 @@ interface ProductCardProps {
 export default function ProductCard({ product, onAddToCart, wishlisted = false, onWishlist }: ProductCardProps) {
   const [added, setAdded] = useState(false)
   const [localWishlisted, setLocalWishlisted] = useState(wishlisted)
+  const [imageError, setImageError] = useState(false)
 
   const price = typeof product.price === 'string' ? parseFloat(product.price) : product.price
+  const hasValidImage = !!product.image && /^(https?:\/\/|\/)/.test(product.image)
 
   const handleAddToCart = () => {
     setAdded(true)
@@ -47,11 +49,12 @@ export default function ProductCard({ product, onAddToCart, wishlisted = false, 
     >
       {/* Image area */}
       <div className="relative bg-white aspect-square overflow-hidden">
-        {product.image ? (
+        {hasValidImage && !imageError ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={product.image}
             alt={product.name}
+            onError={() => setImageError(true)}
             className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-500"
           />
         ) : (

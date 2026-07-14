@@ -1,10 +1,16 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useNotificationStream, StreamNotification } from "@/hooks/useNotificationStream";
 import { getNotifications, markNotificationRead, markAllNotificationsRead, clearAllNotifications } from "@/lib/api";
 import { Bell, CheckCheck, Trash2, ShoppingCart, Package, Tag, AlertTriangle, Info } from "lucide-react";
 
-type Notification = StreamNotification; // shadows browser Notification — keep
+interface Notification {
+  id: number;
+  title: string;
+  message: string;
+  type: string;
+  is_read: boolean;
+  created_at: string;
+}
 const typeConfig: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
   order:        { icon: <ShoppingCart size={16} />, color: "#60a5fa", bg: "rgba(96,165,250,0.12)" },
   order_status: { icon: <ShoppingCart size={16} />, color: "#60a5fa", bg: "rgba(96,165,250,0.12)" },
@@ -20,8 +26,7 @@ function getTypeConfig(type: string) {
 }
 
 export default function NotificationsPage() {
-  const { streamNotifications } = useNotificationStream();
-  const [djangoNotifications, setDjangoNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [clearing, setClearing] = useState(false);
 
   useEffect(() => {
@@ -30,31 +35,29 @@ export default function NotificationsPage() {
     getNotifications()
       .then((r) => {
         const data = Array.isArray(r.data) ? r.data : r.data.results ?? [];
-        setDjangoNotifications(data);
+        setNotifications(data);
       })
       .catch(() => {});
   }, []);
 
-  // merge SSE notifications on top of Django notifications
-  const notifications = [...streamNotifications, ...djangoNotifications];
   const unreadCount = notifications.filter((n) => !n.is_read).length;
 
   const handleMarkRead = async (id: number) => {
     await markNotificationRead(id).catch(() => {});
-    setDjangoNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
   };
 
   const handleMarkAllRead = async () => {
     await markAllNotificationsRead().catch(() => {});
-    setDjangoNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+    setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
   };
 
   const handleClearAll = async () => {
     if (!confirm("Delete all notifications?")) return;
     setClearing(true);
     try {
-      await clearAllNotifications(djangoNotifications.map((n) => n.id));
-      setDjangoNotifications([]);
+      await clearAllNotifications(notifications.map((n) => n.id));
+      setNotifications([]);
     } catch {} finally { setClearing(false); }
   };
 

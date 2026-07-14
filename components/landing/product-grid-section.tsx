@@ -1,13 +1,15 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { Suspense, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { RefreshCw } from 'lucide-react'
 import ProductCard, { type RealProduct } from '@/components/product-card'
-import CheckoutModal from '@/components/checkout-modal'
-import { getProducts, addToWishlist, removeFromWishlist, getWishlist } from '@/lib/api'
+import { useCart } from '@/hooks/useCart'
+import { useProducts } from '@/hooks/useProducts'
+import { useWishlist } from '@/hooks/useWishlist'
 
-const filterCategories = ['All', 'Medicines', 'Vitamins', 'Skincare', 'Baby Care', 'Health Devices']
+const filterCategories = ['All', 'Medicines', 'Supplements', 'Skincare', 'Baby Care', 'Health Devices']
 
 interface ProductGridSectionProps {
   onProductsLoaded?: (products: RealProduct[]) => void
@@ -15,69 +17,32 @@ interface ProductGridSectionProps {
   onCategoryChange?: (category: string) => void
 }
 
-export default function ProductGridSection({ onProductsLoaded, activeCategory = 'All', onCategoryChange }: ProductGridSectionProps) {
-  const [products, setProducts] = useState<RealProduct[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [wishlistMap, setWishlistMap] = useState<Record<number, number>>({})
-  const [checkoutProduct, setCheckoutProduct] = useState<RealProduct | null>(null)
+export default function ProductGridSection(props: ProductGridSectionProps) {
+  return (
+    <Suspense fallback={<div className="h-20 w-full animate-pulse bg-muted rounded-xl" />}>
+      <ProductGridContent {...props} />
+    </Suspense>
+  )
+}
 
-  const fetchProducts = useCallback(async () => {
-    setLoading(true)
-    setError('')
-    try {
-      const res = await getProducts()
-      const data: RealProduct[] = Array.isArray(res.data) ? res.data : res.data.results ?? []
-      setProducts(data)
-      onProductsLoaded?.(data)
-    } catch {
-      setError('Failed to load products. Please check your connection.')
-    } finally {
-      setLoading(false)
-    }
-  }, [onProductsLoaded])
+function ProductGridContent({ onProductsLoaded, activeCategory = 'All', onCategoryChange }: ProductGridSectionProps) {
+  const { products, loading, error, refresh } = useProducts()
+  const { wishlistMap, toggle } = useWishlist()
+  const { addItem } = useCart()
+  const searchParams = useSearchParams()
+  const searchParam = searchParams.get('search')
 
   useEffect(() => {
-    fetchProducts()
-  }, [fetchProducts])
+    if (products.length > 0) onProductsLoaded?.(products)
+  }, [products, onProductsLoaded])
 
-  useEffect(() => {
-    const token = sessionStorage.getItem('access_token')
-    if (!token) return
-    getWishlist()
-      .then((res) => {
-        const items: { id: number; product: number | { id: number } }[] = Array.isArray(res.data)
-          ? res.data
-          : res.data.results ?? []
-        const map: Record<number, number> = {}
-        items.forEach((item) => {
-          const productId = typeof item.product === 'object' ? item.product.id : item.product
-          map[productId] = item.id
-        })
-        setWishlistMap(map)
-      })
-      .catch(() => {})
-  }, [])
-
-  const handleWishlist = async (product: RealProduct) => {
-    const token = sessionStorage.getItem('access_token')
-    if (!token) return
-    if (wishlistMap[product.id]) {
-      try {
-        await removeFromWishlist(wishlistMap[product.id])
-        setWishlistMap((prev) => { const next = { ...prev }; delete next[product.id]; return next })
-      } catch {}
-    } else {
-      try {
-        const res = await addToWishlist(product.id)
-        setWishlistMap((prev) => ({ ...prev, [product.id]: res.data.id }))
-      } catch {}
-    }
-  }
-
-  const filtered = activeCategory === 'All'
-    ? products
-    : products.filter((p) => p.category === activeCategory)
+  const filtered = products.filter((p) => {
+    const matchCategory = activeCategory === 'All' || p.category === activeCategory
+    const matchSearch = !searchParam || 
+      (p.name && p.name.toLowerCase().includes(searchParam.toLowerCase())) || 
+      (p.description && p.description.toLowerCase().includes(searchParam.toLowerCase()))
+    return matchCategory && matchSearch
+  })
 
   return (
     <>
@@ -130,7 +95,7 @@ export default function ProductGridSection({ onProductsLoaded, activeCategory = 
           <div className="flex flex-col items-center justify-center py-20 gap-4">
             <p className="text-muted-foreground text-sm">{error}</p>
             <button
-              onClick={fetchProducts}
+              onClick={refresh}
               className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-emerald-700 transition-colors"
             >
               <RefreshCw size={14} />
@@ -154,8 +119,8 @@ export default function ProductGridSection({ onProductsLoaded, activeCategory = 
                     key={product.id}
                     product={product}
                     wishlisted={!!wishlistMap[product.id]}
-                    onWishlist={handleWishlist}
-                    onAddToCart={(p) => setCheckoutProduct(p)}
+                    onWishlist={(p) => toggle(p.id)}
+                    onAddToCart={(p) => addItem(p.id, 1, { name: p.name, price: typeof p.price === 'string' ? parseFloat(p.price) : p.price, image: p.image })}
                   />
                 ))}
               </motion.div>
@@ -163,16 +128,6 @@ export default function ProductGridSection({ onProductsLoaded, activeCategory = 
           </>
         )}
       </section>
-
-      {/* Checkout modal triggered by Add to Cart */}
-      {checkoutProduct && (
-        <CheckoutModal
-          open={!!checkoutProduct}
-          onClose={() => setCheckoutProduct(null)}
-          products={products}
-          initialProductId={checkoutProduct.id}
-        />
-      )}
     </>
   )
 }

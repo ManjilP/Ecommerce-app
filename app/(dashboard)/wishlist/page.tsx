@@ -193,7 +193,7 @@ export default function WishlistPage() {
                 <tr key={item.id}>
                   <td>
                     <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                      {item.product_image ? (
+                      {item.product_image && /^(https?:\/\/|\/)/.test(item.product_image) ? (
                         <img src={item.product_image} alt={item.product_name} style={{ width: "36px", height: "36px", borderRadius: "10px", objectFit: "cover", flexShrink: 0 }} />
                       ) : (
                         <div style={{ width: "36px", height: "36px", borderRadius: "10px", background: "var(--card-2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -266,7 +266,7 @@ export default function WishlistPage() {
                     const inWishlist = wishlistProductIds.has(p.id);
                     return (
                       <div key={p.id} style={{ display: "flex", alignItems: "center", gap: "14px", padding: "14px 16px", borderRadius: "14px", background: "var(--card-2)", border: `1px solid ${inWishlist ? "rgba(248,113,113,0.2)" : "var(--border)"}` }}>
-                        {p.image ? (
+                        {p.image && /^(https?:\/\/|\/)/.test(p.image) ? (
                           <img src={p.image} alt={p.name} style={{ width: "44px", height: "44px", borderRadius: "10px", objectFit: "cover", flexShrink: 0 }} />
                         ) : (
                           <div style={{ width: "44px", height: "44px", borderRadius: "10px", background: "var(--card)", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -306,7 +306,7 @@ export default function WishlistPage() {
 
             {/* Product preview */}
             <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "14px", borderRadius: "14px", background: "var(--card-2)", border: "1px solid var(--border)", marginBottom: "20px" }}>
-              {orderItem.product_image ? (
+              {orderItem.product_image && /^(https?:\/\/|\/)/.test(orderItem.product_image) ? (
                 <img src={orderItem.product_image} alt={orderItem.product_name} style={{ width: "48px", height: "48px", borderRadius: "10px", objectFit: "cover", flexShrink: 0 }} />
               ) : (
                 <div style={{ width: "48px", height: "48px", borderRadius: "10px", background: "var(--card)", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center" }}>

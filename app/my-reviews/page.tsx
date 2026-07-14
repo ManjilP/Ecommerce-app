@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Star, PenLine, RefreshCw, Trash2 } from 'lucide-react'
 import Navbar from '@/components/navbar'
+import SecondaryNav from '@/components/secondary-nav'
 import Footer from '@/components/footer'
 import { getReviews, deleteReview } from '@/lib/api'
+import { GridBackground } from '@/components/ui/grid-background'
 
 interface Review {
   id: number
@@ -105,9 +107,10 @@ export default function MyReviewsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <GridBackground className="min-h-screen bg-background">
       <Navbar />
-      <div className="pt-20 max-w-2xl mx-auto px-4 py-10">
+      <SecondaryNav />
+      <div className="pt-28 max-w-2xl mx-auto px-4 py-10 relative z-10">
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-8">
           <div>
             <div className="flex items-center gap-3 mb-1">
@@ -200,6 +203,6 @@ export default function MyReviewsPage() {
         )}
       </div>
       <Footer />
-    </div>
+    </GridBackground>
   )
 }

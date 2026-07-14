@@ -22,27 +22,8 @@ export default function HeroSection({ products = [] }: HeroSectionProps) {
   return (
     <>
       <section className="relative overflow-hidden pt-12 pb-14 md:pt-16 md:pb-16">
-        {/* Subtle background pattern */}
-        <div
-          className="absolute inset-0 opacity-40"
-          style={{
-            backgroundImage: `radial-gradient(circle at 20% 50%, #ffffff 0%, transparent 50%), radial-gradient(circle at 80% 20%, #ffffff 0%, transparent 40%)`,
-          }}
-        />
-
         <div className="relative max-w-7xl mx-auto px-4">
           <div className="max-w-3xl">
-            {/* Eyebrow */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-accent border border-primary/20 text-accent-foreground text-sm font-medium mb-6"
-            >
-              <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              Nepal&apos;s Trusted Online Pharmacy
-            </motion.div>
-
             {/* Headline */}
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
@@ -62,7 +43,7 @@ export default function HeroSection({ products = [] }: HeroSectionProps) {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8 max-w-xl"
             >
-              Shop 500+ verified medicines, vitamins, and health products. Fast delivery across 20+ cities in Nepal. Pay with eSewa, Khalti or Cash on Delivery.
+              Your trusted online pharmacy for authentic medicines and health products, delivered fast.
             </motion.p>
 
             {/* CTAs */}
