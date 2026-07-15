@@ -81,7 +81,7 @@ export default function MyNotificationsPage() {
     <GridBackground className="min-h-screen bg-background">
       <Navbar />
       <SecondaryNav />
-      <div className="pt-28 max-w-2xl mx-auto px-4 py-10 relative z-10">
+      <div className="pt-32 max-w-2xl mx-auto px-4 py-10 relative z-10">
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-8">
           <div>
             <div className="flex items-center gap-3 mb-1">
@@ -109,7 +109,7 @@ export default function MyNotificationsPage() {
         {loading && (
           <div className="space-y-2">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="flex gap-4 p-4 rounded-2xl border border-border bg-white animate-pulse">
+              <div key={i} className="flex gap-4 p-4 rounded-2xl border border-border bg-card animate-pulse">
                 <div className="w-10 h-10 rounded-xl bg-muted flex-shrink-0" />
                 <div className="flex-1 space-y-2"><div className="h-4 bg-muted rounded w-1/3" /><div className="h-3 bg-muted rounded w-2/3" /></div>
               </div>
@@ -120,7 +120,7 @@ export default function MyNotificationsPage() {
         {!loading && error && (
           <div className="flex flex-col items-center gap-4 py-16">
             <p className="text-muted-foreground text-sm">{error}</p>
-            <button onClick={fetchNotifications} className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-green-700 transition-colors">
+            <button onClick={fetchNotifications} className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors">
               <RefreshCw size={14} /> Retry
             </button>
           </div>
@@ -148,11 +148,11 @@ export default function MyNotificationsPage() {
                   transition={{ delay: i * 0.05 }}
                   onClick={() => !read && handleMarkRead(notif.id)}
                   className={`flex items-start gap-4 p-4 rounded-2xl border transition-all cursor-pointer ${
-                    !read ? 'bg-accent/50 border-primary/20 border-l-4 border-l-primary' : 'bg-white border-border'
+                    !read ? 'bg-accent/50 border-primary/20 border-l-4 border-l-primary' : 'bg-card border-border'
                   }`}
                 >
-                  <div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center flex-shrink-0 mt-0.5`}>
-                    <Icon size={18} className={color} />
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: bg }}>
+                    <Icon size={18} style={{ color }} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">

@@ -38,30 +38,30 @@ export default function ResetPasswordPage() {
   return (
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg)", position: "relative", overflow: "hidden" }}>
       <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
-        <div style={{ position: "absolute", top: "-10%", right: "-5%", width: "500px", height: "500px", borderRadius: "99px", background: "radial-gradient(circle, rgba(14,116,144,0.12) 0%, transparent 70%)", filter: "blur(40px)" }} />
-        <div style={{ position: "absolute", bottom: "-10%", left: "-5%", width: "450px", height: "450px", borderRadius: "99px", background: "radial-gradient(circle, rgba(124,58,237,0.09) 0%, transparent 70%)", filter: "blur(40px)" }} />
+        <div style={{ position: "absolute", top: "-10%", right: "-5%", width: "500px", height: "500px", borderRadius: "99px", background: "radial-gradient(circle, var(--blue) 0%, transparent 70%)", opacity: 0.08, filter: "blur(40px)" }} />
+        <div style={{ position: "absolute", bottom: "-10%", left: "-5%", width: "450px", height: "450px", borderRadius: "99px", background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)", opacity: 0.08, filter: "blur(40px)" }} />
       </div>
 
       <div style={{ width: "100%", maxWidth: "380px", padding: "0 20px", position: "relative" }}>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: "36px" }}>
-          <div style={{ width: "56px", height: "56px", borderRadius: "18px", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "20px", background: "linear-gradient(135deg, rgba(14,116,144,0.15), rgba(14,116,144,0.05))", border: "1px solid rgba(14,116,144,0.2)" }}>
-            <KeyRound size={24} color="#0e7490" />
+          <div style={{ width: "56px", height: "56px", borderRadius: "18px", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "20px", background: "var(--card-2)", border: "1px solid var(--border-strong)" }}>
+            <KeyRound size={24} color="var(--blue)" />
           </div>
           <h1 style={{ fontSize: "28px", fontWeight: 700, color: "var(--text)", letterSpacing: "-0.5px" }}>Set new password</h1>
           <p style={{ fontSize: "15px", color: "var(--text-2)", marginTop: "6px" }}>Choose a strong password</p>
         </div>
 
-        <div style={{ borderRadius: "24px", padding: "28px", background: "var(--card)", border: "1px solid var(--border)", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
+        <div style={{ borderRadius: "24px", padding: "28px", background: "var(--card)", border: "1px solid var(--border)", boxShadow: "var(--card-shadow)" }}>
           {success ? (
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", padding: "12px 0", textAlign: "center" }}>
-              <CheckCircle size={40} color="#059669" />
+              <CheckCircle size={40} color="var(--green)" />
               <p style={{ fontSize: "16px", fontWeight: 600, color: "var(--text)" }}>Password reset!</p>
               <p style={{ fontSize: "14px", color: "var(--text-2)" }}>Redirecting you to sign in...</p>
             </div>
           ) : (
             <>
               {error && (
-                <div style={{ marginBottom: "20px", padding: "12px 16px", borderRadius: "12px", display: "flex", alignItems: "center", gap: "10px", background: "rgba(220,38,38,0.06)", border: "1px solid rgba(220,38,38,0.15)", color: "var(--red)", fontSize: "14px" }}>
+                <div style={{ marginBottom: "20px", padding: "12px 16px", borderRadius: "12px", display: "flex", alignItems: "center", gap: "10px", background: "color-mix(in srgb, var(--red) 8%, transparent)", border: "1px solid color-mix(in srgb, var(--red) 20%, transparent)", color: "var(--red)", fontSize: "14px" }}>
                   <AlertCircle size={15} style={{ flexShrink: 0 }} />
                   {error}
                 </div>
@@ -85,7 +85,7 @@ export default function ResetPasswordPage() {
                     </button>
                   </div>
                 </div>
-                <button type="submit" disabled={loading} style={{ height: "50px", borderRadius: "14px", fontSize: "16px", fontWeight: 600, color: "#fff", background: loading ? "rgba(14,116,144,0.6)" : "var(--accent)", border: "none", cursor: "pointer", boxShadow: loading ? "none" : "0 4px 14px rgba(14,116,144,0.35)", transition: "all 0.15s" }}>
+                <button type="submit" disabled={loading} style={{ height: "50px", borderRadius: "14px", fontSize: "16px", fontWeight: 600, color: "var(--card)", background: "var(--accent)", opacity: loading ? 0.6 : 1, border: "none", cursor: loading ? "not-allowed" : "pointer", transition: "opacity 0.15s" }}>
                   {loading ? "Resetting..." : "Reset password"}
                 </button>
               </form>

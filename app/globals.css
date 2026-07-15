@@ -1,100 +1,88 @@
 @import "tailwindcss";
 
-* {
-  font-family: 'Times New Roman', Times, serif;
-}
+@custom-variant dark (&:where(.dark, .dark *));
 
-/* ── Light mode (default) ── */
+/* ── Light mode (default) — warm brass / cream, extended from the About Us section ── */
 :root {
   --bg: #f5f0e6;
-  --bg-elevated: #ffffff;
-  --card: #ffffff;
-  --card-2: #f4f4f5;
-  --border: rgba(0,0,0,0.07);
-  --border-strong: rgba(0,0,0,0.11);
-  --text: #18181b;
-  --text-2: rgba(0,0,0,0.55);
-  --text-3: rgba(0,0,0,0.35);
-  --accent: #10b981;
-  --accent-glow: rgba(16,185,129,0.16);
-  --green: #10b981;
-  --red: #dc2626;
-  --orange: #ea580c;
-  --purple: #7c3aed;
-  --yellow: #d97706;
-  --blue: #4f46e5;
-  --card-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06);
+  --bg-elevated: #faf6ee;
+  --card: #fffdf8;
+  --card-2: #ece2d0;
+  --border: rgba(43,33,18,0.09);
+  --border-strong: rgba(43,33,18,0.15);
+  --text: #241f16;
+  --text-2: rgba(36,31,22,0.58);
+  --text-3: rgba(36,31,22,0.36);
+  --accent: #88734c;
+  --accent-hover: #6f5d3d;
+  --ring: rgba(136,115,76,0.18);
+  --green: #4f7a54;
+  --red: #b1473c;
+  --orange: #c17f3a;
+  --purple: #8d6f8a;
+  --yellow: #a68d3f;
+  --blue: #5c7688;
+  --card-shadow: 0 1px 2px rgba(43,33,18,0.05), 0 1px 3px rgba(43,33,18,0.07);
 
-  /* Bento card gradients */
-  --bento-orders-bg: linear-gradient(145deg,#e0f2fe,#bae6fd);
-  --bento-orders-border: rgba(14,116,144,0.2);
-  --bento-orders-label: rgba(14,116,144,0.8);
-  --bento-revenue-bg: linear-gradient(145deg,#dcfce7,#bbf7d0);
-  --bento-revenue-border: rgba(5,150,105,0.2);
-  --bento-revenue-label: rgba(5,150,105,0.8);
-  --bento-products-bg: linear-gradient(145deg,#ede9fe,#ddd6fe);
-  --bento-products-border: rgba(124,58,237,0.2);
-  --bento-products-label: rgba(124,58,237,0.8);
-  --bento-inventory-bg: linear-gradient(145deg,#ffedd5,#fed7aa);
-  --bento-inventory-border: rgba(234,88,12,0.2);
-  --bento-inventory-label: rgba(234,88,12,0.8);
+  /* Chart ink — same hues as above, punched up in chroma so data reads clearly
+     against a card surface. Brand chrome (buttons, badges) keeps the softer tone;
+     only chart fills use these. */
+  --chart-blue: #2f6f9e;
+  --chart-green: #3f8a54;
+  --chart-purple: #8a5a9e;
+  --chart-orange: var(--orange);
+  --chart-yellow: var(--yellow);
 }
 
 /* ── Dark mode ── */
 .dark {
-  --bg: #080808;
-  --bg-elevated: #0f0f0f;
-  --card: #141414;
-  --card-2: #1c1c1c;
-  --border: rgba(255,255,255,0.08);
-  --border-strong: rgba(255,255,255,0.13);
-  --text: #f5f5f5;
-  --text-2: rgba(255,255,255,0.6);
-  --text-3: rgba(255,255,255,0.35);
-  --accent: #34d399;
-  --accent-glow: rgba(52,211,153,0.2);
-  --green: #34d399;
-  --red: #f87171;
-  --orange: #fb923c;
-  --purple: #a78bfa;
-  --yellow: #fbbf24;
-  --blue: #60a5fa;
+  --bg: #14110c;
+  --bg-elevated: #1a160f;
+  --card: #201a12;
+  --card-2: #291f15;
+  --border: rgba(255,247,232,0.08);
+  --border-strong: rgba(255,247,232,0.13);
+  --text: #f3ead9;
+  --text-2: rgba(243,234,217,0.62);
+  --text-3: rgba(243,234,217,0.36);
+  --accent: #c9a06a;
+  --accent-hover: #d9b581;
+  --ring: rgba(201,160,106,0.22);
+  --green: #7fae82;
+  --red: #d1786c;
+  --orange: #d99d5c;
+  --purple: #b090ac;
+  --yellow: #c2a869;
+  --blue: #8ba4b5;
   --card-shadow: none;
 
-  --bento-orders-bg: linear-gradient(145deg,#0d1a2e,#091320);
-  --bento-orders-border: rgba(96,165,250,0.14);
-  --bento-orders-label: rgba(96,165,250,0.6);
-  --bento-revenue-bg: linear-gradient(145deg,#0a1f17,#061410);
-  --bento-revenue-border: rgba(52,211,153,0.14);
-  --bento-revenue-label: rgba(52,211,153,0.6);
-  --bento-products-bg: linear-gradient(145deg,#160d2a,#0e081c);
-  --bento-products-border: rgba(167,139,250,0.14);
-  --bento-products-label: rgba(167,139,250,0.6);
-  --bento-inventory-bg: linear-gradient(145deg,#1a1100,#111000);
-  --bento-inventory-border: rgba(251,146,60,0.14);
-  --bento-inventory-label: rgba(251,146,60,0.6);
+  --chart-blue: var(--blue);
+  --chart-green: var(--green);
+  --chart-purple: var(--purple);
+  --chart-orange: var(--orange);
+  --chart-yellow: var(--yellow);
 }
 
 @theme inline {
-  --color-background: #f5f0e6;
-  --font-sans: 'Times New Roman', Times, serif;
-  --font-heading: 'Times New Roman', Times, serif;
-  --color-foreground: #18181b;
-  --color-card: #ffffff;
-  --color-card-foreground: #18181b;
-  --color-primary: #059669;
-  --color-primary-foreground: #ffffff;
-  --color-secondary: #4f46e5;
-  --color-secondary-foreground: #ffffff;
-  --color-muted: #f4f4f5;
-  --color-muted-foreground: #71717a;
-  --color-accent: #ecfdf5;
-  --color-accent-foreground: #065f46;
-  --color-destructive: #dc2626;
-  --color-destructive-foreground: #ffffff;
-  --color-border: #e4e4e7;
-  --color-input: #f4f4f5;
-  --color-ring: #10b981;
+  --color-background: var(--bg);
+  --font-sans: var(--font-body), 'IBM Plex Sans', system-ui, sans-serif;
+  --font-heading: var(--font-display), 'Fraunces', Georgia, serif;
+  --color-foreground: var(--text);
+  --color-card: var(--card);
+  --color-card-foreground: var(--text);
+  --color-primary: var(--accent);
+  --color-primary-foreground: var(--card);
+  --color-secondary: var(--blue);
+  --color-secondary-foreground: var(--card);
+  --color-muted: var(--card-2);
+  --color-muted-foreground: var(--text-2);
+  --color-accent: var(--card-2);
+  --color-accent-foreground: var(--text);
+  --color-destructive: var(--red);
+  --color-destructive-foreground: #fffdf8;
+  --color-border: var(--border);
+  --color-input: var(--card-2);
+  --color-ring: var(--accent);
   --radius: 1rem;
 }
 
@@ -105,7 +93,7 @@ html { font-size: 16px; scroll-behavior: smooth; }
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Times New Roman', Times, serif;
+  font-family: var(--font-sans);
   font-size: 17px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
@@ -115,8 +103,8 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Times New Roman', Times, serif;
-  font-weight: 700;
+  font-family: var(--font-heading);
+  font-weight: 600;
   letter-spacing: -0.01em;
 }
 
@@ -134,7 +122,7 @@ input, select, textarea {
 }
 input:focus, select:focus, textarea:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-glow);
+  box-shadow: 0 0 0 3px var(--ring);
 }
 input::placeholder, textarea::placeholder { color: var(--text-3); }
 select option { background: var(--card-2); color: var(--text); }

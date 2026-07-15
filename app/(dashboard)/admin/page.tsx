@@ -12,11 +12,11 @@ interface TrackTimeline { stage: string; status: string; timestamp: string | nul
 interface TrackInfo { order_id: number; customer_name: string; current_status: string; delivery_city: string; total_price: string; payment_method: string; payment_status: string; timeline: TrackTimeline[]; }
 
 const statusColor: Record<string, string> = {
-  pending: "#d97706",
-  completed: "#059669",
-  cancelled: "#dc2626",
-  processing: "#0e7490",
-  shipped: "#7c3aed",
+  pending: "var(--orange)",
+  completed: "var(--green)",
+  cancelled: "var(--red)",
+  processing: "var(--blue)",
+  shipped: "var(--purple)",
 };
 
 export default function AdminPage() {
@@ -78,10 +78,10 @@ export default function AdminPage() {
   }, [router]);
 
   const cards = [
-    { label: "Products", value: stats.products, icon: <Package size={22} />, color: "#a78bfa", bg: "rgba(167,139,250,0.1)", href: "/products" },
-    { label: "Orders", value: stats.orders, icon: <ShoppingCart size={22} />, color: "#60a5fa", bg: "rgba(96,165,250,0.1)", href: "/orders" },
-    { label: "Inventory", value: stats.inventory, icon: <Warehouse size={22} />, color: "#34d399", bg: "rgba(52,211,153,0.1)", href: "/inventory" },
-    { label: "Warehouses", value: stats.warehouses, icon: <Building2 size={22} />, color: "#fb923c", bg: "rgba(251,146,60,0.1)", href: "/warehouses" },
+    { label: "Products", value: stats.products, icon: <Package size={22} />, color: "var(--purple)", bg: "rgba(167,139,250,0.1)", href: "/products" },
+    { label: "Orders", value: stats.orders, icon: <ShoppingCart size={22} />, color: "var(--blue)", bg: "rgba(96,165,250,0.1)", href: "/orders" },
+    { label: "Inventory", value: stats.inventory, icon: <Warehouse size={22} />, color: "var(--green)", bg: "rgba(52,211,153,0.1)", href: "/inventory" },
+    { label: "Warehouses", value: stats.warehouses, icon: <Building2 size={22} />, color: "var(--orange)", bg: "rgba(251,146,60,0.1)", href: "/warehouses" },
   ];
 
   if (loading) return (
@@ -119,7 +119,7 @@ export default function AdminPage() {
       <div style={{ borderRadius: "20px", padding: "24px", background: "var(--card)", border: "1px solid var(--border)", marginBottom: "24px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
           <h2 style={{ fontSize: "18px", fontWeight: 600, color: "var(--text)", display: "flex", alignItems: "center", gap: "10px" }}>
-            <ShoppingCart size={18} color="#60a5fa" /> Recent Orders
+            <ShoppingCart size={18} color="var(--blue)" /> Recent Orders
           </h2>
           <Link href="/orders" style={{ fontSize: "13px", fontWeight: 500, color: "var(--accent)" }}>See all →</Link>
         </div>
@@ -141,9 +141,9 @@ export default function AdminPage() {
                       {o.items?.length > 2 && ` +${o.items.length - 2}`}
                     </td>
                     <td><span style={{ padding: "2px 10px", borderRadius: "99px", fontSize: "12px", fontWeight: 500, background: "var(--card-2)", color: "var(--text-2)", fontFamily: "monospace" }}>{o.payment_method ?? "cod"}</span></td>
-                    <td style={{ fontWeight: 600, color: "#34d399" }}>Rs. {parseFloat(o.total_price).toFixed(2)}</td>
+                    <td style={{ fontWeight: 600, color: "var(--green)" }}>Rs. {parseFloat(o.total_price).toFixed(2)}</td>
                     <td>
-                      <span style={{ padding: "2px 10px", borderRadius: "99px", fontSize: "12px", fontWeight: 500, background: (statusColor[o.status] ?? "#6b7280") + "18", color: statusColor[o.status] ?? "#9ca3af" }}>
+                      <span style={{ padding: "2px 10px", borderRadius: "99px", fontSize: "12px", fontWeight: 500, background: `color-mix(in srgb, ${statusColor[o.status] ?? "var(--text-3)"} 12%, transparent)`, color: statusColor[o.status] ?? "var(--text-3)" }}>
                         {o.status}
                       </span>
                     </td>
@@ -151,13 +151,13 @@ export default function AdminPage() {
                     <td>
                       <div style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
                         {([
-                          { show: true, onClick: () => handleTrack(o.id), bg: "#a78bfa", icon: <MapPin size={12} />, label: "Track" },
-                          { show: o.status !== "cancelled" && o.status !== "completed", onClick: () => handleAdvance(o.id, o.status), bg: "#60a5fa", icon: <ArrowRight size={12} />, label: "Advance" },
-                          { show: o.status !== "cancelled", onClick: () => handleCancel(o.id), bg: "#fbbf24", icon: <Ban size={12} />, label: "Cancel" },
-                          { show: true, onClick: () => handleDelete(o.id), bg: "#f87171", icon: <Trash2 size={12} />, label: "Delete" },
+                          { show: true, onClick: () => handleTrack(o.id), bg: "var(--purple)", icon: <MapPin size={12} />, label: "Track" },
+                          { show: o.status !== "cancelled" && o.status !== "completed", onClick: () => handleAdvance(o.id, o.status), bg: "var(--blue)", icon: <ArrowRight size={12} />, label: "Advance" },
+                          { show: o.status !== "cancelled", onClick: () => handleCancel(o.id), bg: "var(--yellow)", icon: <Ban size={12} />, label: "Cancel" },
+                          { show: true, onClick: () => handleDelete(o.id), bg: "var(--red)", icon: <Trash2 size={12} />, label: "Delete" },
                         ] as { show: boolean; onClick: () => void; bg: string; icon: React.ReactNode; label: string }[]).filter(b => b.show).map((btn, i) => (
                           <button key={i} onClick={btn.onClick}
-                            style={{ display: "flex", alignItems: "center", gap: "4px", padding: "4px 10px", borderRadius: "6px", border: "none", background: btn.bg, color: "#fff", fontSize: "11px", fontWeight: 500, cursor: "pointer", transition: "opacity 0.15s", whiteSpace: "nowrap" }}
+                            style={{ display: "flex", alignItems: "center", gap: "4px", padding: "4px 10px", borderRadius: "6px", border: "none", background: btn.bg, color: "var(--card)", fontSize: "11px", fontWeight: 500, cursor: "pointer", transition: "opacity 0.15s", whiteSpace: "nowrap" }}
                             onMouseEnter={e => { e.currentTarget.style.opacity = "0.8"; }}
                             onMouseLeave={e => { e.currentTarget.style.opacity = "1"; }}>
                             {btn.icon}{btn.label}
@@ -180,7 +180,7 @@ export default function AdminPage() {
           <div style={{ width: "100%", maxWidth: "480px", maxHeight: "90vh", overflowY: "auto", borderRadius: "24px", padding: "28px", background: "var(--bg-elevated)", border: "1px solid var(--border)", boxShadow: "0 40px 80px rgba(0,0,0,0.25)" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "24px" }}>
               <h2 style={{ fontSize: "20px", fontWeight: 700, color: "var(--text)", display: "flex", alignItems: "center", gap: "10px" }}>
-                <MapPin size={20} color="#a78bfa" /> Order #{trackData.order_id}
+                <MapPin size={20} color="var(--purple)" /> Order #{trackData.order_id}
               </h2>
               <button onClick={() => setTrackModal(false)} style={{ width: "30px", height: "30px", borderRadius: "99px", border: "1px solid var(--border)", background: "var(--card-2)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "var(--text-2)" }}><X size={15} /></button>
             </div>
@@ -199,7 +199,7 @@ export default function AdminPage() {
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "20px" }}>
               <span style={{ fontSize: "13px", color: "var(--text-2)" }}>Current status:</span>
-              <span style={{ padding: "4px 12px", borderRadius: "99px", fontSize: "13px", fontWeight: 600, background: (statusColor[trackData.current_status] ?? "#6b7280") + "20", color: statusColor[trackData.current_status] ?? "#9ca3af" }}>
+              <span style={{ padding: "4px 12px", borderRadius: "99px", fontSize: "13px", fontWeight: 600, background: `color-mix(in srgb, ${statusColor[trackData.current_status] ?? "var(--text-3)"} 14%, transparent)`, color: statusColor[trackData.current_status] ?? "var(--text-3)" }}>
                 {trackData.current_status}
               </span>
             </div>

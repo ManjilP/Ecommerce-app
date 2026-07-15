@@ -12,17 +12,17 @@ type FilterTab = 'All' | string
 
 const filterTabs: FilterTab[] = ['All', 'pending', 'processing', 'delivered', 'cancelled']
 
-const statusConfig: Record<string, { label: string; color: string; bg: string; dot: string }> = {
-  pending: { label: 'Pending', color: 'text-amber-700', bg: 'bg-amber-100', dot: 'bg-amber-500' },
-  processing: { label: 'Processing', color: 'text-blue-700', bg: 'bg-blue-100', dot: 'bg-blue-500' },
-  delivered: { label: 'Delivered', color: 'text-green-700', bg: 'bg-green-100', dot: 'bg-green-500' },
-  cancelled: { label: 'Cancelled', color: 'text-red-700', bg: 'bg-red-100', dot: 'bg-red-500' },
+const statusConfig: Record<string, { label: string; var: string }> = {
+  pending: { label: 'Pending', var: 'var(--orange)' },
+  processing: { label: 'Processing', var: 'var(--blue)' },
+  delivered: { label: 'Delivered', var: 'var(--green)' },
+  cancelled: { label: 'Cancelled', var: 'var(--red)' },
 }
 
-const paymentConfig: Record<string, { label: string; color: string; bg: string }> = {
-  esewa: { label: 'eSewa', color: 'text-green-700', bg: 'bg-green-100' },
-  khalti: { label: 'Khalti', color: 'text-purple-700', bg: 'bg-purple-100' },
-  cod: { label: 'Cash on Delivery', color: 'text-gray-700', bg: 'bg-gray-100' },
+const paymentConfig: Record<string, { label: string; var: string }> = {
+  esewa: { label: 'eSewa', var: 'var(--green)' },
+  khalti: { label: 'Khalti', var: 'var(--purple)' },
+  cod: { label: 'Cash on Delivery', var: 'var(--text-2)' },
 }
 
 interface OrderItem {
@@ -74,7 +74,7 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
   const statusKey = (order.status ?? '').toLowerCase()
   const status = statusConfig[statusKey] ?? statusConfig.pending
   const paymentKey = (order.payment_method ?? order.payment ?? '').toLowerCase()
-  const payment = paymentConfig[paymentKey] ?? { label: order.payment_method ?? '—', color: 'text-gray-700', bg: 'bg-gray-100' }
+  const payment = paymentConfig[paymentKey] ?? { label: order.payment_method ?? '—', var: 'var(--text-2)' }
   const total = getOrderTotal(order)
 
   return (
@@ -86,7 +86,7 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ duration: 0.2 }}
-          className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+          className="relative w-full max-w-lg bg-card rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
         >
           <div className="px-6 py-5 border-b border-border flex items-center justify-between flex-shrink-0">
             <div>
@@ -102,13 +102,13 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
               <div className="bg-muted rounded-2xl p-4">
                 <p className="text-xs text-muted-foreground mb-1">Status</p>
                 <div className="flex items-center gap-1.5">
-                  <span className={`w-2 h-2 rounded-full ${status.dot}`} />
-                  <span className={`text-sm font-semibold ${status.color}`}>{status.label}</span>
+                  <span className="w-2 h-2 rounded-full" style={{ background: status.var }} />
+                  <span className="text-sm font-semibold" style={{ color: status.var }}>{status.label}</span>
                 </div>
               </div>
               <div className="bg-muted rounded-2xl p-4">
                 <p className="text-xs text-muted-foreground mb-1">Payment</p>
-                <span className={`text-sm font-semibold ${payment.color}`}>{payment.label}</span>
+                <span className="text-sm font-semibold" style={{ color: payment.var }}>{payment.label}</span>
               </div>
               {order.city && (
                 <div className="bg-muted rounded-2xl p-4">
@@ -138,7 +138,7 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
             <div className="border-t border-border pt-4 space-y-2">
               <div className="flex justify-between text-sm text-muted-foreground">
                 <span>Delivery</span>
-                <span className="text-green-600 font-medium">Free</span>
+                <span className="font-medium" style={{ color: "var(--green)" }}>Free</span>
               </div>
               <div className="flex justify-between text-base font-bold text-foreground pt-1 border-t border-border">
                 <span>Grand Total</span>
@@ -181,7 +181,7 @@ export default function MyOrdersPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="pt-20 max-w-3xl mx-auto px-4 py-10">
+      <div className="pt-24 max-w-3xl mx-auto px-4 py-10">
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
           <div className="flex items-center gap-3 mb-1">
             <div className="w-10 h-10 rounded-2xl bg-accent flex items-center justify-center">
@@ -222,7 +222,7 @@ export default function MyOrdersPage() {
         {!loading && error && (
           <div className="flex flex-col items-center gap-4 py-16">
             <p className="text-muted-foreground text-sm">{error}</p>
-            <button onClick={fetchOrders} className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-green-700 transition-colors">
+            <button onClick={fetchOrders} className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors">
               <RefreshCw size={14} /> Retry
             </button>
           </div>
@@ -237,7 +237,7 @@ export default function MyOrdersPage() {
             <p className="text-sm text-muted-foreground max-w-xs">
               {activeFilter === 'All' ? "You haven't placed any orders yet." : 'No orders in this category.'}
             </p>
-            <Link href="/landing" className="mt-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-green-700 transition-colors">
+            <Link href="/landing" className="mt-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors">
               Shop Now
             </Link>
           </motion.div>
@@ -272,9 +272,9 @@ export default function MyOrdersPage() {
                         {order.items.map((it) => `${getItemName(it)} ×${it.quantity}`).join(', ')}
                       </p>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${payment.bg} ${payment.color}`}>{payment.label}</span>
-                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 ${status.bg} ${status.color}`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
+                        <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ background: `color-mix(in srgb, ${payment.var} 14%, transparent)`, color: payment.var }}>{payment.label}</span>
+                        <span className="text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1" style={{ background: `color-mix(in srgb, ${status.var} 14%, transparent)`, color: status.var }}>
+                          <span className="w-1.5 h-1.5 rounded-full" style={{ background: status.var }} />
                           {status.label}
                         </span>
                       </div>

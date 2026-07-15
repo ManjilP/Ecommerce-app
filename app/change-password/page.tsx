@@ -55,14 +55,14 @@ export default function ChangePasswordPage() {
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-3xl border border-border shadow-sm p-7">
+        <div className="bg-card rounded-3xl border border-border shadow-sm p-7">
           {success && (
             <div className="mb-5 flex items-center gap-3 px-4 py-3.5 rounded-xl bg-accent border border-primary/20 text-primary text-sm font-medium">
               <CheckCircle size={16} className="flex-shrink-0" /> Password changed successfully.
             </div>
           )}
           {error && (
-            <div className="mb-5 px-4 py-3.5 rounded-xl bg-red-50 border border-red-200 text-destructive text-sm">
+            <div className="mb-5 px-4 py-3.5 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm">
               {error}
             </div>
           )}
@@ -84,9 +84,9 @@ export default function ChangePasswordPage() {
                       width: "100%",
                       padding: "11px 44px 11px 14px",
                       borderRadius: "12px",
-                      border: "1px solid #d4e8d4",
-                      background: "#ffffff",
-                      color: "#1a1a1a",
+                      border: "1px solid var(--border-strong)",
+                      background: "var(--card-2)",
+                      color: "var(--text)",
                       fontSize: "14px",
                       outline: "none",
                       boxSizing: "border-box",
@@ -106,7 +106,7 @@ export default function ChangePasswordPage() {
             <button
               type="submit"
               disabled={saving}
-              className="w-full py-3.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:bg-emerald-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed mt-1"
+              className="w-full py-3.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed mt-1"
             >
               {saving ? "Updating…" : "Update Password"}
             </button>

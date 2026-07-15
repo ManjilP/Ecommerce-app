@@ -30,11 +30,11 @@ interface Order {
 interface Product { id: number; name: string; price: string; }
 
 const statusColor: Record<string, string> = {
-  pending: "#d97706",
-  completed: "#059669",
-  cancelled: "#dc2626",
-  processing: "#10b981",
-  shipped: "#7c3aed",
+  pending: "var(--orange)",
+  completed: "var(--green)",
+  cancelled: "var(--red)",
+  processing: "var(--green)",
+  shipped: "var(--purple)",
 };
 
 export default function OrdersPage() {
@@ -263,9 +263,9 @@ export default function OrdersPage() {
           <h1 style={{ fontSize: "32px", fontWeight: 700, letterSpacing: "-0.5px", color: "var(--text)", lineHeight: 1.1 }}>Orders</h1>
           <p style={{ fontSize: "16px", color: "var(--text-2)", marginTop: "6px" }}>{count} total orders</p>
         </div>
-        <button onClick={() => { setModal(true); setError(""); }} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "0 24px", height: "44px", borderRadius: "4px", fontSize: "15px", fontWeight: 600, color: "rgba(0,113,227,1)", background: "transparent", border: "1.5px solid rgba(0,113,227,0.6)", cursor: "pointer", transition: "all 0.15s" }}
-          onMouseEnter={e => { e.currentTarget.style.background = "rgba(0,113,227,0.06)"; e.currentTarget.style.borderColor = "rgba(0,113,227,1)"; }}
-          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(0,113,227,0.6)"; }}>
+        <button onClick={() => { setModal(true); setError(""); }} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "0 24px", height: "44px", borderRadius: "4px", fontSize: "15px", fontWeight: 600, color: "var(--accent)", background: "transparent", border: "1.5px solid rgba(136,115,76,0.6)", cursor: "pointer", transition: "all 0.15s" }}
+          onMouseEnter={e => { e.currentTarget.style.background = "rgba(136,115,76,0.06)"; e.currentTarget.style.borderColor = "var(--accent)"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(136,115,76,0.6)"; }}>
           <Plus size={16} /> New Order
         </button>
       </div>
@@ -275,9 +275,9 @@ export default function OrdersPage() {
           <Search size={16} style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", color: "var(--text-3)" }} />
           <input value={searchInput} onChange={(e) => setSearchInput(e.target.value)} placeholder="Search by customer or status..." style={{ paddingLeft: "46px", height: "50px" }} />
         </div>
-        <button type="submit" style={{ padding: "0 24px", height: "50px", borderRadius: "4px", fontSize: "15px", fontWeight: 600, color: "rgba(0,113,227,1)", background: "transparent", border: "1.5px solid rgba(0,113,227,0.6)", cursor: "pointer", whiteSpace: "nowrap", transition: "all 0.15s" }}
-          onMouseEnter={e => { e.currentTarget.style.background = "rgba(0,113,227,0.06)"; e.currentTarget.style.borderColor = "rgba(0,113,227,1)"; }}
-          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(0,113,227,0.6)"; }}>Search</button>
+        <button type="submit" style={{ padding: "0 24px", height: "50px", borderRadius: "4px", fontSize: "15px", fontWeight: 600, color: "var(--accent)", background: "transparent", border: "1.5px solid rgba(136,115,76,0.6)", cursor: "pointer", whiteSpace: "nowrap", transition: "all 0.15s" }}
+          onMouseEnter={e => { e.currentTarget.style.background = "rgba(136,115,76,0.06)"; e.currentTarget.style.borderColor = "var(--accent)"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(136,115,76,0.6)"; }}>Search</button>
         {search && <button type="button" onClick={() => { setSearchInput(""); setSearch(""); setPage(1); }} style={{ padding: "0 20px", height: "50px", borderRadius: "4px", fontSize: "15px", fontWeight: 500, color: "var(--text-2)", background: "transparent", border: "1.5px solid var(--border)", cursor: "pointer", transition: "all 0.15s" }}
           onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--text-3)"; }}
           onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border)"; }}>Clear</button>}
@@ -313,7 +313,7 @@ export default function OrdersPage() {
                       </div>
                     </td>
                     <td>
-                      <span className="px-2.5 py-1 rounded-full text-xs font-medium" style={{ background: (statusColor[o.status] ?? "#6b7280") + "18", color: statusColor[o.status] ?? "#9ca3af" }}>
+                      <span className="px-2.5 py-1 rounded-full text-xs font-medium" style={{ background: `color-mix(in srgb, ${statusColor[o.status] ?? "var(--text-3)"} 12%, transparent)`, color: statusColor[o.status] ?? "var(--text-3)" }}>
                         {o.status}
                       </span>
                     </td>
@@ -322,24 +322,24 @@ export default function OrdersPage() {
                         <span className="px-2 py-0.5 rounded-lg text-xs font-mono" style={{ background: "var(--card-2)", color: "var(--text-2)" }}>{o.payment_method ?? "cod"}</span>
                         {o.requires_prescription && (
                           <span className="px-2 py-0.5 rounded-lg text-xs font-medium" style={{
-                            background: o.prescription_status === "approved" ? "#05966918" : o.prescription_status === "rejected" ? "#dc262618" : "#d9770618",
-                            color: o.prescription_status === "approved" ? "#059669" : o.prescription_status === "rejected" ? "#dc2626" : "#d97706",
+                            background: o.prescription_status === "approved" ? "color-mix(in srgb, var(--green) 12%, transparent)" : o.prescription_status === "rejected" ? "color-mix(in srgb, var(--red) 12%, transparent)" : "color-mix(in srgb, var(--orange) 12%, transparent)",
+                            color: o.prescription_status === "approved" ? "var(--green)" : o.prescription_status === "rejected" ? "var(--red)" : "var(--orange)",
                           }}>
                             Rx: {o.prescription_status ?? "not uploaded"}
                           </span>
                         )}
                       </div>
                     </td>
-                    <td className="font-semibold" style={{ color: "#34d399" }}>Rs. {parseFloat(o.total_price).toFixed(2)}</td>
+                    <td className="font-semibold" style={{ color: "var(--green)" }}>Rs. {parseFloat(o.total_price).toFixed(2)}</td>
                     <td style={{ color: "var(--text-3)" }}>{new Date(o.created_at).toLocaleDateString()}</td>
                     <td>
                       <div style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
                         {([
-                          { show: true, onClick: () => handleTrack(o.id), color: "#fff", bg: "#a78bfa", icon: <MapPin size={13} />, label: "Track" },
-                          { show: (!o.payment_method || o.payment_method === "cod") && o.status === "pending", onClick: () => handleConfirmPayment(o.id), color: "#fff", bg: "#a78bfa", icon: <CreditCard size={13} />, label: "Confirm" },
-                          { show: isAdmin && o.status !== "cancelled" && o.status !== "completed", onClick: () => handleUpdateStatus(o.id, o.status), color: "#fff", bg: "#60a5fa", icon: <ArrowRight size={13} />, label: "Advance" },
-                          { show: o.status !== "cancelled", onClick: () => handleCancel(o.id), color: "#fff", bg: "#fbbf24", icon: <Ban size={13} />, label: "Cancel" },
-                          { show: true, onClick: () => handleDelete(o.id), color: "#fff", bg: "#f87171", icon: <Trash2 size={13} />, label: "Delete" },
+                          { show: true, onClick: () => handleTrack(o.id), color: "var(--card)", bg: "var(--purple)", icon: <MapPin size={13} />, label: "Track" },
+                          { show: (!o.payment_method || o.payment_method === "cod") && o.status === "pending", onClick: () => handleConfirmPayment(o.id), color: "var(--card)", bg: "var(--purple)", icon: <CreditCard size={13} />, label: "Confirm" },
+                          { show: isAdmin && o.status !== "cancelled" && o.status !== "completed", onClick: () => handleUpdateStatus(o.id, o.status), color: "var(--card)", bg: "var(--blue)", icon: <ArrowRight size={13} />, label: "Advance" },
+                          { show: o.status !== "cancelled", onClick: () => handleCancel(o.id), color: "var(--card)", bg: "var(--yellow)", icon: <Ban size={13} />, label: "Cancel" },
+                          { show: true, onClick: () => handleDelete(o.id), color: "var(--card)", bg: "var(--red)", icon: <Trash2 size={13} />, label: "Delete" },
                         ] as { show: boolean; onClick: () => void; color: string; bg: string; icon: React.ReactNode; label: string }[]).filter(b => b.show).map((btn, i) => (
                           <button key={i} onClick={btn.onClick}
                             style={{ display: "flex", alignItems: "center", gap: "5px", padding: "4px 10px", borderRadius: "6px", border: "none", background: btn.bg, color: btn.color, fontSize: "12px", fontWeight: 500, cursor: "pointer", transition: "opacity 0.15s", whiteSpace: "nowrap" }}
@@ -360,8 +360,8 @@ export default function OrdersPage() {
             <div className="flex items-center justify-between mt-4 px-2">
               <span className="text-xs" style={{ color: "var(--text-3)" }}>Page {page} of {totalPages}</span>
               <div className="flex gap-1">
-                <button onClick={() => goToPage(page - 1)} disabled={page === 1} className="p-1.5 rounded-lg transition-colors hover:bg-white/5" style={{ color: page === 1 ? "var(--border-strong)" : "var(--text-2)" }}><ChevronLeft size={16} /></button>
-                <button onClick={() => goToPage(page + 1)} disabled={page === totalPages} className="p-1.5 rounded-lg transition-colors hover:bg-white/5" style={{ color: page === totalPages ? "var(--border-strong)" : "var(--text-2)" }}><ChevronRight size={16} /></button>
+                <button onClick={() => goToPage(page - 1)} disabled={page === 1} className="p-1.5 rounded-lg transition-colors hover:bg-[var(--card-2)]" style={{ color: page === 1 ? "var(--border-strong)" : "var(--text-2)" }}><ChevronLeft size={16} /></button>
+                <button onClick={() => goToPage(page + 1)} disabled={page === totalPages} className="p-1.5 rounded-lg transition-colors hover:bg-[var(--card-2)]" style={{ color: page === totalPages ? "var(--border-strong)" : "var(--text-2)" }}><ChevronRight size={16} /></button>
               </div>
             </div>
           )}
@@ -475,7 +475,7 @@ export default function OrdersPage() {
                       type="button"
                       onClick={handleApplyCoupon}
                       disabled={couponApplying || !couponCode.trim() || subtotal === 0}
-                      style={{ padding: "0 18px", borderRadius: "12px", fontSize: "14px", fontWeight: 600, color: "#fff", background: couponApplying || !couponCode.trim() || subtotal === 0 ? "#c7c7cc" : "rgba(0,113,227,0.85)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", border: "1px solid rgba(0,113,227,0.4)", boxShadow: couponApplying || !couponCode.trim() || subtotal === 0 ? "none" : "0 4px 16px rgba(0,113,227,0.3), inset 0 1px 0 rgba(255,255,255,0.2)", cursor: couponApplying || !couponCode.trim() || subtotal === 0 ? "not-allowed" : "pointer", whiteSpace: "nowrap", transition: "all 0.2s" }}
+                      style={{ padding: "0 18px", borderRadius: "12px", fontSize: "14px", fontWeight: 600, color: "var(--card)", background: "var(--accent)", opacity: couponApplying || !couponCode.trim() || subtotal === 0 ? 0.6 : 1, cursor: couponApplying || !couponCode.trim() || subtotal === 0 ? "not-allowed" : "pointer", whiteSpace: "nowrap", transition: "all 0.2s" }}
                     >
                       {couponApplying ? "..." : "Apply"}
                     </button>
@@ -497,9 +497,9 @@ export default function OrdersPage() {
                   <button type="button" onClick={() => { setModal(false); setCouponCode(""); setCouponResult(null); setCouponError(""); }} style={{ flex: 1, height: "48px", borderRadius: "99px", fontSize: "15px", fontWeight: 500, color: "var(--text)", background: "var(--card-2)", border: "1px solid var(--border)", cursor: "pointer", transition: "all 0.2s" }}
                     onMouseEnter={e => e.currentTarget.style.background = "var(--border)"}
                     onMouseLeave={e => e.currentTarget.style.background = "var(--card-2)"}>Cancel</button>
-                  <button type="submit" disabled={saving} style={{ flex: 1, height: "48px", borderRadius: "99px", fontSize: "15px", fontWeight: 600, color: "#fff", background: saving ? "#c7c7cc" : "rgba(0,113,227,0.85)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", border: "1px solid rgba(0,113,227,0.4)", boxShadow: saving ? "none" : "0 4px 24px rgba(0,113,227,0.3), inset 0 1px 0 rgba(255,255,255,0.2)", cursor: saving ? "not-allowed" : "pointer", transition: "all 0.2s" }}
-                    onMouseEnter={e => { if (!saving) { e.currentTarget.style.background = "rgba(0,113,227,1)"; e.currentTarget.style.boxShadow = "0 8px 32px rgba(0,113,227,0.4), inset 0 1px 0 rgba(255,255,255,0.2)"; } }}
-                    onMouseLeave={e => { if (!saving) { e.currentTarget.style.background = "rgba(0,113,227,0.85)"; e.currentTarget.style.boxShadow = "0 4px 24px rgba(0,113,227,0.3), inset 0 1px 0 rgba(255,255,255,0.2)"; } }}>
+                  <button type="submit" disabled={saving} style={{ flex: 1, height: "48px", borderRadius: "99px", fontSize: "15px", fontWeight: 600, color: "var(--card)", background: "var(--accent)", opacity: saving ? 0.6 : 1, cursor: saving ? "not-allowed" : "pointer", transition: "all 0.2s" }}
+                    onMouseEnter={e => { if (!saving) { e.currentTarget.style.background = "var(--accent-hover)"; } }}
+                    onMouseLeave={e => { if (!saving) { e.currentTarget.style.background = "var(--accent)"; } }}>
                     {saving ? "Creating..." : "Create Order"}
                   </button>
                 </div>
@@ -516,7 +516,7 @@ export default function OrdersPage() {
             {/* Header */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "24px" }}>
               <h2 style={{ fontSize: "20px", fontWeight: 700, color: "var(--text)", display: "flex", alignItems: "center", gap: "10px" }}>
-                <MapPin size={20} color="#a78bfa" /> Order #{trackData.order_id}
+                <MapPin size={20} color="var(--purple)" /> Order #{trackData.order_id}
               </h2>
               <button onClick={() => setTrackModal(false)} style={{ width: "30px", height: "30px", borderRadius: "99px", border: "1px solid var(--border)", background: "var(--card-2)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "var(--text-2)" }}><X size={15} /></button>
             </div>
@@ -539,7 +539,7 @@ export default function OrdersPage() {
             {/* Status Badge */}
             <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "20px" }}>
               <span style={{ fontSize: "13px", color: "var(--text-2)" }}>Current status:</span>
-              <span style={{ padding: "4px 12px", borderRadius: "99px", fontSize: "13px", fontWeight: 600, background: (statusColor[trackData.current_status] ?? "#6b7280") + "20", color: statusColor[trackData.current_status] ?? "#9ca3af" }}>
+              <span style={{ padding: "4px 12px", borderRadius: "99px", fontSize: "13px", fontWeight: 600, background: `color-mix(in srgb, ${statusColor[trackData.current_status] ?? "var(--text-3)"} 14%, transparent)`, color: statusColor[trackData.current_status] ?? "var(--text-3)" }}>
                 {trackData.current_status}
               </span>
             </div>
@@ -591,7 +591,7 @@ export default function OrdersPage() {
               )}
               <div style={{ display: "flex", gap: "10px", paddingTop: "4px" }}>
                 <button type="button" onClick={() => setEsewaModal(false)} style={{ flex: 1, height: "44px", borderRadius: "99px", fontSize: "14px", fontWeight: 500, color: "var(--text)", border: "1px solid var(--border)", background: "var(--card-2)", cursor: "pointer" }}>Cancel</button>
-                <button type="submit" disabled={esewaConfirming} style={{ flex: 1, height: "44px", borderRadius: "99px", fontSize: "14px", fontWeight: 600, color: "#fff", border: "none", cursor: "pointer", background: esewaConfirming ? "#c7c7cc" : "rgba(0,113,227,0.85)", backdropFilter: "blur(12px)", transition: "all 0.2s" }}>
+                <button type="submit" disabled={esewaConfirming} style={{ flex: 1, height: "44px", borderRadius: "99px", fontSize: "14px", fontWeight: 600, color: "var(--card)", border: "none", cursor: "pointer", background: "var(--accent)", opacity: esewaConfirming ? 0.6 : 1, transition: "all 0.2s" }}>
                   {esewaConfirming ? "Confirming..." : "Confirm Payment"}
                 </button>
               </div>

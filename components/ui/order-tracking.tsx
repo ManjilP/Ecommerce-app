@@ -22,7 +22,7 @@ const OrderTracking = React.forwardRef<HTMLDivElement, OrderTrackingProps>(
               <div key={index} className="flex">
                 <div className="flex flex-col items-center">
                   {step.isCompleted ? (
-                    <CheckCircle2 className="h-6 w-6 shrink-0" style={{ color: "#34d399" }} />
+                    <CheckCircle2 className="h-6 w-6 shrink-0" style={{ color: "var(--green)" }} />
                   ) : (
                     <Circle className="h-6 w-6 shrink-0" style={{ color: "var(--border-strong)" }} />
                   )}
@@ -30,7 +30,7 @@ const OrderTracking = React.forwardRef<HTMLDivElement, OrderTrackingProps>(
                     <div
                       className={cn("w-[1.5px] grow my-1")}
                       style={{
-                        background: steps[index + 1].isCompleted ? "#34d39960" : "var(--border)",
+                        background: steps[index + 1].isCompleted ? "color-mix(in srgb, var(--green) 38%, transparent)" : "var(--border)",
                         minHeight: "24px",
                       }}
                     />

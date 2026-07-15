@@ -127,9 +127,9 @@ export default function ProductsPage() {
           <h1 style={{ fontSize: "32px", fontWeight: 700, letterSpacing: "-0.5px", color: "var(--text)", lineHeight: 1.1 }}>Products</h1>
           <p style={{ fontSize: "16px", color: "var(--text-2)", marginTop: "6px" }}>{count} total products</p>
         </div>
-        <button onClick={openCreate} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "0 20px", height: "40px", borderRadius: "4px", fontSize: "14px", fontWeight: 600, color: "rgba(0,113,227,1)", background: "transparent", border: "1.5px solid rgba(0,113,227,0.6)", cursor: "pointer", transition: "all 0.15s" }}
-          onMouseEnter={e => { e.currentTarget.style.background = "rgba(0,113,227,0.06)"; e.currentTarget.style.borderColor = "rgba(0,113,227,1)"; }}
-          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(0,113,227,0.6)"; }}>
+        <button onClick={openCreate} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "0 20px", height: "40px", borderRadius: "4px", fontSize: "14px", fontWeight: 600, color: "var(--accent)", background: "transparent", border: "1.5px solid rgba(136,115,76,0.6)", cursor: "pointer", transition: "all 0.15s" }}
+          onMouseEnter={e => { e.currentTarget.style.background = "rgba(136,115,76,0.06)"; e.currentTarget.style.borderColor = "var(--accent)"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(136,115,76,0.6)"; }}>
           <Plus size={15} /> Add Product
         </button>
       </div>
@@ -139,7 +139,7 @@ export default function ProductsPage() {
           <Search size={16} style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", color: "var(--text-3)" }} />
           <input value={searchInput} onChange={(e) => setSearchInput(e.target.value)} placeholder="Search by name or SKU..." style={{ paddingLeft: "46px", height: "50px" }} />
         </div>
-        <button type="submit" style={{ padding: "0 24px", borderRadius: "14px", fontSize: "16px", fontWeight: 600, color: "#fff", background: "var(--accent)", border: "none", cursor: "pointer", whiteSpace: "nowrap" }}>Search</button>
+        <button type="submit" style={{ padding: "0 24px", borderRadius: "14px", fontSize: "16px", fontWeight: 600, color: "var(--card)", background: "var(--accent)", border: "none", cursor: "pointer", whiteSpace: "nowrap" }}>Search</button>
         {search && <button type="button" onClick={() => { setSearchInput(""); setSearch(""); setPage(1); load(); }} style={{ padding: "0 20px", borderRadius: "14px", fontSize: "16px", fontWeight: 500, color: "var(--text-2)", background: "var(--card-2)", border: "none", cursor: "pointer" }}>Clear</button>}
       </form>
 
@@ -169,22 +169,22 @@ export default function ProductsPage() {
                       <div className="flex items-center gap-2">
                         {p.name}
                         {p.requires_prescription && (
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold" style={{ background: "#d9770618", color: "#d97706" }}>Rx</span>
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold" style={{ background: "color-mix(in srgb, var(--orange) 12%, transparent)", color: "var(--orange)" }}>Rx</span>
                         )}
                       </div>
                     </td>
                     <td style={{ color: "var(--text-2)" }}>{p.category}</td>
-                    <td className="font-semibold" style={{ color: "#34d399" }}>Rs. {parseFloat(String(p.price)).toFixed(2)}</td>
+                    <td className="font-semibold" style={{ color: "var(--green)" }}>Rs. {parseFloat(String(p.price)).toFixed(2)}</td>
                     <td>
                       <div className="flex gap-1 items-center">
-                        <button onClick={() => openEdit(p)} className="p-1.5 rounded-lg transition-colors hover:bg-white/5" style={{ color: "#60a5fa" }} title="Edit"><Pencil size={13} /></button>
-                        <button onClick={() => handleUploadClick(p.id)} disabled={uploadingId === p.id} className="p-1.5 rounded-lg transition-colors hover:bg-white/5" style={{ color: "#a78bfa" }} title="Upload image">
+                        <button onClick={() => openEdit(p)} className="p-1.5 rounded-lg transition-colors hover:bg-[var(--card-2)]" style={{ color: "var(--blue)" }} title="Edit"><Pencil size={13} /></button>
+                        <button onClick={() => handleUploadClick(p.id)} disabled={uploadingId === p.id} className="p-1.5 rounded-lg transition-colors hover:bg-[var(--card-2)]" style={{ color: "var(--purple)" }} title="Upload image">
                           {uploadingId === p.id ? <span className="text-xs" style={{ color: "var(--text-3)" }}>...</span> : <Upload size={13} />}
                         </button>
-                        <button onClick={() => handleFetchImage(p.id)} disabled={fetchingId === p.id} className="p-1.5 rounded-lg transition-colors hover:bg-white/5" style={{ color: "#34d399" }} title="Auto-fetch image">
+                        <button onClick={() => handleFetchImage(p.id)} disabled={fetchingId === p.id} className="p-1.5 rounded-lg transition-colors hover:bg-[var(--card-2)]" style={{ color: "var(--green)" }} title="Auto-fetch image">
                           {fetchingId === p.id ? <span className="text-xs" style={{ color: "var(--text-3)" }}>...</span> : <ImageIcon size={13} />}
                         </button>
-                        <button onClick={() => handleDelete(p.id)} className="p-1.5 rounded-lg transition-colors hover:bg-white/5" style={{ color: "#f87171" }} title="Delete"><Trash2 size={13} /></button>
+                        <button onClick={() => handleDelete(p.id)} className="p-1.5 rounded-lg transition-colors hover:bg-[var(--card-2)]" style={{ color: "var(--red)" }} title="Delete"><Trash2 size={13} /></button>
                       </div>
                     </td>
                   </tr>
@@ -195,10 +195,10 @@ export default function ProductsPage() {
           </div>
           {totalPages > 1 && (
             <div className="flex items-center justify-between mt-4">
-              <span className="text-sm" style={{ color: "#6b7280" }}>Page {page} of {totalPages} ({count} total)</span>
+              <span className="text-sm" style={{ color: "var(--text-2)" }}>Page {page} of {totalPages} ({count} total)</span>
               <div className="flex gap-2">
-                <button onClick={() => goToPage(page - 1)} disabled={page === 1} className="p-1 rounded" style={{ color: page === 1 ? "#3e3e42" : "#9ca3af" }}><ChevronLeft size={18} /></button>
-                <button onClick={() => goToPage(page + 1)} disabled={page === totalPages} className="p-1 rounded" style={{ color: page === totalPages ? "#3e3e42" : "#9ca3af" }}><ChevronRight size={18} /></button>
+                <button onClick={() => goToPage(page - 1)} disabled={page === 1} className="p-1 rounded" style={{ color: page === 1 ? "var(--border-strong)" : "var(--text-3)" }}><ChevronLeft size={18} /></button>
+                <button onClick={() => goToPage(page + 1)} disabled={page === totalPages} className="p-1 rounded" style={{ color: page === totalPages ? "var(--border-strong)" : "var(--text-3)" }}><ChevronRight size={18} /></button>
               </div>
             </div>
           )}
@@ -240,7 +240,7 @@ export default function ProductsPage() {
               </label>
               <div className="flex gap-3 pt-4">
                 <button type="button" onClick={() => setModal(false)} className="flex-1 py-3.5 rounded-xl text-sm font-semibold bg-transparent border-2 border-border text-foreground hover:bg-accent transition-colors">Cancel</button>
-                <button type="submit" disabled={saving} className="flex-1 py-3.5 rounded-xl text-sm font-semibold bg-primary text-primary-foreground hover:bg-emerald-700 transition-all disabled:opacity-70 flex items-center justify-center">
+                <button type="submit" disabled={saving} className="flex-1 py-3.5 rounded-xl text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-all disabled:opacity-70 flex items-center justify-center">
                   {saving ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : "Save"}
                 </button>
               </div>

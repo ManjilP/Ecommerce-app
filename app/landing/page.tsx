@@ -20,12 +20,17 @@ export default function LandingPage() {
     }
   }, [router])
 
+  useEffect(() => {
+    const category = new URLSearchParams(window.location.search).get('category')
+    if (category) setActiveCategory(category)
+  }, [])
+
   return (
     <GridBackground className="min-h-screen bg-background">
       <Navbar />
       <SecondaryNav activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
-      {/* pt-28 accounts for fixed navbar (h-16) + secondary nav (h-12) */}
-      <main className="pt-28 relative z-10">
+      {/* pt-32 accounts for fixed navbar (h-16) + secondary nav (h-12) */}
+      <main className="pt-32 relative z-10">
         <HeroSection />
         <PromoCards />
         <ProductGridSection activeCategory={activeCategory} onCategoryChange={setActiveCategory} />

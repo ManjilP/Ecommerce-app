@@ -11,7 +11,7 @@ export default function ContactPage() {
     <GridBackground className="min-h-screen flex flex-col bg-background">
       <Navbar />
       <SecondaryNav />
-      <main className="flex-1 pt-28">
+      <main className="flex-1 pt-32">
         <Contact2
           title="Contact Us"
           description="Have questions about your order, need help finding a medicine, or want to share feedback? Our team is here to assist you."

@@ -36,20 +36,20 @@ export default function AdminLoginPage() {
   return (
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg)", position: "relative", overflow: "hidden" }}>
       <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
-        <div style={{ position: "absolute", top: "-10%", right: "-5%", width: "500px", height: "500px", borderRadius: "99px", background: "radial-gradient(circle, rgba(245,158,11,0.1) 0%, transparent 70%)", filter: "blur(40px)" }} />
-        <div style={{ position: "absolute", bottom: "-10%", left: "-5%", width: "450px", height: "450px", borderRadius: "99px", background: "radial-gradient(circle, rgba(14,116,144,0.07) 0%, transparent 70%)", filter: "blur(40px)" }} />
+        <div style={{ position: "absolute", top: "-10%", right: "-5%", width: "500px", height: "500px", borderRadius: "99px", background: "radial-gradient(circle, var(--orange) 0%, transparent 70%)", opacity: 0.08, filter: "blur(40px)" }} />
+        <div style={{ position: "absolute", bottom: "-10%", left: "-5%", width: "450px", height: "450px", borderRadius: "99px", background: "radial-gradient(circle, var(--blue) 0%, transparent 70%)", opacity: 0.06, filter: "blur(40px)" }} />
       </div>
       <div style={{ width: "100%", maxWidth: "400px", padding: "0 16px" }}>
 
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: "40px" }}>
-          <div style={{ width: "52px", height: "52px", borderRadius: "16px", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "20px", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.25)" }}>
-            <ShieldCheck size={24} color="#f59e0b" />
+          <div style={{ width: "52px", height: "52px", borderRadius: "16px", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "20px", background: "var(--card-2)", border: "1px solid var(--border-strong)" }}>
+            <ShieldCheck size={24} color="var(--orange)" />
           </div>
           <h1 style={{ fontSize: "26px", fontWeight: 700, color: "var(--text)", letterSpacing: "-0.3px" }}>Vendor Portal</h1>
           <p style={{ fontSize: "15px", color: "var(--text-2)", marginTop: "6px" }}>Sign in to your vendor account</p>
         </div>
 
-        <div style={{ borderRadius: "24px", padding: "28px", background: "var(--card)", border: "1px solid rgba(245,158,11,0.2)", boxShadow: "0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)" }}>
+        <div style={{ borderRadius: "24px", padding: "28px", background: "var(--card)", border: "1px solid var(--border)", boxShadow: "var(--card-shadow)" }}>
           {error && (
             <div style={{ marginBottom: "20px", padding: "14px 16px", borderRadius: "12px", display: "flex", alignItems: "center", gap: "10px", background: "rgba(220,38,38,0.08)", border: "1px solid rgba(220,38,38,0.2)", color: "var(--red)", fontSize: "15px" }}>
               <AlertCircle size={16} style={{ flexShrink: 0 }} />
@@ -69,7 +69,7 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={loading}
-              style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", height: "50px", borderRadius: "14px", fontSize: "16px", fontWeight: 600, color: "#fff", background: loading ? "rgba(217,119,6,0.6)" : "#d97706", border: "none", cursor: "pointer", marginTop: "8px", boxShadow: loading ? "none" : "0 0 24px rgba(217,119,6,0.3)" }}
+              style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", height: "50px", borderRadius: "14px", fontSize: "16px", fontWeight: 600, color: "var(--card)", background: "var(--orange)", opacity: loading ? 0.6 : 1, border: "none", cursor: "pointer", marginTop: "8px" }}
             >
               <LogIn size={18} />
               {loading ? "Signing in..." : "Vendor Sign In"}

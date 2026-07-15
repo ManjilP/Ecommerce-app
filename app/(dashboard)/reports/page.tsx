@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { getInventorySummary, getSalesChart, getRevenueByCity, getTopProducts, getTopCustomers, getCouponUsage } from "@/lib/api";
 import { Package, TrendingUp, MapPin, Users, Ticket } from "lucide-react";
+import { RankedBarRow, TrendBarChart } from "@/components/ui/bar-chart";
 
 type DaysOption = 7 | 30 | 90;
 
@@ -11,18 +12,6 @@ interface TopProduct { product__name: string; total_sold: number; total_revenue:
 interface TopCustomer { customer_name: string; total_orders: number; total_spent: number; }
 interface CouponStat { code: string; discount_type: string; times_used: number; total_discount: number; }
 interface InventorySummary { [key: string]: unknown; }
-
-function CssBar({ value, max, color }: { value: number; max: number; color: string }) {
-  const pct = max > 0 ? Math.round((value / max) * 100) : 0;
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-      <div style={{ flex: 1, borderRadius: "99px", height: "6px", background: "var(--border-strong)" }}>
-        <div style={{ height: "6px", borderRadius: "99px", width: `${pct}%`, background: color, transition: "width 0.3s" }} />
-      </div>
-      <span style={{ fontSize: "12px", color: "var(--text-3)", width: "32px", textAlign: "right" }}>{pct}%</span>
-    </div>
-  );
-}
 
 function Section({ title, icon, children, loading }: { title: string; icon: React.ReactNode; children: React.ReactNode; loading: boolean }) {
   return (
@@ -67,7 +56,6 @@ export default function ReportsPage() {
 
   const handleDaysChange = (d: DaysOption) => { setDays(d); loadByDays(d); };
 
-  const maxRevenue = Math.max(...sales.map((s) => s.total_revenue), 1);
   const maxCity = Math.max(...cities.map((c) => c.total_revenue), 1);
   const maxProductSold = Math.max(...topProducts.map((p) => p.total_sold), 1);
   const maxCustomerSpent = Math.max(...topCustomers.map((c) => c.total_spent), 1);
@@ -81,7 +69,7 @@ export default function ReportsPage() {
         </div>
         <div style={{ display: "flex", gap: "8px" }}>
           {([7, 30, 90] as DaysOption[]).map((d) => (
-            <button key={d} onClick={() => handleDaysChange(d)} style={{ padding: "0 16px", height: "38px", borderRadius: "10px", fontSize: "14px", fontWeight: 600, color: days === d ? "#fff" : "var(--text-2)", background: days === d ? "#d97706" : "var(--card-2)", border: "1px solid var(--border)", cursor: "pointer" }}>
+            <button key={d} onClick={() => handleDaysChange(d)} style={{ padding: "0 16px", height: "38px", borderRadius: "10px", fontSize: "14px", fontWeight: 600, color: days === d ? "var(--card)" : "var(--text-2)", background: days === d ? "var(--orange)" : "var(--card-2)", border: "1px solid var(--border)", cursor: "pointer" }}>
               {d}d
             </button>
           ))}
@@ -105,7 +93,7 @@ export default function ReportsPage() {
         </Section>
 
         {/* Coupon Usage */}
-        <Section title="Coupon Usage" icon={<Ticket size={16} color="#f59e0b" />} loading={loading.coupons}>
+        <Section title="Coupon Usage" icon={<Ticket size={16} color="var(--orange)" />} loading={loading.coupons}>
           {coupons.length > 0 ? (
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
               {coupons.map((c) => (
@@ -122,24 +110,24 @@ export default function ReportsPage() {
         </Section>
 
         {/* Sales Chart */}
-        <Section title={`Revenue — last ${days} days`} icon={<TrendingUp size={16} color="var(--purple)" />} loading={loading.sales}>
+        <Section title={`Revenue — last ${days} days`} icon={<TrendingUp size={16} color="var(--chart-green)" />} loading={loading.sales}>
           {sales.length > 0 ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px", maxHeight: "280px", overflowY: "auto" }}>
-              {sales.map((s) => (
-                <div key={s.label}>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
-                    <span style={{ fontSize: "13px", color: "var(--text-2)" }}>{s.label}</span>
-                    <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--purple)" }}>Rs. {Number(s.total_revenue).toFixed(0)}</span>
-                  </div>
-                  <CssBar value={s.total_revenue} max={maxRevenue} color="var(--purple)" />
-                </div>
-              ))}
-            </div>
+            <>
+              <p style={{ fontSize: "28px", fontWeight: 700, color: "var(--text)", letterSpacing: "-0.5px", marginBottom: "16px" }}>
+                Rs. {sales.reduce((sum, s) => sum + Number(s.total_revenue), 0).toFixed(0)}
+                <span style={{ fontSize: "13px", fontWeight: 500, color: "var(--text-3)", marginLeft: "8px" }}>total</span>
+              </p>
+              <TrendBarChart
+                data={sales.map((s) => ({ label: s.label, value: s.total_revenue }))}
+                color="var(--chart-green)"
+                formatValue={(v) => `Rs. ${v.toFixed(0)}`}
+              />
+            </>
           ) : <p style={{ fontSize: "15px", color: "var(--text-3)" }}>No sales data.</p>}
         </Section>
 
         {/* Revenue by City */}
-        <Section title={`Revenue by City — last ${days} days`} icon={<MapPin size={16} color="var(--accent)" />} loading={loading.cities}>
+        <Section title={`Revenue by City — last ${days} days`} icon={<MapPin size={16} color="var(--chart-blue)" />} loading={loading.cities}>
           {cities.length > 0 ? (
             <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
               {cities.map((c) => (
@@ -151,7 +139,7 @@ export default function ReportsPage() {
                       <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--green)" }}>Rs. {Number(c.total_revenue).toFixed(0)}</span>
                     </div>
                   </div>
-                  <CssBar value={c.total_revenue} max={maxCity} color="var(--accent)" />
+                  <RankedBarRow label={c.delivery_city} value={c.total_revenue} max={maxCity} color="var(--chart-blue)" valueLabel={`Rs. ${Number(c.total_revenue).toFixed(0)}`} />
                 </div>
               ))}
             </div>
@@ -159,14 +147,14 @@ export default function ReportsPage() {
         </Section>
 
         {/* Top Products */}
-        <Section title={`Top Products — last ${days} days`} icon={<Package size={16} color="var(--green)" />} loading={loading.products}>
+        <Section title={`Top Products — last ${days} days`} icon={<Package size={16} color="var(--chart-purple)" />} loading={loading.products}>
           {topProducts.length > 0 ? (
             <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
               {topProducts.map((p, i) => (
                 <div key={p.product__name}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                      <span style={{ fontSize: "12px", width: "22px", height: "22px", borderRadius: "99px", display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(5,150,105,0.12)", color: "var(--green)", fontWeight: 700 }}>{i + 1}</span>
+                      <span style={{ fontSize: "12px", width: "22px", height: "22px", borderRadius: "99px", display: "flex", alignItems: "center", justifyContent: "center", background: "color-mix(in srgb, var(--chart-purple) 14%, transparent)", color: "var(--chart-purple)", fontWeight: 700 }}>{i + 1}</span>
                       <span style={{ fontSize: "15px", fontWeight: 500, color: "var(--text)", maxWidth: "160px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.product__name}</span>
                     </div>
                     <div style={{ display: "flex", gap: "12px" }}>
@@ -174,7 +162,7 @@ export default function ReportsPage() {
                       <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--green)" }}>Rs. {Number(p.total_revenue).toFixed(0)}</span>
                     </div>
                   </div>
-                  <CssBar value={p.total_sold} max={maxProductSold} color="var(--green)" />
+                  <RankedBarRow label={p.product__name} value={p.total_sold} max={maxProductSold} color="var(--chart-purple)" valueLabel={`${p.total_sold} sold`} />
                 </div>
               ))}
             </div>
@@ -182,14 +170,14 @@ export default function ReportsPage() {
         </Section>
 
         {/* Top Customers */}
-        <Section title={`Top Customers — last ${days} days`} icon={<Users size={16} color="var(--yellow)" />} loading={loading.customers}>
+        <Section title={`Top Customers — last ${days} days`} icon={<Users size={16} color="var(--chart-yellow)" />} loading={loading.customers}>
           {topCustomers.length > 0 ? (
             <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
               {topCustomers.map((c, i) => (
                 <div key={c.customer_name}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                      <span style={{ fontSize: "12px", width: "22px", height: "22px", borderRadius: "99px", display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(217,119,6,0.12)", color: "var(--yellow)", fontWeight: 700 }}>{i + 1}</span>
+                      <span style={{ fontSize: "12px", width: "22px", height: "22px", borderRadius: "99px", display: "flex", alignItems: "center", justifyContent: "center", background: "color-mix(in srgb, var(--chart-yellow) 14%, transparent)", color: "var(--chart-yellow)", fontWeight: 700 }}>{i + 1}</span>
                       <span style={{ fontSize: "15px", fontWeight: 500, color: "var(--text)" }}>{c.customer_name}</span>
                     </div>
                     <div style={{ display: "flex", gap: "12px" }}>
@@ -197,7 +185,7 @@ export default function ReportsPage() {
                       <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--green)" }}>Rs. {Number(c.total_spent).toFixed(0)}</span>
                     </div>
                   </div>
-                  <CssBar value={c.total_spent} max={maxCustomerSpent} color="var(--yellow)" />
+                  <RankedBarRow label={c.customer_name} value={c.total_spent} max={maxCustomerSpent} color="var(--chart-yellow)" valueLabel={`Rs. ${Number(c.total_spent).toFixed(0)}`} />
                 </div>
               ))}
             </div>

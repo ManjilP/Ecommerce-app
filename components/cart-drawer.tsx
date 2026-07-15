@@ -41,7 +41,7 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
-              className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col"
+              className="relative w-full max-w-md bg-card h-full shadow-2xl flex flex-col"
             >
               <div className="flex items-center justify-between px-6 py-5 border-b border-border flex-shrink-0">
                 <h2 className="font-heading text-xl font-bold text-foreground flex items-center gap-2">
@@ -118,7 +118,7 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
                   </div>
                   <button
                     onClick={() => setCheckoutOpen(true)}
-                    className="w-full py-3.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:bg-emerald-700 active:scale-[0.99] transition-all"
+                    className="w-full py-3.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 active:scale-[0.99] transition-all"
                   >
                     Proceed to Checkout
                   </button>

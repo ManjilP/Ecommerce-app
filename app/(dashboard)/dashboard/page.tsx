@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { getProducts, getOrders, getTopProducts, getSalesChart } from "@/lib/api";
 import { Package, ShoppingCart, Warehouse, TrendingUp, ArrowUpRight, Activity } from "lucide-react";
 import Link from "next/link";
+import { TrendBarChart } from "@/components/ui/bar-chart";
 import { useRouter } from "next/navigation";
 
 interface Order { id: number; customer_name: string; status: string; total_price: string; created_at: string; }
@@ -10,11 +11,11 @@ interface TopProduct { product__name: string; total_sold: number; total_revenue:
 interface SalesPoint { label: string; total_revenue: number; }
 
 const statusColor: Record<string, string> = {
-  pending: "#fb923c",
-  completed: "#34d399",
-  cancelled: "#f87171",
-  processing: "#60a5fa",
-  shipped: "#a78bfa",
+  pending: "var(--orange)",
+  completed: "var(--green)",
+  cancelled: "var(--red)",
+  processing: "var(--blue)",
+  shipped: "var(--purple)",
 };
 
 function BentoCard({ children, className = "", style = {} }: { children: React.ReactNode; className?: string; style?: React.CSSProperties }) {
@@ -60,8 +61,6 @@ export default function DashboardPage() {
     }).finally(() => setLoading(false));
   }, []);
 
-  const maxRevenue = Math.max(...salesData.map((s) => s.total_revenue), 1);
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -86,17 +85,17 @@ export default function DashboardPage() {
         {/* Orders "” 2 cols */}
         <BentoCard
           className="col-span-2 flex flex-col justify-between"
-          style={{ minHeight: "190px", background: "var(--bento-orders-bg)", borderColor: "var(--bento-orders-border)" }}
+          style={{ minHeight: "190px" }}
         >
           <div className="flex items-start justify-between">
-            <p style={{ fontSize: "13px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--bento-orders-label)" }}>Total Orders</p>
-            <div className="p-2.5 rounded-xl" style={{ background: "rgba(96,165,250,0.1)", border: "1px solid rgba(96,165,250,0.15)" }}>
-              <ShoppingCart size={20} color="#60a5fa" />
+            <p style={{ fontSize: "13px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--text-3)" }}>Total Orders</p>
+            <div className="p-2.5 rounded-xl" style={{ background: "color-mix(in srgb, var(--blue) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--blue) 18%, transparent)" }}>
+              <ShoppingCart size={20} color="var(--blue)" />
             </div>
           </div>
           <div>
             <p style={{ fontSize: "56px", fontWeight: 800, letterSpacing: "-2px", color: "var(--text)", lineHeight: 1 }}>{stats.orders}</p>
-            <Link href="/orders" className="flex items-center gap-1.5 mt-4" style={{ fontSize: "13px", fontWeight: 500, color: "#60a5fa", width: "fit-content" }}>
+            <Link href="/orders" className="flex items-center gap-1.5 mt-4" style={{ fontSize: "13px", fontWeight: 500, color: "var(--blue)", width: "fit-content" }}>
               View all orders <ArrowUpRight size={14} />
             </Link>
           </div>
@@ -105,17 +104,17 @@ export default function DashboardPage() {
         {/* Revenue */}
         <BentoCard
           className="flex flex-col justify-between"
-          style={{ minHeight: "190px", background: "var(--bento-revenue-bg)", borderColor: "var(--bento-revenue-border)" }}
+          style={{ minHeight: "190px" }}
         >
           <div className="flex items-start justify-between">
-            <p style={{ fontSize: "13px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--bento-revenue-label)" }}>Revenue</p>
-            <div className="p-2.5 rounded-xl" style={{ background: "rgba(52,211,153,0.1)", border: "1px solid rgba(52,211,153,0.15)" }}>
-              <TrendingUp size={20} color="#34d399" />
+            <p style={{ fontSize: "13px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--text-3)" }}>Revenue</p>
+            <div className="p-2.5 rounded-xl" style={{ background: "color-mix(in srgb, var(--green) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--green) 18%, transparent)" }}>
+              <TrendingUp size={20} color="var(--green)" />
             </div>
           </div>
           <div>
             <p style={{ fontSize: "34px", fontWeight: 800, letterSpacing: "-1px", color: "var(--text)", lineHeight: 1 }}>Rs. {stats.revenue.toFixed(0)}</p>
-            <Link href="/reports" className="flex items-center gap-1.5 mt-4" style={{ fontSize: "13px", fontWeight: 500, color: "#34d399", width: "fit-content" }}>
+            <Link href="/reports" className="flex items-center gap-1.5 mt-4" style={{ fontSize: "13px", fontWeight: 500, color: "var(--green)", width: "fit-content" }}>
               Reports <ArrowUpRight size={14} />
             </Link>
           </div>
@@ -124,17 +123,17 @@ export default function DashboardPage() {
         {/* Products */}
         <BentoCard
           className="flex flex-col justify-between"
-          style={{ minHeight: "190px", background: "var(--bento-products-bg)", borderColor: "var(--bento-products-border)" }}
+          style={{ minHeight: "190px" }}
         >
           <div className="flex items-start justify-between">
-            <p style={{ fontSize: "13px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--bento-products-label)" }}>Products</p>
-            <div className="p-2.5 rounded-xl" style={{ background: "rgba(167,139,250,0.1)", border: "1px solid rgba(167,139,250,0.15)" }}>
-              <Package size={20} color="#a78bfa" />
+            <p style={{ fontSize: "13px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--text-3)" }}>Products</p>
+            <div className="p-2.5 rounded-xl" style={{ background: "color-mix(in srgb, var(--purple) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--purple) 18%, transparent)" }}>
+              <Package size={20} color="var(--purple)" />
             </div>
           </div>
           <div>
             <p style={{ fontSize: "34px", fontWeight: 800, letterSpacing: "-1px", color: "var(--text)", lineHeight: 1 }}>{stats.products}</p>
-            <Link href="/products" className="flex items-center gap-1.5 mt-4" style={{ fontSize: "13px", fontWeight: 500, color: "#a78bfa", width: "fit-content" }}>
+            <Link href="/products" className="flex items-center gap-1.5 mt-4" style={{ fontSize: "13px", fontWeight: 500, color: "var(--purple)", width: "fit-content" }}>
               Manage <ArrowUpRight size={14} />
             </Link>
           </div>
@@ -150,20 +149,12 @@ export default function DashboardPage() {
             <Activity size={18} style={{ color: "var(--text-3)" }} />
           </div>
           {salesData.length > 0 ? (
-            <div className="flex items-end gap-2" style={{ height: "72px" }}>
-              {salesData.map((s, i) => {
-                const h = Math.max(6, Math.round((s.total_revenue / maxRevenue) * 64));
-                return (
-                  <div key={i} className="flex-1 group relative flex flex-col justify-end">
-                    <div
-                      className="w-full rounded-md transition-opacity"
-                      style={{ height: `${h}px`, background: `rgba(14,116,144,${0.4 + (i / salesData.length) * 0.6})` }}
-                      title={`Rs. ${s.total_revenue.toFixed(0)}`}
-                    />
-                  </div>
-                );
-              })}
-            </div>
+            <TrendBarChart
+              data={salesData.map((s) => ({ label: s.label, value: s.total_revenue }))}
+              color="var(--chart-green)"
+              height={72}
+              formatValue={(v) => `Rs. ${v.toFixed(0)}`}
+            />
           ) : (
             <p style={{ fontSize: "15px", color: "var(--text-3)" }}>No sales data yet.</p>
           )}
@@ -172,18 +163,18 @@ export default function DashboardPage() {
         {/* Inventory */}
         <BentoCard
           className="flex flex-col justify-between"
-          style={{ minHeight: "200px", background: "var(--bento-inventory-bg)", borderColor: "var(--bento-inventory-border)" }}
+          style={{ minHeight: "200px" }}
         >
           <div className="flex items-start justify-between">
-            <p style={{ fontSize: "13px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--bento-inventory-label)" }}>Inventory</p>
-            <div className="p-2.5 rounded-xl" style={{ background: "rgba(251,146,60,0.1)", border: "1px solid rgba(251,146,60,0.15)" }}>
-              <Warehouse size={20} color="#fb923c" />
+            <p style={{ fontSize: "13px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--text-3)" }}>Inventory</p>
+            <div className="p-2.5 rounded-xl" style={{ background: "color-mix(in srgb, var(--orange) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--orange) 18%, transparent)" }}>
+              <Warehouse size={20} color="var(--orange)" />
             </div>
           </div>
           <div>
             <p style={{ fontSize: "34px", fontWeight: 800, letterSpacing: "-1px", color: "var(--text)", lineHeight: 1 }}>{stats.inventory}</p>
-            <p style={{ fontSize: "13px", color: "rgba(251,146,60,0.5)", marginTop: "4px" }}>items tracked</p>
-            <Link href="/inventory" className="flex items-center gap-1.5 mt-3" style={{ fontSize: "13px", fontWeight: 500, color: "#fb923c", width: "fit-content" }}>
+            <p style={{ fontSize: "13px", color: "var(--text-3)", marginTop: "4px" }}>items tracked</p>
+            <Link href="/inventory" className="flex items-center gap-1.5 mt-3" style={{ fontSize: "13px", fontWeight: 500, color: "var(--orange)", width: "fit-content" }}>
               View inventory <ArrowUpRight size={14} />
             </Link>
           </div>
@@ -200,7 +191,7 @@ export default function DashboardPage() {
                     <span style={{ fontSize: "12px", color: "var(--text-3)", fontFamily: "monospace", width: "16px" }}>{i + 1}</span>
                     <span style={{ fontSize: "14px", color: "var(--text)", maxWidth: "120px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.product__name}</span>
                   </div>
-                  <span style={{ fontSize: "14px", fontWeight: 600, color: "#34d399" }}>Rs. {Number(p.total_revenue).toFixed(0)}</span>
+                  <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--green)" }}>Rs. {Number(p.total_revenue).toFixed(0)}</span>
                 </div>
               ))}
             </div>
@@ -211,7 +202,7 @@ export default function DashboardPage() {
         <BentoCard className="col-span-2" style={{ minHeight: "200px" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
             <p style={{ fontSize: "16px", fontWeight: 600, color: "var(--text)" }}>Recent Orders</p>
-            <Link href="/orders" style={{ fontSize: "13px", fontWeight: 500, color: "var(--accent)" }}>See all â†’</Link>
+            <Link href="/orders" style={{ fontSize: "13px", fontWeight: 500, color: "var(--accent)" }}>See all →</Link>
           </div>
           {recentOrders.length > 0 ? (
             <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
@@ -222,10 +213,10 @@ export default function DashboardPage() {
                     <p style={{ fontSize: "13px", color: "var(--text-3)", marginTop: "2px" }}>{new Date(o.created_at).toLocaleDateString()}</p>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <span style={{ fontSize: "13px", padding: "4px 10px", borderRadius: "99px", background: (statusColor[o.status] ?? "#6b7280") + "18", color: statusColor[o.status] ?? "#9ca3af", fontWeight: 500 }}>
+                    <span style={{ fontSize: "13px", padding: "4px 10px", borderRadius: "99px", background: `color-mix(in srgb, ${statusColor[o.status] ?? "var(--text-3)"} 14%, transparent)`, color: statusColor[o.status] ?? "var(--text-2)", fontWeight: 500 }}>
                       {o.status}
                     </span>
-                    <span style={{ fontSize: "15px", fontWeight: 600, color: "#34d399" }}>Rs. {parseFloat(o.total_price).toFixed(2)}</span>
+                    <span style={{ fontSize: "15px", fontWeight: 600, color: "var(--green)" }}>Rs. {parseFloat(o.total_price).toFixed(2)}</span>
                   </div>
                 </div>
               ))}
@@ -238,10 +229,10 @@ export default function DashboardPage() {
           <p style={{ fontSize: "13px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--text-3)", marginBottom: "20px" }}>Quick Links</p>
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
             {[
-              { label: "Add Product", href: "/products", color: "#a78bfa" },
-              { label: "New Order", href: "/orders", color: "#60a5fa" },
-              { label: "View Reports", href: "/reports", color: "#34d399" },
-              { label: "Coupons", href: "/coupons", color: "#fbbf24" },
+              { label: "Add Product", href: "/products", color: "var(--purple)" },
+              { label: "New Order", href: "/orders", color: "var(--blue)" },
+              { label: "View Reports", href: "/reports", color: "var(--green)" },
+              { label: "Coupons", href: "/coupons", color: "var(--yellow)" },
             ].map(({ label, href, color }) => (
               <Link key={href} href={href} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "15px", color, padding: "8px 0", borderBottom: "1px solid var(--border)" }}>
                 <span>{label}</span>

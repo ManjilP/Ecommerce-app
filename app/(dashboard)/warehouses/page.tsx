@@ -67,7 +67,7 @@ export default function WarehousesPage() {
           <h1 style={{ fontSize: "32px", fontWeight: 700, letterSpacing: "-0.5px", color: "var(--text)", lineHeight: 1.1 }}>Warehouses</h1>
           <p style={{ fontSize: "16px", color: "var(--text-2)", marginTop: "6px" }}>{count} total warehouses</p>
         </div>
-        <button onClick={openCreate} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "0 24px", height: "48px", borderRadius: "14px", fontSize: "16px", fontWeight: 600, color: "#fff", background: "var(--accent)", border: "none", cursor: "pointer", boxShadow: "0 0 24px rgba(14,116,144,0.35)" }}>
+        <button onClick={openCreate} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "0 24px", height: "48px", borderRadius: "14px", fontSize: "16px", fontWeight: 600, color: "var(--card)", background: "var(--accent)", border: "none", cursor: "pointer" }}>
           <Plus size={18} /> Add Warehouse
         </button>
       </div>
@@ -77,7 +77,7 @@ export default function WarehousesPage() {
           <Search size={16} style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", color: "var(--text-3)", pointerEvents: "none" }} />
           <input value={searchInput} onChange={(e) => setSearchInput(e.target.value)} placeholder="Search warehouses..." style={{ paddingLeft: "46px", height: "50px" }} />
         </div>
-        <button type="submit" style={{ padding: "0 24px", borderRadius: "14px", fontSize: "16px", fontWeight: 600, color: "#fff", background: "var(--accent)", border: "none", cursor: "pointer", whiteSpace: "nowrap" }}>Search</button>
+        <button type="submit" style={{ padding: "0 24px", borderRadius: "14px", fontSize: "16px", fontWeight: 600, color: "var(--card)", background: "var(--accent)", border: "none", cursor: "pointer", whiteSpace: "nowrap" }}>Search</button>
         {search && <button type="button" onClick={() => { setSearchInput(""); setSearch(""); setPage(1); load(); }} style={{ padding: "0 20px", borderRadius: "14px", fontSize: "16px", fontWeight: 500, color: "var(--text-2)", background: "var(--card-2)", border: "none", cursor: "pointer" }}>Clear</button>}
       </form>
 
@@ -97,8 +97,8 @@ export default function WarehousesPage() {
                     <td style={{ color: "var(--text-2)" }}>{w.location ?? "—"}</td>
                     <td>
                       <div style={{ display: "flex", gap: "4px" }}>
-                        <button onClick={() => openEdit(w)} style={{ padding: "6px", borderRadius: "8px", color: "#60a5fa", background: "transparent", border: "none", cursor: "pointer" }} title="Edit"><Pencil size={15} /></button>
-                        <button onClick={() => handleDelete(w.id)} style={{ padding: "6px", borderRadius: "8px", color: "#f87171", background: "transparent", border: "none", cursor: "pointer" }} title="Delete"><Trash2 size={15} /></button>
+                        <button onClick={() => openEdit(w)} style={{ padding: "6px", borderRadius: "8px", color: "var(--blue)", background: "transparent", border: "none", cursor: "pointer" }} title="Edit"><Pencil size={15} /></button>
+                        <button onClick={() => handleDelete(w.id)} style={{ padding: "6px", borderRadius: "8px", color: "var(--red)", background: "transparent", border: "none", cursor: "pointer" }} title="Delete"><Trash2 size={15} /></button>
                       </div>
                     </td>
                   </tr>
@@ -133,7 +133,7 @@ export default function WarehousesPage() {
               <div>{label("Location")}<input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="e.g. Thamel, Kathmandu" /></div>
               <div style={{ display: "flex", gap: "10px", paddingTop: "8px" }}>
                 <button type="button" onClick={() => setModal(false)} style={{ flex: 1, height: "48px", borderRadius: "14px", fontSize: "16px", fontWeight: 500, color: "var(--text-2)", background: "var(--card-2)", border: "none", cursor: "pointer" }}>Cancel</button>
-                <button type="submit" disabled={saving} style={{ flex: 1, height: "48px", borderRadius: "14px", fontSize: "16px", fontWeight: 600, color: "#fff", background: "var(--accent)", border: "none", cursor: "pointer" }}>{saving ? "Saving..." : "Save"}</button>
+                <button type="submit" disabled={saving} style={{ flex: 1, height: "48px", borderRadius: "14px", fontSize: "16px", fontWeight: 600, color: "var(--card)", background: "var(--accent)", border: "none", cursor: "pointer" }}>{saving ? "Saving..." : "Save"}</button>
               </div>
             </form>
           </div>

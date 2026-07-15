@@ -16,7 +16,7 @@ interface Review {
 interface Product { id: number; name: string; }
 
 const ratingLabels: Record<number, string> = { 1: "Very Bad", 2: "Bad", 3: "Average", 4: "Good", 5: "Excellent" };
-const ratingColor: Record<number, string> = { 1: "#f87171", 2: "#fb923c", 3: "#fbbf24", 4: "#34d399", 5: "#10b981" };
+const ratingColor: Record<number, string> = { 1: "var(--red)", 2: "var(--orange)", 3: "var(--yellow)", 4: "var(--green)", 5: "var(--green)" };
 
 function StarRating({ value, onChange, readonly = false }: { value: number; onChange?: (v: number) => void; readonly?: boolean }) {
   const [hover, setHover] = useState(0);
@@ -33,8 +33,8 @@ function StarRating({ value, onChange, readonly = false }: { value: number; onCh
         >
           <Star
             size={readonly ? 16 : 24}
-            fill={(hover || value) >= s ? "#fbbf24" : "none"}
-            color={(hover || value) >= s ? "#fbbf24" : "var(--border-strong)"}
+            fill={(hover || value) >= s ? "var(--yellow)" : "none"}
+            color={(hover || value) >= s ? "var(--yellow)" : "var(--border-strong)"}
             strokeWidth={1.5}
           />
         </button>
@@ -107,9 +107,9 @@ export default function ReviewsPage() {
           <h1 style={{ fontSize: "32px", fontWeight: 700, letterSpacing: "-0.5px", color: "var(--text)", lineHeight: 1.1 }}>My Reviews</h1>
           <p style={{ fontSize: "16px", color: "var(--text-2)", marginTop: "6px" }}>{reviews.length} {reviews.length === 1 ? "review" : "reviews"} written</p>
         </div>
-        <button onClick={openCreate} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "0 24px", height: "44px", borderRadius: "4px", fontSize: "15px", fontWeight: 600, color: "rgba(0,113,227,1)", background: "transparent", border: "1.5px solid rgba(0,113,227,0.6)", cursor: "pointer", transition: "all 0.15s" }}
-          onMouseEnter={e => { e.currentTarget.style.background = "rgba(0,113,227,0.06)"; e.currentTarget.style.borderColor = "rgba(0,113,227,1)"; }}
-          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(0,113,227,0.6)"; }}>
+        <button onClick={openCreate} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "0 24px", height: "44px", borderRadius: "4px", fontSize: "15px", fontWeight: 600, color: "var(--accent)", background: "transparent", border: "1.5px solid rgba(136,115,76,0.6)", cursor: "pointer", transition: "all 0.15s" }}
+          onMouseEnter={e => { e.currentTarget.style.background = "rgba(136,115,76,0.06)"; e.currentTarget.style.borderColor = "var(--accent)"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(136,115,76,0.6)"; }}>
           <Plus size={16} /> Write Review
         </button>
       </div>
@@ -119,9 +119,9 @@ export default function ReviewsPage() {
           <Star size={44} color="var(--border-strong)" style={{ margin: "0 auto 16px" }} />
           <p style={{ fontSize: "18px", fontWeight: 600, color: "var(--text)", marginBottom: "8px" }}>No reviews yet</p>
           <p style={{ fontSize: "15px", color: "var(--text-3)", marginBottom: "24px" }}>Share your experience with products you&apos;ve ordered</p>
-          <button onClick={openCreate} style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "0 24px", height: "46px", borderRadius: "12px", fontSize: "15px", fontWeight: 600, color: "#fff", background: "rgba(0,113,227,0.85)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", border: "1px solid rgba(0,113,227,0.4)", boxShadow: "0 4px 24px rgba(0,113,227,0.3), inset 0 1px 0 rgba(255,255,255,0.2)", cursor: "pointer", transition: "all 0.2s" }}
-            onMouseEnter={e => { e.currentTarget.style.background = "rgba(0,113,227,1)"; }}
-            onMouseLeave={e => { e.currentTarget.style.background = "rgba(0,113,227,0.85)"; }}>
+          <button onClick={openCreate} style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "0 24px", height: "46px", borderRadius: "12px", fontSize: "15px", fontWeight: 600, color: "var(--card)", background: "var(--accent)", cursor: "pointer", transition: "all 0.2s" }}
+            onMouseEnter={e => { e.currentTarget.style.background = "var(--accent-hover)"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "var(--accent)"; }}>
             <Plus size={16} /> Write your first review
           </button>
         </div>
@@ -146,8 +146,8 @@ export default function ReviewsPage() {
                   </p>
                 </div>
                 <div style={{ display: "flex", gap: "4px", flexShrink: 0 }}>
-                  <button onClick={() => openEdit(r)} style={{ padding: "8px", borderRadius: "10px", color: "#60a5fa", background: "transparent", border: "none", cursor: "pointer" }} title="Edit"><Pencil size={16} /></button>
-                  <button onClick={() => handleDelete(r.id)} style={{ padding: "8px", borderRadius: "10px", color: "#f87171", background: "transparent", border: "none", cursor: "pointer" }} title="Delete"><Trash2 size={16} /></button>
+                  <button onClick={() => openEdit(r)} style={{ padding: "8px", borderRadius: "10px", color: "var(--blue)", background: "transparent", border: "none", cursor: "pointer" }} title="Edit"><Pencil size={16} /></button>
+                  <button onClick={() => handleDelete(r.id)} style={{ padding: "8px", borderRadius: "10px", color: "var(--red)", background: "transparent", border: "none", cursor: "pointer" }} title="Delete"><Trash2 size={16} /></button>
                 </div>
               </div>
             </div>
@@ -209,9 +209,9 @@ export default function ReviewsPage() {
                 <button type="button" onClick={() => setModal(false)} style={{ flex: 1, height: "48px", borderRadius: "99px", fontSize: "15px", fontWeight: 500, color: "var(--text)", background: "var(--card-2)", border: "1px solid var(--border)", cursor: "pointer", transition: "all 0.2s" }}
                   onMouseEnter={e => e.currentTarget.style.background = "var(--border)"}
                   onMouseLeave={e => e.currentTarget.style.background = "var(--card-2)"}>Cancel</button>
-                <button type="submit" disabled={saving} style={{ flex: 1, height: "48px", borderRadius: "99px", fontSize: "15px", fontWeight: 600, color: "#fff", background: saving ? "#c7c7cc" : "rgba(0,113,227,0.85)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", border: "1px solid rgba(0,113,227,0.4)", boxShadow: saving ? "none" : "0 4px 24px rgba(0,113,227,0.3), inset 0 1px 0 rgba(255,255,255,0.2)", cursor: saving ? "not-allowed" : "pointer", transition: "all 0.2s" }}
-                  onMouseEnter={e => { if (!saving) { e.currentTarget.style.background = "rgba(0,113,227,1)"; e.currentTarget.style.boxShadow = "0 8px 32px rgba(0,113,227,0.4), inset 0 1px 0 rgba(255,255,255,0.2)"; } }}
-                  onMouseLeave={e => { if (!saving) { e.currentTarget.style.background = "rgba(0,113,227,0.85)"; e.currentTarget.style.boxShadow = "0 4px 24px rgba(0,113,227,0.3), inset 0 1px 0 rgba(255,255,255,0.2)"; } }}>
+                <button type="submit" disabled={saving} style={{ flex: 1, height: "48px", borderRadius: "99px", fontSize: "15px", fontWeight: 600, color: "var(--card)", background: "var(--accent)", opacity: saving ? 0.6 : 1, cursor: saving ? "not-allowed" : "pointer", transition: "all 0.2s" }}
+                  onMouseEnter={e => { if (!saving) { e.currentTarget.style.background = "var(--accent-hover)"; } }}
+                  onMouseLeave={e => { if (!saving) { e.currentTarget.style.background = "var(--accent)"; } }}>
                   {saving ? "Saving..." : editing ? "Update" : "Submit"}
                 </button>
               </div>

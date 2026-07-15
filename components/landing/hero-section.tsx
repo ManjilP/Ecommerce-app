@@ -55,7 +55,7 @@ export default function HeroSection({ products = [] }: HeroSectionProps) {
             >
               <button
                 onClick={() => setCheckoutOpen(true)}
-                className="flex items-center gap-2 px-7 py-3.5 bg-primary text-primary-foreground rounded-xl font-semibold text-base hover:bg-emerald-700 active:scale-[0.98] transition-all shadow-md shadow-primary/20"
+                className="flex items-center gap-2 px-7 py-3.5 bg-primary text-primary-foreground rounded-xl font-semibold text-base hover:bg-primary/90 active:scale-[0.98] transition-all shadow-sm"
               >
                 Order Now
                 <ChevronRight size={16} />
@@ -83,7 +83,7 @@ export default function HeroSection({ products = [] }: HeroSectionProps) {
             {trustBadges.map(({ icon: Icon, label, sub }) => (
               <div
                 key={label}
-                className="flex items-center gap-3 px-5 py-3 bg-white rounded-2xl border border-border shadow-sm"
+                className="flex items-center gap-3 px-5 py-3 bg-card rounded-2xl border border-border shadow-sm"
               >
                 <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center flex-shrink-0">
                   <Icon size={18} className="text-primary" />

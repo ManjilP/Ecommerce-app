@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Search, Heart, Bell, ChevronDown, Menu, X,
-  ShoppingCart, LogOut, Package, Star, Settings,
+  ShoppingCart, LogOut, Package, Star, User,
 } from 'lucide-react'
 import { categories } from '@/lib/pharmacy-data'
 import { getMe, getUnreadNotificationCount, logout } from '@/lib/api'
@@ -36,6 +36,13 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [user, setUser] = useState<UserInfo | null>(null)
   const [notifCount, setNotifCount] = useState(0)
+  const [hasToken, setHasToken] = useState(false)
+
+  // Runs before paint so the avatar (not the "Login" button) shows immediately
+  // on every navigation, instead of flashing logged-out while getMe() resolves.
+  useLayoutEffect(() => {
+    setHasToken(!!sessionStorage.getItem('access_token'))
+  }, [])
 
   useEffect(() => {
     const token = sessionStorage.getItem('access_token')
@@ -100,16 +107,16 @@ export default function Navbar() {
     ? displayName.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()
     : 'U'
 
-  const isLoggedIn = !!user
+  const isLoggedIn = hasToken || !!user
 
   return (
     <>
       {/* Primary Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-border shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center gap-4">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-md border-b border-border shadow-sm">
+        <div className="max-w-[1600px] mx-auto px-4 md:px-8 h-20 flex items-center gap-4">
           {/* Logo */}
           <Link href="/landing" className="flex-shrink-0">
-            <span className="font-heading text-2xl font-bold text-foreground tracking-tight">
+            <span className="font-heading text-3xl font-bold text-foreground tracking-tight">
               Shop<span className="text-primary">.</span>
             </span>
           </Link>
@@ -126,27 +133,27 @@ export default function Navbar() {
               onChange={(e) => handleSearchChange(e.target.value)}
               onFocus={() => searchQuery && setShowSuggestions(suggestions.length > 0)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit()}
-              className="w-full bg-muted/50 border border-border text-foreground text-sm rounded-full !pl-12 pr-24 py-3 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 focus:bg-background transition-all shadow-sm hover:shadow-md"
+              className="w-full bg-muted/50 border border-border text-foreground text-sm rounded-full !pl-12 pr-24 py-3 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/50 focus:bg-background transition-all"
             />
             <div className="absolute inset-y-0 right-1.5 flex items-center gap-1">
               {searchQuery && (
-                <button 
-                  onClick={() => { setSearchQuery(''); setShowSuggestions(false); router.push('/landing#products'); }} 
+                <button
+                  onClick={() => { setSearchQuery(''); setShowSuggestions(false); router.push('/landing#products'); }}
                   className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-full transition-colors"
                 >
                   <X size={16} />
                 </button>
               )}
-              <button 
-                onClick={handleSearchSubmit} 
-                className="px-4 py-1.5 bg-primary text-primary-foreground text-sm font-semibold rounded-full hover:bg-emerald-600 transition-all hover:scale-105 shadow-sm hover:shadow-primary/25"
+              <button
+                onClick={handleSearchSubmit}
+                className="px-4 py-1.5 bg-primary text-primary-foreground text-sm font-semibold rounded-full hover:bg-primary/90 transition-colors"
               >
                 Search
               </button>
             </div>
-            
+
             {showSuggestions && (
-              <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-background border border-border/60 rounded-2xl shadow-xl overflow-hidden backdrop-blur-xl">
+              <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-card border border-border/60 rounded-2xl shadow-xl overflow-hidden">
                 <div className="max-h-[280px] overflow-y-auto py-2 custom-scrollbar">
                   {suggestions.map((name) => (
                     <button 
@@ -163,8 +170,62 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Right actions */}
-          <div className="flex items-center gap-2 ml-auto">
+          {/* Wishlist / Notifications / Cart — kept close to the search bar */}
+          <div className="flex items-center gap-2">
+            <Link href="/my-wishlist" className="p-2 rounded-xl hover:bg-muted transition-colors relative">
+              <Heart size={20} className="text-foreground" />
+              {wishlistCount > 0 && (
+                <span className="absolute top-1 right-1 w-4 h-4 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                  {wishlistCount > 9 ? '9+' : wishlistCount}
+                </span>
+              )}
+            </Link>
+
+            <Link href="/my-notifications" className="p-2 rounded-xl hover:bg-muted transition-colors relative">
+              <Bell size={20} className="text-foreground" />
+              {notifCount > 0 && (
+                <span className="absolute top-1 right-1 w-4 h-4 bg-destructive text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                  {notifCount > 9 ? '9+' : notifCount}
+                </span>
+              )}
+            </Link>
+
+            <button onClick={() => setCartOpen(true)} className="hidden md:flex p-2 rounded-xl hover:bg-muted transition-colors relative">
+              <ShoppingCart size={20} className="text-foreground" />
+              {cartCount > 0 && (
+                <span className="absolute top-1 right-1 w-4 h-4 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                  {cartCount > 9 ? '9+' : cartCount}
+                </span>
+              )}
+            </button>
+
+            {/* Mobile menu toggle */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-xl hover:bg-muted transition-colors md:hidden"
+            >
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
+
+          {/* About / Contact */}
+          <div className="hidden lg:flex items-center gap-1 flex-shrink-0 lg:ml-auto">
+            {[
+              { label: 'About', href: '/about' },
+              { label: 'Contact', href: '/contact' },
+            ].map(({ label, href }) => (
+              <Link
+                key={label}
+                href={href}
+                className="px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-lg transition-colors whitespace-nowrap"
+              >
+                {label}
+              </Link>
+            ))}
+          </div>
+
+          {/* Profile — pushed to the far right */}
+          <div className="flex items-center gap-2 ml-auto lg:ml-0">
             {isLoggedIn ? (
               <div className="relative">
                 <button
@@ -183,7 +244,7 @@ export default function Navbar() {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: -8, scale: 0.97 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute right-0 top-full mt-2 w-52 bg-white border border-border rounded-2xl shadow-lg overflow-hidden"
+                      className="absolute right-0 top-full mt-2 w-52 bg-card border border-border rounded-2xl shadow-lg overflow-hidden"
                     >
                       <div className="p-3 border-b border-border">
                         <p className="font-semibold text-sm text-foreground">{displayName}</p>
@@ -195,7 +256,7 @@ export default function Navbar() {
                           { icon: Heart, label: 'My Wishlist', href: '/my-wishlist' },
                           { icon: Star, label: 'My Reviews', href: '/my-reviews' },
                           { icon: Bell, label: 'Notifications', href: '/my-notifications' },
-                          { icon: Settings, label: 'Settings', href: '#' },
+                          { icon: User, label: 'View Profile', href: '/my-profile' },
                         ].map(({ icon: Icon, label, href }) => (
                           <Link
                             key={label}
@@ -211,7 +272,7 @@ export default function Navbar() {
                       <div className="border-t border-border py-1">
                         <button
                           onClick={handleLogout}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-destructive hover:bg-red-50 transition-colors"
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-destructive hover:bg-destructive/10 transition-colors"
                         >
                           <LogOut size={15} />
                           Sign Out
@@ -224,49 +285,11 @@ export default function Navbar() {
             ) : (
               <Link
                 href="/login"
-                className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-emerald-700 transition-colors"
+                className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors"
               >
                 Login
               </Link>
             )}
-
-            {/* Wishlist */}
-            <Link href="/my-wishlist" className="p-2 rounded-xl hover:bg-muted transition-colors relative">
-              <Heart size={20} className="text-foreground" />
-              {wishlistCount > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                  {wishlistCount > 9 ? '9+' : wishlistCount}
-                </span>
-              )}
-            </Link>
-
-            {/* Notifications */}
-            <Link href="/my-notifications" className="p-2 rounded-xl hover:bg-muted transition-colors relative">
-              <Bell size={20} className="text-foreground" />
-              {notifCount > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 bg-destructive text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                  {notifCount > 9 ? '9+' : notifCount}
-                </span>
-              )}
-            </Link>
-
-            {/* Cart */}
-            <button onClick={() => setCartOpen(true)} className="hidden md:flex p-2 rounded-xl hover:bg-muted transition-colors relative">
-              <ShoppingCart size={20} className="text-foreground" />
-              {cartCount > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                  {cartCount > 9 ? '9+' : cartCount}
-                </span>
-              )}
-            </button>
-
-            {/* Mobile menu toggle */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-xl hover:bg-muted transition-colors md:hidden"
-            >
-              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
           </div>
         </div>
 
@@ -296,7 +319,7 @@ export default function Navbar() {
               )}
               <button 
                 onClick={handleSearchSubmit} 
-                className="p-1.5 mr-1 bg-primary text-primary-foreground rounded-full hover:bg-emerald-600 transition-all shadow-sm"
+                className="p-1.5 mr-1 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-colors"
               >
                 <Search size={14} />
               </button>
@@ -329,7 +352,7 @@ export default function Navbar() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="fixed top-[120px] left-0 right-0 z-40 bg-white border-b border-border shadow-lg md:hidden"
+            className="fixed top-[136px] left-0 right-0 z-40 bg-card border-b border-border shadow-lg md:hidden"
           >
             <div className="p-4 space-y-1">
               {[
@@ -352,7 +375,7 @@ export default function Navbar() {
               {isLoggedIn && (
                 <button
                   onClick={() => { setMobileMenuOpen(false); handleLogout() }}
-                  className="w-full text-left px-4 py-3 rounded-xl text-sm font-medium text-destructive hover:bg-red-50 transition-colors"
+                  className="w-full text-left px-4 py-3 rounded-xl text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"
                 >
                   Sign Out
                 </button>

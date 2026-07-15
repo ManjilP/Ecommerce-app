@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import Link from 'next/link'
+import { useRouter, usePathname } from 'next/navigation'
 import { AlignJustify, ChevronDown } from 'lucide-react'
 import { categories } from '@/lib/pharmacy-data'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -14,6 +14,8 @@ interface SecondaryNavProps {
 export default function SecondaryNav({ activeCategory = 'All', onCategoryChange }: SecondaryNavProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const router = useRouter()
+  const pathname = usePathname()
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -24,18 +26,22 @@ export default function SecondaryNav({ activeCategory = 'All', onCategoryChange 
   }, [])
 
   const handleCategory = (cat: string) => {
-    onCategoryChange?.(cat)
     setIsDropdownOpen(false)
+    if (pathname === '/landing' && onCategoryChange) {
+      onCategoryChange(cat)
+    } else {
+      router.push(`/landing?category=${encodeURIComponent(cat)}#products`)
+    }
   }
 
   return (
-    <div className="fixed top-16 left-0 right-0 z-30 bg-card border-b border-border shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 h-12 flex items-center gap-3 relative">
+    <div className="fixed top-20 left-0 right-0 z-30 bg-card border-b border-border shadow-sm">
+      <div className="max-w-[1600px] mx-auto px-4 md:px-8 h-12 flex items-center gap-3 relative">
         {/* All categories button with dropdown */}
         <div className="relative" ref={dropdownRef}>
           <button 
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)} 
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold flex-shrink-0 hover:bg-emerald-700 transition-colors shadow-sm"
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold flex-shrink-0 hover:bg-primary/90 transition-colors shadow-sm"
           >
             <AlignJustify size={16} />
             <span>All Categories</span>
@@ -49,7 +55,7 @@ export default function SecondaryNav({ activeCategory = 'All', onCategoryChange 
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -10, scale: 0.95 }}
                 transition={{ duration: 0.15, ease: "easeOut" }}
-                className="absolute top-full left-0 mt-2 w-64 bg-white border border-border rounded-xl shadow-xl overflow-hidden z-50 backdrop-blur-xl"
+                className="absolute top-full left-0 mt-2 w-64 bg-card border border-border rounded-xl shadow-xl overflow-hidden z-50"
               >
                 <div className="p-2 max-h-[350px] overflow-y-auto custom-scrollbar">
                   <button
@@ -77,26 +83,8 @@ export default function SecondaryNav({ activeCategory = 'All', onCategoryChange 
           </AnimatePresence>
         </div>
 
-        {/* Spacer to push links to the right */}
+        {/* Spacer to push remaining content to the right */}
         <div className="flex-1" />
-
-        {/* Right nav links */}
-        <div className="hidden md:flex items-center gap-1 flex-shrink-0">
-          {[
-            { label: 'About', href: '/about' },
-            { label: 'Contact', href: '/contact' },
-            { label: 'My Wishlist', href: '/my-wishlist' },
-            { label: 'Notifications', href: '/my-notifications' },
-          ].map(({ label, href }) => (
-            <Link
-              key={label}
-              href={href}
-              className="px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-lg transition-colors whitespace-nowrap"
-            >
-              {label}
-            </Link>
-          ))}
-        </div>
       </div>
     </div>
   )

@@ -6,7 +6,7 @@ export default function Footer() {
   const year = new Date().getFullYear()
 
   return (
-    <footer className="bg-[#1a1a1a] text-white mt-24">
+    <footer className="bg-[#221b12] text-white mt-24">
       <div className="max-w-7xl mx-auto px-4 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Column 1 — Brand + tagline */}
@@ -26,7 +26,7 @@ export default function Footer() {
                 <li key={cat}>
                   <Link
                     href="/landing"
-                    className="text-sm text-gray-400 hover:text-primary transition-colors"
+                    className="text-sm text-white/55 hover:text-primary transition-colors"
                   >
                     {cat}
                   </Link>
@@ -48,7 +48,7 @@ export default function Footer() {
                 { label: 'Terms of Service', href: '#' },
               ].map(({ label, href }) => (
                 <li key={label}>
-                  <Link href={href} className="text-sm text-gray-400 hover:text-primary transition-colors">
+                  <Link href={href} className="text-sm text-white/55 hover:text-primary transition-colors">
                     {label}
                   </Link>
                 </li>
@@ -65,7 +65,7 @@ export default function Footer() {
                 { label: 'Notifications', href: '/my-notifications' },
               ].map(({ label, href }) => (
                 <li key={label}>
-                  <Link href={href} className="text-sm text-gray-400 hover:text-primary transition-colors">
+                  <Link href={href} className="text-sm text-white/55 hover:text-primary transition-colors">
                     {label}
                   </Link>
                 </li>
@@ -85,7 +85,7 @@ export default function Footer() {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-white">eSewa</p>
-                  <p className="text-xs text-gray-400">Digital wallet payment</p>
+                  <p className="text-xs text-white/55">Digital wallet payment</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
@@ -94,16 +94,16 @@ export default function Footer() {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-white">Khalti</p>
-                  <p className="text-xs text-gray-400">Digital wallet payment</p>
+                  <p className="text-xs text-white/55">Digital wallet payment</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
-                <div className="w-10 h-10 rounded-lg bg-gray-600 flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center flex-shrink-0">
                   <span className="text-white text-xs font-bold">COD</span>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-white">Cash on Delivery</p>
-                  <p className="text-xs text-gray-400">Pay when you receive</p>
+                  <p className="text-xs text-white/55">Pay when you receive</p>
                 </div>
               </div>
             </div>
@@ -112,10 +112,10 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="mt-12 pt-6 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-white/40">
             &copy; {year} Shop. All rights reserved. Registered in Nepal.
           </p>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-white/40">
             Prices in Nepalese Rupees (NPR). All medicines require valid prescription where mandated.
           </p>
         </div>

@@ -47,10 +47,8 @@ export default function PromoCards() {
           >
             <div>
               <span
-                className={`inline-block text-[11px] font-semibold tracking-wide uppercase mb-4 px-2.5 py-1 rounded-full ${
-                  promo.featured
-                    ? 'bg-white/15 text-white'
-                    : 'bg-accent text-accent-foreground'
+                className={`block text-xs font-semibold tracking-wide uppercase mb-3 ${
+                  promo.featured ? 'text-white/70' : 'text-primary'
                 }`}
               >
                 {promo.subtitle}
@@ -74,7 +72,7 @@ export default function PromoCards() {
               className={`flex items-center gap-2 text-sm font-semibold mt-6 w-fit px-5 py-2.5 rounded-xl transition-colors ${
                 promo.featured
                   ? 'bg-white text-primary hover:bg-white/90'
-                  : 'bg-primary text-primary-foreground hover:bg-emerald-700'
+                  : 'bg-primary text-primary-foreground hover:bg-primary/90'
               }`}
             >
               {promo.cta}

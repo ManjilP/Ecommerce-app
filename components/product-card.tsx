@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Heart, ShoppingCart } from 'lucide-react'
+import { Heart, ShoppingCart, Pill } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 export interface RealProduct {
@@ -60,14 +60,14 @@ export default function ProductCard({ product, onAddToCart, wishlisted = false, 
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <div className="w-16 h-16 rounded-2xl bg-accent flex items-center justify-center">
-              <span className="text-3xl">💊</span>
+              <Pill size={26} className="text-primary" />
             </div>
           </div>
         )}
 
         {/* Category badge */}
         <div className="absolute top-3 right-3">
-          <span className="px-2 py-0.5 bg-white/90 backdrop-blur-sm text-[10px] font-semibold text-muted-foreground rounded-full border border-border shadow-sm">
+          <span className="px-2 py-0.5 bg-card/90 backdrop-blur-sm text-[10px] font-semibold text-muted-foreground rounded-full border border-border shadow-sm">
             {product.category}
           </span>
         </div>
@@ -75,7 +75,7 @@ export default function ProductCard({ product, onAddToCart, wishlisted = false, 
         {/* Wishlist button */}
         <button
           onClick={handleWishlist}
-          className="absolute bottom-3 right-3 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-red-50"
+          className="absolute bottom-3 right-3 w-8 h-8 bg-card rounded-full shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-destructive/10"
           aria-label={localWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
         >
           <Heart
@@ -99,7 +99,7 @@ export default function ProductCard({ product, onAddToCart, wishlisted = false, 
           <p className="text-lg font-bold text-foreground leading-none">
             NPR {isNaN(price) ? product.price : price.toLocaleString()}
           </p>
-          <span className="text-[10px] font-semibold px-2 py-1 rounded-full text-green-700 bg-green-100">
+          <span className="text-[10px] font-semibold px-2 py-1 rounded-full" style={{ color: 'var(--green)', background: 'color-mix(in srgb, var(--green) 14%, transparent)' }}>
             In Stock
           </span>
         </div>
@@ -109,8 +109,8 @@ export default function ProductCard({ product, onAddToCart, wishlisted = false, 
           onClick={handleAddToCart}
           className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
             added
-              ? 'bg-emerald-600 text-white scale-95'
-              : 'bg-primary text-primary-foreground hover:bg-emerald-700 active:scale-95'
+              ? 'bg-primary text-primary-foreground scale-95'
+              : 'bg-primary text-primary-foreground hover:bg-primary/90 active:scale-95'
           }`}
         >
           <ShoppingCart size={14} />

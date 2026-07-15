@@ -64,7 +64,7 @@ function ProductGridContent({ onProductsLoaded, activeCategory = 'All', onCatego
                 className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
                   activeCategory === cat
                     ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'bg-card border border-border text-black hover:border-primary/40'
+                    : 'bg-card border border-border text-foreground hover:border-primary/40'
                 }`}
               >
                 {cat}
@@ -96,7 +96,7 @@ function ProductGridContent({ onProductsLoaded, activeCategory = 'All', onCatego
             <p className="text-muted-foreground text-sm">{error}</p>
             <button
               onClick={refresh}
-              className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-emerald-700 transition-colors"
+              className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors"
             >
               <RefreshCw size={14} />
               Retry

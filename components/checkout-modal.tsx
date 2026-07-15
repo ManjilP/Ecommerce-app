@@ -197,7 +197,7 @@ export default function CheckoutModal({ open, onClose, products = [], initialPro
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.94, y: 20 }}
               transition={{ duration: 0.25 }}
-              className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+              className="relative w-full max-w-lg bg-card rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
             >
               {/* Header */}
               <div className="flex items-center justify-between px-6 py-5 border-b border-border flex-shrink-0">
@@ -217,7 +217,7 @@ export default function CheckoutModal({ open, onClose, products = [], initialPro
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="absolute inset-0 bg-white z-10 flex flex-col items-center justify-center gap-4"
+                    className="absolute inset-0 bg-card z-10 flex flex-col items-center justify-center gap-4"
                   >
                     <motion.div
                       initial={{ scale: 0 }}
@@ -252,7 +252,7 @@ export default function CheckoutModal({ open, onClose, products = [], initialPro
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Ram Kumar"
-                      style={{ background: '#f0f5f0', border: '1px solid #d4e8d4', padding: '10px 12px', borderRadius: '12px', width: '100%', fontSize: '14px', outline: 'none' }}
+                      style={{ background: 'var(--card-2)', border: '1px solid var(--border-strong)', padding: '10px 12px', borderRadius: '12px', width: '100%', fontSize: '14px', outline: 'none' }}
                     />
                   </div>
                   <div>
@@ -262,7 +262,7 @@ export default function CheckoutModal({ open, onClose, products = [], initialPro
                     <select
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
-                      style={{ background: '#f0f5f0', border: '1px solid #d4e8d4', padding: '10px 12px', borderRadius: '12px', width: '100%', fontSize: '14px', outline: 'none', cursor: 'pointer' }}
+                      style={{ background: 'var(--card-2)', border: '1px solid var(--border-strong)', padding: '10px 12px', borderRadius: '12px', width: '100%', fontSize: '14px', outline: 'none', cursor: 'pointer' }}
                     >
                       <option value="">Select city</option>
                       {nepaliCities.map((c) => (
@@ -284,7 +284,7 @@ export default function CheckoutModal({ open, onClose, products = [], initialPro
                           <select
                             value={item.productId}
                             onChange={(e) => updateItem(idx, 'productId', Number(e.target.value))}
-                            style={{ flex: 1, background: '#f0f5f0', border: '1px solid #d4e8d4', padding: '8px 12px', borderRadius: '12px', fontSize: '14px', outline: 'none', cursor: 'pointer' }}
+                            style={{ flex: 1, background: 'var(--card-2)', border: '1px solid var(--border-strong)', padding: '8px 12px', borderRadius: '12px', fontSize: '14px', outline: 'none', cursor: 'pointer' }}
                           >
                             {products.map((p) => (
                               <option key={p.id} value={p.id}>{p.name}</option>
@@ -296,12 +296,12 @@ export default function CheckoutModal({ open, onClose, products = [], initialPro
                             max={99}
                             value={item.quantity}
                             onChange={(e) => updateItem(idx, 'quantity', Number(e.target.value))}
-                            style={{ width: '64px', background: '#f0f5f0', border: '1px solid #d4e8d4', padding: '8px', borderRadius: '12px', fontSize: '14px', outline: 'none', textAlign: 'center' }}
+                            style={{ width: '64px', background: 'var(--card-2)', border: '1px solid var(--border-strong)', padding: '8px', borderRadius: '12px', fontSize: '14px', outline: 'none', textAlign: 'center' }}
                           />
                           <button
                             onClick={() => removeItem(idx)}
                             disabled={items.length === 1}
-                            className="w-9 h-9 flex items-center justify-center rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                            className="w-9 h-9 flex items-center justify-center rounded-xl bg-destructive/10 text-destructive hover:bg-destructive/15 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                           >
                             <Trash2 size={14} />
                           </button>
@@ -336,8 +336,8 @@ export default function CheckoutModal({ open, onClose, products = [], initialPro
                           paddingRight: '12px',
                           paddingTop: '10px',
                           paddingBottom: '10px',
-                          background: couponApplied ? '#f0fdf4' : '#f0f5f0',
-                          border: couponApplied ? '1px solid #86efac' : couponError ? '1px solid #fca5a5' : '1px solid #d4e8d4',
+                          background: couponApplied ? 'color-mix(in srgb, var(--green) 10%, var(--card-2))' : 'var(--card-2)',
+                          border: couponApplied ? '1px solid var(--green)' : couponError ? '1px solid var(--red)' : '1px solid var(--border-strong)',
                           borderRadius: '12px',
                           width: '100%',
                           fontSize: '14px',
@@ -347,7 +347,7 @@ export default function CheckoutModal({ open, onClose, products = [], initialPro
                     </div>
                     <button
                       onClick={handleApplyCoupon}
-                      className="px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-emerald-700 transition-colors"
+                      className="px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
                     >
                       Apply
                     </button>
@@ -397,7 +397,7 @@ export default function CheckoutModal({ open, onClose, products = [], initialPro
                         className={`py-3 px-2 rounded-xl border-2 text-xs font-semibold transition-all flex flex-col items-center gap-1.5 ${
                           payment === method
                             ? `border-primary ${bg} ${color}`
-                            : 'border-border bg-white text-muted-foreground hover:bg-muted'
+                            : 'border-border bg-card text-muted-foreground hover:bg-muted'
                         }`}
                       >
                         {img ? (
@@ -415,7 +415,7 @@ export default function CheckoutModal({ open, onClose, products = [], initialPro
                 <button
                   onClick={handlePlace}
                   disabled={loading || !name.trim() || !city}
-                  className="w-full py-3.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2 hover:bg-emerald-700 active:scale-[0.99] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full py-3.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2 hover:bg-primary/90 active:scale-[0.99] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {loading ? (
                     <>

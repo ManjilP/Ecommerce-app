@@ -39,7 +39,7 @@ function StarRating({ rating, size = 14 }: { rating: number; size?: number }) {
   return (
     <div className="flex items-center gap-0.5">
       {[1, 2, 3, 4, 5].map((s) => (
-        <Star key={s} size={size} className={s <= rating ? 'text-amber-400 fill-amber-400' : 'text-gray-200 fill-gray-200'} />
+        <Star key={s} size={size} className={s <= rating ? 'text-[var(--yellow)] fill-[var(--yellow)]' : 'text-muted-foreground fill-muted'} />
       ))}
     </div>
   )
@@ -64,14 +64,14 @@ function RatingSummary({ reviews }: { reviews: Review[] }) {
           <div key={star} className="flex items-center gap-3">
             <div className="flex items-center gap-0.5 w-16">
               <span className="text-xs text-muted-foreground w-2">{star}</span>
-              <Star size={11} className="text-amber-400 fill-amber-400" />
+              <Star size={11} className="text-[var(--yellow)] fill-[var(--yellow)]" />
             </div>
             <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${pct}%` }}
                 transition={{ duration: 0.8, delay: (5 - star) * 0.08 }}
-                className="h-full bg-amber-400 rounded-full"
+                className="h-full bg-[var(--yellow)] rounded-full"
               />
             </div>
             <span className="text-xs text-muted-foreground w-8 text-right">{pct}%</span>
@@ -110,12 +110,12 @@ export default function MyReviewsPage() {
     <GridBackground className="min-h-screen bg-background">
       <Navbar />
       <SecondaryNav />
-      <div className="pt-28 max-w-2xl mx-auto px-4 py-10 relative z-10">
+      <div className="pt-32 max-w-2xl mx-auto px-4 py-10 relative z-10">
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-8">
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <div className="w-10 h-10 rounded-2xl bg-amber-100 flex items-center justify-center">
-                <Star size={20} className="text-amber-500" />
+              <div className="w-10 h-10 rounded-2xl bg-[color-mix(in_srgb,var(--yellow)_14%,transparent)] flex items-center justify-center">
+                <Star size={20} className="text-[var(--yellow)]" />
               </div>
               <h1 className="font-heading text-3xl font-bold text-foreground">My Reviews</h1>
             </div>
@@ -123,7 +123,7 @@ export default function MyReviewsPage() {
               {reviews.length} product {reviews.length === 1 ? 'review' : 'reviews'}
             </p>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-green-700 transition-colors">
+          <button className="flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors">
             <PenLine size={14} /> Write a Review
           </button>
         </motion.div>
@@ -150,7 +150,7 @@ export default function MyReviewsPage() {
         {!loading && error && (
           <div className="flex flex-col items-center gap-4 py-16">
             <p className="text-muted-foreground text-sm">{error}</p>
-            <button onClick={fetchReviews} className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-green-700 transition-colors">
+            <button onClick={fetchReviews} className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors">
               <RefreshCw size={14} /> Retry
             </button>
           </div>
@@ -189,7 +189,7 @@ export default function MyReviewsPage() {
                       </div>
                       <button
                         onClick={() => handleDelete(review.id)}
-                        className="text-xs text-muted-foreground border border-border px-3 py-1.5 rounded-lg hover:border-red-300 hover:text-red-500 transition-all flex-shrink-0 flex items-center gap-1"
+                        className="text-xs text-muted-foreground border border-border px-3 py-1.5 rounded-lg hover:border-destructive/40 hover:text-destructive transition-all flex-shrink-0 flex items-center gap-1"
                       >
                         <Trash2 size={11} /> Delete
                       </button>

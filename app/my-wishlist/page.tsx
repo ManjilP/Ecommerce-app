@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Heart, Trash2, ShoppingCart, RefreshCw } from 'lucide-react'
+import { Heart, Trash2, ShoppingCart, RefreshCw, Pill } from 'lucide-react'
 import Navbar from '@/components/navbar'
 import SecondaryNav from '@/components/secondary-nav'
 import Footer from '@/components/footer'
@@ -88,11 +88,11 @@ export default function MyWishlistPage() {
     <div className="min-h-screen bg-background">
       <Navbar />
       <SecondaryNav />
-      <div className="pt-28 max-w-3xl mx-auto px-4 py-10">
+      <div className="pt-32 max-w-3xl mx-auto px-4 py-10">
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
           <div className="flex items-center gap-3 mb-1">
-            <div className="w-10 h-10 rounded-2xl bg-red-100 flex items-center justify-center">
-              <Heart size={20} className="text-red-500 fill-red-500" />
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: 'color-mix(in srgb, var(--red) 12%, transparent)' }}>
+              <Heart size={20} style={{ color: 'var(--red)', fill: 'var(--red)' }} />
             </div>
             <h1 className="font-heading text-3xl font-bold text-foreground">My Wishlist</h1>
           </div>
@@ -118,7 +118,7 @@ export default function MyWishlistPage() {
             <p className="text-muted-foreground text-sm">{error}</p>
             <button
               onClick={fetchWishlist}
-              className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-green-700 transition-colors"
+              className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors"
             >
               <RefreshCw size={14} /> Retry
             </button>
@@ -134,7 +134,7 @@ export default function MyWishlistPage() {
             <p className="text-sm text-muted-foreground max-w-xs">Save items you love to buy them later.</p>
             <Link
               href="/landing"
-              className="mt-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-green-700 transition-colors"
+              className="mt-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors"
             >
               Browse Products
             </Link>
@@ -158,12 +158,12 @@ export default function MyWishlistPage() {
                   transition={{ delay: i * 0.07 }}
                   className="bg-card rounded-2xl border border-border overflow-hidden hover:border-primary/30 hover:shadow-md transition-all"
                 >
-                  <div className="h-40 bg-muted flex items-center justify-center text-4xl">
+                  <div className="h-40 bg-muted flex items-center justify-center">
                     {image ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={image} alt={name} className="w-full h-full object-contain p-3" />
                     ) : (
-                      '💊'
+                      <Pill size={32} className="text-primary" />
                     )}
                   </div>
                   <div className="p-4">
@@ -177,13 +177,13 @@ export default function MyWishlistPage() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => setCheckoutProductId(productId)}
-                        className="flex-1 flex items-center justify-center gap-2 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-green-700 transition-colors"
+                        className="flex-1 flex items-center justify-center gap-2 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors"
                       >
                         <ShoppingCart size={14} /> Buy Now
                       </button>
                       <button
                         onClick={() => handleRemove(item.id)}
-                        className="p-2 rounded-xl border border-border text-muted-foreground hover:border-red-300 hover:text-red-500 transition-all"
+                        className="p-2 rounded-xl border border-border text-muted-foreground hover:border-destructive/40 hover:text-destructive transition-all"
                       >
                         <Trash2 size={15} />
                       </button>

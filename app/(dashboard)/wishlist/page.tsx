@@ -168,15 +168,15 @@ export default function WishlistPage() {
         </div>
         <div style={{ display: "flex", gap: "10px" }}>
           {items.length > 0 && (
-            <button onClick={handleClear} disabled={clearing} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "0 16px", height: "40px", borderRadius: "4px", fontSize: "14px", fontWeight: 500, color: "#f87171", background: "transparent", border: "1.5px solid rgba(248,113,113,0.5)", cursor: clearing ? "not-allowed" : "pointer", transition: "all 0.15s" }}
-              onMouseEnter={e => { e.currentTarget.style.background = "rgba(248,113,113,0.06)"; e.currentTarget.style.borderColor = "#f87171"; }}
+            <button onClick={handleClear} disabled={clearing} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "0 16px", height: "40px", borderRadius: "4px", fontSize: "14px", fontWeight: 500, color: "var(--red)", background: "transparent", border: "1.5px solid rgba(248,113,113,0.5)", cursor: clearing ? "not-allowed" : "pointer", transition: "all 0.15s" }}
+              onMouseEnter={e => { e.currentTarget.style.background = "rgba(248,113,113,0.06)"; e.currentTarget.style.borderColor = "var(--red)"; }}
               onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(248,113,113,0.5)"; }}>
               <X size={15} /> {clearing ? "Clearing..." : "Clear all"}
             </button>
           )}
-          <button onClick={openModal} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "0 20px", height: "40px", borderRadius: "4px", fontSize: "14px", fontWeight: 600, color: "rgba(0,113,227,1)", background: "transparent", border: "1.5px solid rgba(0,113,227,0.6)", cursor: "pointer", transition: "all 0.15s" }}
-            onMouseEnter={e => { e.currentTarget.style.background = "rgba(0,113,227,0.06)"; e.currentTarget.style.borderColor = "rgba(0,113,227,1)"; }}
-            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(0,113,227,0.6)"; }}>
+          <button onClick={openModal} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "0 20px", height: "40px", borderRadius: "4px", fontSize: "14px", fontWeight: 600, color: "var(--accent)", background: "transparent", border: "1.5px solid rgba(136,115,76,0.6)", cursor: "pointer", transition: "all 0.15s" }}
+            onMouseEnter={e => { e.currentTarget.style.background = "rgba(136,115,76,0.06)"; e.currentTarget.style.borderColor = "var(--accent)"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(136,115,76,0.6)"; }}>
             <Plus size={15} /> Add Product
           </button>
         </div>
@@ -209,12 +209,12 @@ export default function WishlistPage() {
                   <td>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                       <button onClick={() => openOrderModal(item)}
-                        style={{ display: "flex", alignItems: "center", gap: "5px", padding: "6px 14px", borderRadius: "99px", fontSize: "13px", fontWeight: 600, color: "#fff", background: "rgba(0,113,227,0.85)", backdropFilter: "blur(12px)", border: "1px solid rgba(0,113,227,0.4)", boxShadow: "0 2px 12px rgba(0,113,227,0.25)", cursor: "pointer", transition: "all 0.2s", whiteSpace: "nowrap" }}
-                        onMouseEnter={e => e.currentTarget.style.background = "rgba(0,113,227,1)"}
-                        onMouseLeave={e => e.currentTarget.style.background = "rgba(0,113,227,0.85)"}>
+                        style={{ display: "flex", alignItems: "center", gap: "5px", padding: "6px 14px", borderRadius: "99px", fontSize: "13px", fontWeight: 600, color: "var(--card)", background: "var(--accent)", cursor: "pointer", transition: "all 0.2s", whiteSpace: "nowrap" }}
+                        onMouseEnter={e => e.currentTarget.style.background = "var(--accent-hover)"}
+                        onMouseLeave={e => e.currentTarget.style.background = "var(--accent)"}>
                         <ShoppingBag size={13} /> Order
                       </button>
-                      <button onClick={() => handleRemove(item.id)} disabled={removingId === item.id} style={{ padding: "6px", borderRadius: "8px", color: "#f87171", background: "transparent", border: "none", cursor: "pointer" }} title="Remove">
+                      <button onClick={() => handleRemove(item.id)} disabled={removingId === item.id} style={{ padding: "6px", borderRadius: "8px", color: "var(--red)", background: "transparent", border: "none", cursor: "pointer" }} title="Remove">
                         {removingId === item.id ? <span style={{ fontSize: "12px", color: "var(--text-3)" }}>...</span> : <Trash2 size={15} />}
                       </button>
                     </div>
@@ -227,9 +227,9 @@ export default function WishlistPage() {
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
                       <Heart size={40} color="var(--border-strong)" />
                       <p style={{ fontSize: "16px" }}>Your wishlist is empty.</p>
-                      <button onClick={openModal} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "0 20px", height: "42px", borderRadius: "12px", fontSize: "15px", fontWeight: 600, color: "#fff", background: "rgba(0,113,227,0.85)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", border: "1px solid rgba(0,113,227,0.4)", boxShadow: "0 4px 24px rgba(0,113,227,0.3), inset 0 1px 0 rgba(255,255,255,0.2)", cursor: "pointer", transition: "all 0.2s" }}
-                        onMouseEnter={e => { e.currentTarget.style.background = "rgba(0,113,227,1)"; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = "rgba(0,113,227,0.85)"; }}>
+                      <button onClick={openModal} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "0 20px", height: "42px", borderRadius: "12px", fontSize: "15px", fontWeight: 600, color: "var(--card)", background: "var(--accent)", cursor: "pointer", transition: "all 0.2s" }}
+                        onMouseEnter={e => { e.currentTarget.style.background = "var(--accent-hover)"; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = "var(--accent)"; }}>
                         <Plus size={16} /> Browse Products
                       </button>
                     </div>
@@ -281,8 +281,8 @@ export default function WishlistPage() {
                         <button
                           onClick={() => !inWishlist && handleAdd(p.id)}
                           disabled={inWishlist || addingId === p.id}
-                          style={{ display: "flex", alignItems: "center", gap: "6px", padding: "0 16px", height: "38px", borderRadius: "99px", fontSize: "14px", fontWeight: 600, flexShrink: 0, color: inWishlist ? "#f87171" : "#fff", background: inWishlist ? "rgba(248,113,113,0.1)" : addingId === p.id ? "#c7c7cc" : "rgba(0,113,227,0.85)", backdropFilter: inWishlist ? "none" : "blur(12px)", WebkitBackdropFilter: inWishlist ? "none" : "blur(12px)", border: inWishlist ? "1px solid rgba(248,113,113,0.3)" : "1px solid rgba(0,113,227,0.4)", boxShadow: inWishlist || addingId === p.id ? "none" : "0 4px 16px rgba(0,113,227,0.3), inset 0 1px 0 rgba(255,255,255,0.2)", cursor: inWishlist ? "default" : "pointer", transition: "all 0.2s" }}>
-                          <Heart size={14} fill={inWishlist ? "#f87171" : "none"} />
+                          style={{ display: "flex", alignItems: "center", gap: "6px", padding: "0 16px", height: "38px", borderRadius: "99px", fontSize: "14px", fontWeight: 600, flexShrink: 0, color: inWishlist ? "var(--red)" : "var(--card)", background: inWishlist ? "rgba(248,113,113,0.1)" : addingId === p.id ? "var(--border-strong)" : "rgba(136,115,76,0.85)", backdropFilter: inWishlist ? "none" : "blur(12px)", WebkitBackdropFilter: inWishlist ? "none" : "blur(12px)", border: inWishlist ? "1px solid rgba(248,113,113,0.3)" : "1px solid rgba(136,115,76,0.4)", cursor: inWishlist ? "default" : "pointer", transition: "all 0.2s" }}>
+                          <Heart size={14} fill={inWishlist ? "var(--red)" : "none"} />
                           {addingId === p.id ? "Adding..." : inWishlist ? "Saved" : "Add"}
                         </button>
                       </div>
@@ -322,7 +322,7 @@ export default function WishlistPage() {
 
             {orderSuccess ? (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", padding: "32px 0", textAlign: "center" }}>
-                <CheckCircle size={52} color="#34c759" />
+                <CheckCircle size={52} color="var(--green)" />
                 <p style={{ fontSize: "20px", fontWeight: 700, color: "var(--text)" }}>Order placed!</p>
                 <p style={{ fontSize: "14px", color: "var(--text-2)" }}>Thank you for your purchase.</p>
               </div>
@@ -369,7 +369,7 @@ export default function WishlistPage() {
                       </div>
                       <div style={{ height: "1px", background: "var(--border)", margin: "8px 0" }} />
                       <div style={{ display: "flex", justifyContent: "space-between", fontSize: "15px", fontWeight: 700, color: "var(--text)" }}>
-                        <span>Total</span><span style={{ color: "#0071e3" }}>Rs. {(subtotal - discount).toFixed(2)}</span>
+                        <span>Total</span><span style={{ color: "var(--accent)" }}>Rs. {(subtotal - discount).toFixed(2)}</span>
                       </div>
                     </>
                   )}
@@ -383,7 +383,7 @@ export default function WishlistPage() {
                   <div style={{ display: "flex", gap: "8px" }}>
                     <input value={couponCode} onChange={e => { setCouponCode(e.target.value.toUpperCase()); setCouponResult(null); setCouponError(""); }} placeholder="e.g. SAVE20" style={{ fontFamily: "monospace" }} />
                     <button type="button" onClick={handleApplyCoupon} disabled={couponApplying || !couponCode.trim()}
-                      style={{ padding: "0 16px", borderRadius: "12px", fontSize: "14px", fontWeight: 600, color: "#fff", background: couponApplying || !couponCode.trim() ? "#c7c7cc" : "rgba(0,113,227,0.85)", border: "1px solid rgba(0,113,227,0.4)", cursor: couponApplying || !couponCode.trim() ? "not-allowed" : "pointer", whiteSpace: "nowrap" }}>
+                      style={{ padding: "0 16px", borderRadius: "12px", fontSize: "14px", fontWeight: 600, color: "var(--card)", background: "var(--accent)", opacity: couponApplying || !couponCode.trim() ? 0.6 : 1, cursor: couponApplying || !couponCode.trim() ? "not-allowed" : "pointer", whiteSpace: "nowrap" }}>
                       {couponApplying ? "..." : "Apply"}
                     </button>
                   </div>
@@ -397,9 +397,9 @@ export default function WishlistPage() {
 
                 <div style={{ display: "flex", gap: "10px", paddingTop: "4px" }}>
                   <button type="button" onClick={closeOrderModal} style={{ flex: 1, height: "48px", borderRadius: "99px", fontSize: "15px", fontWeight: 500, color: "var(--text)", background: "var(--card-2)", border: "1px solid var(--border)", cursor: "pointer" }}>Cancel</button>
-                  <button type="submit" disabled={orderSaving} style={{ flex: 1, height: "48px", borderRadius: "99px", fontSize: "15px", fontWeight: 600, color: "#fff", background: orderSaving ? "#c7c7cc" : "rgba(0,113,227,0.85)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", border: "1px solid rgba(0,113,227,0.4)", boxShadow: orderSaving ? "none" : "0 4px 24px rgba(0,113,227,0.3), inset 0 1px 0 rgba(255,255,255,0.2)", cursor: orderSaving ? "not-allowed" : "pointer", transition: "all 0.2s" }}
-                    onMouseEnter={e => { if (!orderSaving) { e.currentTarget.style.background = "rgba(0,113,227,1)"; } }}
-                    onMouseLeave={e => { if (!orderSaving) { e.currentTarget.style.background = "rgba(0,113,227,0.85)"; } }}>
+                  <button type="submit" disabled={orderSaving} style={{ flex: 1, height: "48px", borderRadius: "99px", fontSize: "15px", fontWeight: 600, color: "var(--card)", background: "var(--accent)", opacity: orderSaving ? 0.6 : 1, cursor: orderSaving ? "not-allowed" : "pointer", transition: "all 0.2s" }}
+                    onMouseEnter={e => { if (!orderSaving) { e.currentTarget.style.background = "var(--accent-hover)"; } }}
+                    onMouseLeave={e => { if (!orderSaving) { e.currentTarget.style.background = "var(--accent)"; } }}>
                     {orderSaving ? "Placing..." : "Place Order"}
                   </button>
                 </div>

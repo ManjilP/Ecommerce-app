@@ -162,7 +162,7 @@ export default function Sidebar() {
               <div style={{ position: "relative", flexShrink: 0 }}>
                 <Icon size={20} strokeWidth={active ? 2 : 1.7} />
                 {isNotif && unreadCount > 0 && (
-                  <span style={{ position: "absolute", top: "-6px", right: "-6px", minWidth: "16px", height: "16px", borderRadius: "99px", background: "#ef4444", color: "#fff", fontSize: "10px", fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 3px" }}>
+                  <span style={{ position: "absolute", top: "-6px", right: "-6px", minWidth: "16px", height: "16px", borderRadius: "99px", background: "var(--red)", color: "var(--card)", fontSize: "10px", fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 3px" }}>
                     {unreadCount > 9 ? "9+" : unreadCount}
                   </span>
                 )}
@@ -174,7 +174,7 @@ export default function Sidebar() {
         })}
 
         {isAdmin && (
-          <Link href="/admin" style={{ ...itemStyle(pathname === "/admin"), color: pathname === "/admin" ? "var(--text)" : "#f59e0b" }}>
+          <Link href="/admin" style={{ ...itemStyle(pathname === "/admin"), color: pathname === "/admin" ? "var(--text)" : "var(--orange)" }}>
             <ShieldCheck size={20} strokeWidth={1.7} />
             {open && <span>Vendor</span>}
           </Link>
@@ -189,8 +189,8 @@ export default function Sidebar() {
             onMouseEnter={(e) => { if (pathname !== "/profile") e.currentTarget.style.background = "var(--card-2)"; }}
             onMouseLeave={(e) => { if (pathname !== "/profile") e.currentTarget.style.background = "transparent"; }}
           >
-            <div style={{ width: "34px", height: "34px", borderRadius: "99px", background: "linear-gradient(135deg, var(--accent), rgba(14,116,144,0.5))", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <span style={{ fontSize: "13px", fontWeight: 700, color: "#fff" }}>{username.slice(0, 2).toUpperCase()}</span>
+            <div style={{ width: "34px", height: "34px", borderRadius: "99px", background: "linear-gradient(135deg, var(--accent), var(--blue))", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--card)" }}>{username.slice(0, 2).toUpperCase()}</span>
             </div>
             {open && (
               <div style={{ flex: 1, minWidth: 0 }}>
@@ -218,8 +218,8 @@ export default function Sidebar() {
 
         <button
           onClick={handleLogout}
-          style={{ ...itemStyle(false), color: "#f87171", justifyContent: open ? "flex-start" : "center", padding: open ? "0 16px" : "0" }}
-          onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(248,113,113,0.08)")}
+          style={{ ...itemStyle(false), color: "var(--red)", justifyContent: open ? "flex-start" : "center", padding: open ? "0 16px" : "0" }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = "color-mix(in srgb, var(--red) 8%, transparent)")}
           onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
         >
           <LogOut size={20} strokeWidth={1.7} />
