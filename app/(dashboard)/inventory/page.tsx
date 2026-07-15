@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { getInventory, getProducts, getWarehouses, createInventoryItem, updateInventoryItem, deleteInventoryItem } from "@/lib/api";
 import { Plus, Pencil, Trash2, X } from "lucide-react";
@@ -21,6 +21,10 @@ const label = (text: string) => (
 );
 
 export default function InventoryPage() {
+  return <Suspense fallback={null}><InventoryPageInner /></Suspense>
+}
+
+function InventoryPageInner() {
   const searchParams = useSearchParams();
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
