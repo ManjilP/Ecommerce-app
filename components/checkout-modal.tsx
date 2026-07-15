@@ -286,8 +286,8 @@ export default function CheckoutModal({ open, onClose, products = [], initialPro
                             onChange={(e) => updateItem(idx, 'productId', Number(e.target.value))}
                             style={{ flex: 1, background: 'var(--card-2)', border: '1px solid var(--border-strong)', padding: '8px 12px', borderRadius: '12px', fontSize: '14px', outline: 'none', cursor: 'pointer' }}
                           >
-                            {products.map((p) => (
-                              <option key={p.id} value={p.id}>{p.name}</option>
+                            {products.map((p, pi) => (
+                              <option key={p.id ?? pi} value={p.id}>{p.name}</option>
                             ))}
                           </select>
                           <input

@@ -7,6 +7,12 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
+// Public API — no tenant slug, used for customer-facing product fetches
+const publicApi = axios.create({
+  baseURL: BASE_URL,
+  headers: { "Content-Type": "application/json" },
+});
+
 export const isTokenExpired = (token: string) => {
   try {
     const payload = JSON.parse(atob(token.split(".")[1]));
@@ -41,6 +47,12 @@ api.interceptors.request.use(async (config) => {
     process.env.NEXT_PUBLIC_TENANT_SLUG;
   if (tenantSlug) config.headers["X-Tenant-Slug"] = tenantSlug;
 
+  return config;
+});
+
+publicApi.interceptors.request.use((config) => {
+  const token = sessionStorage.getItem("access_token");
+  if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
@@ -106,6 +118,9 @@ export const adminLogin = (username: string, password: string) =>
 export const vendorLogin = (username: string, password: string) =>
   api.post("/api/auth/vendor/login/", { username, password });
 
+export const vendorRegister = (username: string, password: string, email: string, store_name: string, slug: string) =>
+  api.post("/api/auth/vendor/register/", { username, password, email, store_name, slug });
+
 
 export const register = (username: string, password: string, email: string, city?: string) =>
   api.post("/api/auth/register/", { username, password, email, ...(city ? { city } : {}) });
@@ -113,9 +128,9 @@ export const register = (username: string, password: string, email: string, city
 export const googleLoginApi = (access_token: string) =>
   api.post("/api/auth/google/login", { access_token });
 
-// Products
-export const getProducts = () => api.get("/api/products/");
-export const getProduct = (id: number) => api.get(`/api/products/${id}/`);
+// Products — use publicApi so all vendors' products are visible to customers
+export const getProducts = () => publicApi.get("/api/products/");
+export const getProduct = (id: number) => publicApi.get(`/api/products/${id}/`);
 export const createProduct = (data: unknown) => api.post("/api/products/", data);
 export const updateProduct = (id: number, data: unknown) => api.put(`/api/products/${id}/`, data);
 export const deleteProduct = (id: number) => api.delete(`/api/products/${id}/`);

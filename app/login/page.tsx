@@ -266,7 +266,7 @@ function LoginPageContent() {
                 </button>
 
                 <div className="text-center pt-1">
-                  <Link href="/admin-login" className="text-xs font-medium hover:underline" style={{ color: 'var(--orange)' }}>Vendor login →</Link>
+                  <Link href="/vendor-login" className="text-xs font-medium hover:underline" style={{ color: 'var(--orange)' }}>Vendor login →</Link>
                 </div>
               </motion.form>
             )}
