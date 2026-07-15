@@ -1,26 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Bell, Package, CheckCircle, Tag, RotateCcw, RefreshCw } from 'lucide-react'
+import { Bell, Package, CheckCircle, Tag, RotateCcw } from 'lucide-react'
 import Navbar from '@/components/navbar'
 import SecondaryNav from '@/components/secondary-nav'
 import Footer from '@/components/footer'
-import { getNotifications, markNotificationRead, markAllNotificationsRead } from '@/lib/api'
 import { GridBackground } from '@/components/ui/grid-background'
-
-interface Notification {
-  id: number
-  notification_type?: string
-  message_type?: string
-  title?: string
-  message?: string
-  description?: string
-  is_read?: boolean
-  read?: boolean
-  created_at?: string
-  timestamp?: string
-}
+import { useNotifications, Notification } from '@/hooks/useNotifications'
 
 const typeConfig: Record<string, { icon: typeof Bell; color: string; bg: string }> = {
   order: { icon: Package, color: 'text-blue-600', bg: 'bg-blue-100' },
@@ -30,10 +16,7 @@ const typeConfig: Record<string, { icon: typeof Bell; color: string; bg: string 
   default: { icon: Bell, color: 'text-gray-600', bg: 'bg-gray-100' },
 }
 
-const isRead = (n: Notification) => !!(n.is_read ?? n.read)
-const getTitle = (n: Notification) => n.title ?? 'Notification'
-const getMessage = (n: Notification) => n.message ?? n.description ?? ''
-const getType = (n: Notification) => (n.notification_type ?? n.message_type ?? 'default').toLowerCase()
+const getType = (n: Notification) => (n.type ?? 'default').toLowerCase()
 
 function formatTime(ts?: string): string {
   if (!ts) return ''
@@ -45,37 +28,10 @@ function formatTime(ts?: string): string {
 }
 
 export default function MyNotificationsPage() {
-  const [notifs, setNotifs] = useState<Notification[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const { notifications: notifs, unreadCount, markRead, markAllRead } = useNotifications()
 
-  const fetchNotifications = async () => {
-    setLoading(true)
-    setError('')
-    try {
-      const res = await getNotifications()
-      setNotifs(Array.isArray(res.data) ? res.data : res.data.results ?? [])
-    } catch { setError('Failed to load notifications.') }
-    finally { setLoading(false) }
-  }
-
-  useEffect(() => { fetchNotifications() }, [])
-
-  const handleMarkRead = async (id: number) => {
-    try {
-      await markNotificationRead(id)
-      setNotifs((prev) => prev.map((n) => n.id === id ? { ...n, is_read: true } : n))
-    } catch {}
-  }
-
-  const handleMarkAllRead = async () => {
-    try {
-      await markAllNotificationsRead()
-      setNotifs((prev) => prev.map((n) => ({ ...n, is_read: true })))
-    } catch {}
-  }
-
-  const unreadCount = notifs.filter((n) => !isRead(n)).length
+  const handleMarkRead = (id: number) => markRead(id)
+  const handleMarkAllRead = () => markAllRead()
 
   return (
     <GridBackground className="min-h-screen bg-background">
@@ -106,40 +62,18 @@ export default function MyNotificationsPage() {
           )}
         </motion.div>
 
-        {loading && (
-          <div className="space-y-2">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="flex gap-4 p-4 rounded-2xl border border-border bg-card animate-pulse">
-                <div className="w-10 h-10 rounded-xl bg-muted flex-shrink-0" />
-                <div className="flex-1 space-y-2"><div className="h-4 bg-muted rounded w-1/3" /><div className="h-3 bg-muted rounded w-2/3" /></div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {!loading && error && (
-          <div className="flex flex-col items-center gap-4 py-16">
-            <p className="text-muted-foreground text-sm">{error}</p>
-            <button onClick={fetchNotifications} className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors">
-              <RefreshCw size={14} /> Retry
-            </button>
-          </div>
-        )}
-
-        {!loading && !error && notifs.length === 0 && (
+        {notifs.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
             <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center"><Bell size={28} className="text-muted-foreground" /></div>
             <h3 className="font-heading text-xl font-bold text-foreground">You&apos;re all caught up</h3>
             <p className="text-sm text-muted-foreground">No notifications yet. Check back later!</p>
           </div>
-        )}
-
-        {!loading && !error && notifs.length > 0 && (
+        ) : (
           <div className="space-y-2">
             {notifs.map((notif, i) => {
               const config = typeConfig[getType(notif)] ?? typeConfig.default
               const { icon: Icon, color, bg } = config
-              const read = isRead(notif)
+              const read = notif.is_read
               return (
                 <motion.div
                   key={notif.id}
@@ -151,15 +85,15 @@ export default function MyNotificationsPage() {
                     !read ? 'bg-accent/50 border-primary/20 border-l-4 border-l-primary' : 'bg-card border-border'
                   }`}
                 >
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: bg }}>
-                    <Icon size={18} style={{ color }} />
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${bg}`}>
+                    <Icon size={18} className={color} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
-                      <p className={`text-sm font-semibold ${!read ? 'text-foreground' : 'text-muted-foreground'} leading-snug`}>{getTitle(notif)}</p>
-                      <span className="text-xs text-muted-foreground flex-shrink-0 mt-0.5">{formatTime(notif.created_at ?? notif.timestamp)}</span>
+                      <p className={`text-sm font-semibold ${!read ? 'text-foreground' : 'text-muted-foreground'} leading-snug`}>{notif.title || 'Notification'}</p>
+                      <span className="text-xs text-muted-foreground flex-shrink-0 mt-0.5">{formatTime(notif.created_at)}</span>
                     </div>
-                    <p className={`text-xs mt-1 leading-relaxed ${!read ? 'text-muted-foreground' : 'text-muted-foreground/70'}`}>{getMessage(notif)}</p>
+                    <p className={`text-xs mt-1 leading-relaxed ${!read ? 'text-muted-foreground' : 'text-muted-foreground/70'}`}>{notif.message}</p>
                     {!read && (
                       <span className="inline-flex items-center gap-1 mt-2 text-[10px] text-primary font-semibold uppercase tracking-wide">
                         <span className="w-1.5 h-1.5 rounded-full bg-primary" /> Unread

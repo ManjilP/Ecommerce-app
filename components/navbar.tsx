@@ -8,8 +8,10 @@ import {
   Search, Heart, Bell, ChevronDown, Menu, X,
   ShoppingCart, LogOut, Package, Star, User,
 } from 'lucide-react'
+// Bell is still used in the mobile menu + user dropdown links below
 import { categories } from '@/lib/pharmacy-data'
-import { getMe, getUnreadNotificationCount, logout } from '@/lib/api'
+import { getMe, logout } from '@/lib/api'
+import { NotificationBell } from '@/components/NotificationBell'
 import CartDrawer from '@/components/cart-drawer'
 import { useCart } from '@/hooks/useCart'
 import { useProducts } from '@/hooks/useProducts'
@@ -35,7 +37,6 @@ export default function Navbar() {
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [user, setUser] = useState<UserInfo | null>(null)
-  const [notifCount, setNotifCount] = useState(0)
   const [hasToken, setHasToken] = useState(false)
 
   // Runs before paint so the avatar (not the "Login" button) shows immediately
@@ -49,9 +50,6 @@ export default function Navbar() {
     if (!token) return
 
     getMe().then((res) => setUser(res.data)).catch(() => {})
-    getUnreadNotificationCount()
-      .then((res) => setNotifCount(res.data.unread_count ?? res.data.count ?? 0))
-      .catch(() => {})
   }, [])
 
   const handleSearchChange = (val: string) => {
@@ -181,14 +179,7 @@ export default function Navbar() {
               )}
             </Link>
 
-            <Link href="/my-notifications" className="p-2 rounded-xl hover:bg-muted transition-colors relative">
-              <Bell size={20} className="text-foreground" />
-              {notifCount > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 bg-destructive text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                  {notifCount > 9 ? '9+' : notifCount}
-                </span>
-              )}
-            </Link>
+            <NotificationBell />
 
             <button onClick={() => setCartOpen(true)} className="hidden md:flex p-2 rounded-xl hover:bg-muted transition-colors relative">
               <ShoppingCart size={20} className="text-foreground" />

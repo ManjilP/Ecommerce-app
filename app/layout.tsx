@@ -5,6 +5,8 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { CartProvider } from "@/hooks/useCart";
 import { ProductsProvider } from "@/hooks/useProducts";
 import { WishlistProvider } from "@/hooks/useWishlist";
+import { NotificationsProvider } from "@/hooks/useNotifications";
+import { NotificationToasts } from "@/components/NotificationBell";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const fraunces = Fraunces({
@@ -32,7 +34,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ThemeProvider>
             <ProductsProvider>
               <WishlistProvider>
-                <CartProvider>{children}</CartProvider>
+                <CartProvider>
+                  <NotificationsProvider>
+                    <NotificationToasts />
+                    {children}
+                  </NotificationsProvider>
+                </CartProvider>
               </WishlistProvider>
             </ProductsProvider>
           </ThemeProvider>
