@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { getInventory, getProducts, getWarehouses, createInventoryItem, updateInventoryItem, deleteInventoryItem } from "@/lib/api";
 import { Plus, Pencil, Trash2, X } from "lucide-react";
 
@@ -20,6 +21,7 @@ const label = (text: string) => (
 );
 
 export default function InventoryPage() {
+  const searchParams = useSearchParams();
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [warehouses, setWarehouses] = useState<WarehouseItem[]>([]);
@@ -42,9 +44,19 @@ export default function InventoryPage() {
 
   useEffect(() => {
     load();
-    getProducts().then((r) => setProducts(Array.isArray(r.data) ? r.data : r.data.results ?? [])).catch(() => {});
-    getWarehouses().then((r) => setWarehouses(Array.isArray(r.data) ? r.data : r.data.results ?? [])).catch(() => {});
-  }, []);
+    Promise.all([
+      getProducts().then((r) => setProducts(Array.isArray(r.data) ? r.data : r.data.results ?? [])),
+      getWarehouses().then((r) => setWarehouses(Array.isArray(r.data) ? r.data : r.data.results ?? [])),
+    ]).then(() => {
+      const productId = searchParams.get("product");
+      if (productId) {
+        setForm({ ...emptyForm, product: productId });
+        setEditing(null);
+        setSaveError("");
+        setModal(true);
+      }
+    }).catch(() => {});
+  }, [searchParams]);
 
   const openCreate = () => { setEditing(null); setForm(emptyForm); setSaveError(""); setModal(true); };
   const handleDelete = async (id: number) => {

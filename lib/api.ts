@@ -110,6 +110,9 @@ export const vendorLogin = (username: string, password: string) =>
 export const register = (username: string, password: string, email: string, city?: string) =>
   api.post("/api/auth/register/", { username, password, email, ...(city ? { city } : {}) });
 
+export const googleLoginApi = (access_token: string) =>
+  api.post("/api/auth/google/login", { access_token });
+
 // Products
 export const getProducts = () => api.get("/api/products/");
 export const getProduct = (id: number) => api.get(`/api/products/${id}/`);

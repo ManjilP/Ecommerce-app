@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { getProducts, deleteProduct, createProduct, updateProduct, uploadProductImage, fetchProductImage } from "@/lib/api";
-import { Plus, Pencil, Trash2, X, Package, Search, ChevronLeft, ChevronRight, Upload, ImageIcon } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Package, Search, ChevronLeft, ChevronRight, Upload, ImageIcon, AlertCircle } from "lucide-react";
 
 interface Product {
   id: number;
@@ -18,6 +19,7 @@ interface Product {
 const emptyForm = { name: "", sku: "", category: "", price: "", description: "", requires_prescription: false };
 
 export default function ProductsPage() {
+  const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [count, setCount] = useState(0);
   const [page, setPage] = useState(1);
@@ -33,6 +35,7 @@ export default function ProductsPage() {
   const [fetchingId, setFetchingId] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadTargetId, setUploadTargetId] = useState<number | null>(null);
+  const [stockBanner, setStockBanner] = useState<{ id: number; name: string } | null>(null);
 
   const pageSize = 5;
   const totalPages = Math.ceil((count || products.length) / pageSize);
@@ -71,8 +74,16 @@ export default function ProductsPage() {
     setSaveError("");
     try {
       const payload = { name: form.name, sku: form.sku, category: form.category, price: parseFloat(form.price), description: form.description || undefined, requires_prescription: form.requires_prescription };
-      if (editing) await updateProduct(editing.id, payload);
-      else await createProduct(payload);
+      if (editing) {
+        await updateProduct(editing.id, payload);
+      } else {
+        const res = await createProduct(payload);
+        const newProduct = res.data;
+        setModal(false);
+        load();
+        setStockBanner({ id: newProduct.id, name: newProduct.name });
+        return;
+      }
       setModal(false);
       load();
     } catch (err: unknown) {
@@ -133,6 +144,31 @@ export default function ProductsPage() {
           <Plus size={15} /> Add Product
         </button>
       </div>
+
+      {stockBanner && (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", padding: "14px 18px", marginBottom: "20px", borderRadius: "14px", background: "color-mix(in srgb, var(--orange) 10%, transparent)", border: "1px solid color-mix(in srgb, var(--orange) 30%, transparent)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <AlertCircle size={16} color="var(--orange)" />
+            <span style={{ fontSize: "14px", color: "var(--text)", fontWeight: 500 }}>
+              <strong>&quot;{stockBanner.name}&quot;</strong> was created but has no stock — customers can&apos;t order it yet.
+            </span>
+          </div>
+          <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
+            <button
+              onClick={() => router.push(`/inventory?product=${stockBanner.id}`)}
+              style={{ padding: "6px 14px", borderRadius: "8px", fontSize: "13px", fontWeight: 600, color: "var(--card)", background: "var(--orange)", border: "none", cursor: "pointer" }}
+            >
+              Add Stock
+            </button>
+            <button
+              onClick={() => setStockBanner(null)}
+              style={{ padding: "6px", borderRadius: "8px", color: "var(--text-3)", background: "transparent", border: "none", cursor: "pointer" }}
+            >
+              <X size={14} />
+            </button>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSearch} style={{ display: "flex", gap: "10px", alignItems: "stretch", marginBottom: "24px" }}>
         <div style={{ position: "relative", flex: 1 }}>

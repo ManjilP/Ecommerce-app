@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Eye, EyeOff, Lock, User, AlertCircle } from 'lucide-react'
-import { login, register, isTokenExpired } from '@/lib/api'
+import { login, register, isTokenExpired, googleLoginApi } from '@/lib/api'
 import { useGoogleLogin } from '@react-oauth/google'
 
 type Tab = 'login' | 'register'
@@ -135,10 +135,23 @@ function LoginPageContent() {
   }
 
   const googleLogin = useGoogleLogin({
-    onSuccess: () => {
-      setLoginErrors({ general: 'Google login coming soon. Please use username/password.' })
+    onSuccess: async (tokenResponse) => {
+      try {
+        const res = await googleLoginApi(tokenResponse.access_token)
+        const data = res.data
+        sessionStorage.setItem('access_token', data.access ?? data.access_token ?? '')
+        sessionStorage.setItem('refresh_token', data.refresh ?? data.refresh_token ?? '')
+        if (data.is_admin) sessionStorage.setItem('is_admin', 'true')
+        if (data.username) sessionStorage.setItem('username', data.username)
+        router.replace('/landing')
+      } catch {
+        setLoginErrors({ general: 'Google login failed. Please try again.' })
+      }
     },
-    onError: () => setLoginErrors({ general: 'Google login failed.' }),
+    onError: (err) => {
+      console.error('Google login error:', err)
+      setLoginErrors({ general: `Google login failed: ${err.error ?? 'unknown'}` })
+    },
   })
 
   const inputStyle = (err?: string): React.CSSProperties => ({
