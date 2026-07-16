@@ -78,9 +78,9 @@ export default function NotificationsPage() {
         <div style={{ display: "flex", gap: "10px" }}>
           {unreadCount > 0 && (
             <button onClick={handleMarkAllRead}
-              style={{ display: "flex", alignItems: "center", gap: "8px", padding: "0 20px", height: "40px", borderRadius: "8px", fontSize: "14px", fontWeight: 500, color: "var(--accent)", background: "transparent", border: "1.5px solid rgba(136,115,76,0.5)", cursor: "pointer", transition: "all 0.15s" }}
-              onMouseEnter={e => { e.currentTarget.style.background = "rgba(136,115,76,0.06)"; e.currentTarget.style.borderColor = "var(--accent)"; }}
-              onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(136,115,76,0.5)"; }}>
+              style={{ display: "flex", alignItems: "center", gap: "8px", padding: "0 20px", height: "40px", borderRadius: "8px", fontSize: "14px", fontWeight: 500, color: "var(--accent)", background: "transparent", border: "1.5px solid rgba(14,143,156,0.5)", cursor: "pointer", transition: "all 0.15s" }}
+              onMouseEnter={e => { e.currentTarget.style.background = "rgba(14,143,156,0.06)"; e.currentTarget.style.borderColor = "var(--accent)"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(14,143,156,0.5)"; }}>
               <CheckCheck size={15} /> Mark all read
             </button>
           )}
@@ -102,7 +102,7 @@ export default function NotificationsPage() {
             <div key={n.id} style={{
               borderRadius: "16px", padding: "22px 24px", display: "flex", alignItems: "center", gap: "16px",
               background: "var(--card)",
-              border: `1px solid ${n.is_read ? "var(--border)" : "rgba(136,115,76,0.35)"}`,
+              border: `1px solid ${n.is_read ? "var(--border)" : "rgba(14,143,156,0.35)"}`,
               borderLeft: `4px solid ${n.is_read ? "var(--border)" : "var(--accent)"}`,
               transition: "border-color 0.15s",
             }}>
@@ -122,9 +122,9 @@ export default function NotificationsPage() {
               </div>
               {!n.is_read && (
                 <button onClick={() => handleMarkRead(n.id)}
-                  style={{ display: "flex", alignItems: "center", gap: "6px", padding: "0 14px", height: "36px", borderRadius: "8px", border: "1.5px solid rgba(136,115,76,0.5)", background: "transparent", color: "var(--accent)", fontSize: "13px", fontWeight: 500, cursor: "pointer", flexShrink: 0, transition: "all 0.15s" }}
-                  onMouseEnter={e => { e.currentTarget.style.background = "rgba(136,115,76,0.06)"; e.currentTarget.style.borderColor = "var(--accent)"; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(136,115,76,0.5)"; }}>
+                  style={{ display: "flex", alignItems: "center", gap: "6px", padding: "0 14px", height: "36px", borderRadius: "8px", border: "1.5px solid rgba(14,143,156,0.5)", background: "transparent", color: "var(--accent)", fontSize: "13px", fontWeight: 500, cursor: "pointer", flexShrink: 0, transition: "all 0.15s" }}
+                  onMouseEnter={e => { e.currentTarget.style.background = "rgba(14,143,156,0.06)"; e.currentTarget.style.borderColor = "var(--accent)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(14,143,156,0.5)"; }}>
                   <CheckCheck size={13} /> Mark read
                 </button>
               )}

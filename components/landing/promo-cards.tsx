@@ -12,13 +12,6 @@ const promos = [
     featured: true,
   },
   {
-    title: 'eSewa, Khalti & COD',
-    subtitle: 'Pay your way',
-    description: 'Checkout with eSewa, Khalti, or cash on delivery — whichever works for you.',
-    cta: 'Start Checkout',
-    featured: false,
-  },
-  {
     title: 'Prescription Uploads',
     subtitle: 'For Rx medicines',
     description: 'Ordering a prescription-only item? Upload it securely during checkout.',
@@ -30,7 +23,7 @@ const promos = [
 export default function PromoCards() {
   return (
     <section className="max-w-7xl mx-auto px-4 pb-14">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {promos.map((promo, i) => (
           <motion.div
             key={promo.title}
@@ -38,10 +31,10 @@ export default function PromoCards() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: i * 0.08 }}
-            className={`group rounded-2xl p-7 flex flex-col justify-between border transition-all duration-200 hover:shadow-md ${
+            className={`group rounded-3xl p-7 flex flex-col justify-between transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 ${
               promo.featured
-                ? 'bg-primary border-primary'
-                : 'bg-card border-border'
+                ? 'bg-primary border border-primary shadow-lg shadow-primary/20'
+                : 'glass'
             }`}
             style={{ minHeight: '230px' }}
           >

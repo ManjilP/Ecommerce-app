@@ -26,7 +26,7 @@ export default function LandingPage() {
   }, [])
 
   return (
-    <GridBackground className="min-h-screen bg-background">
+    <GridBackground className="min-h-screen mesh-bg">
       <Navbar />
       <SecondaryNav activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
       {/* pt-32 accounts for fixed navbar (h-16) + secondary nav (h-12) */}

@@ -7,6 +7,7 @@ import { motion } from 'framer-motion'
 import { Eye, EyeOff, Lock, User, AlertCircle } from 'lucide-react'
 import { login, register, isTokenExpired, googleLoginApi } from '@/lib/api'
 import { useGoogleLogin } from '@react-oauth/google'
+import { useCart } from '@/hooks/useCart'
 
 type Tab = 'login' | 'register'
 
@@ -29,6 +30,7 @@ export default function LoginPage() {
 function LoginPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { mergeGuestCart } = useCart()
   const [tab, setTab] = useState<Tab>(searchParams.get('tab') === 'register' ? 'register' : 'login')
 
   // Login
@@ -98,6 +100,7 @@ function LoginPageContent() {
         else if (payload.role !== undefined) isAdmin = payload.role === 'admin'
       } catch {}
       sessionStorage.setItem('is_admin', String(isAdmin))
+      await mergeGuestCart()
       router.replace(isAdmin ? '/dashboard' : '/landing')
     } catch (err: unknown) {
       const e = err as { response?: { data?: { detail?: string; non_field_errors?: string[] } } }
@@ -123,6 +126,7 @@ function LoginPageContent() {
       sessionStorage.setItem('refresh_token', res.data.refresh)
       sessionStorage.setItem('username', regUsername.trim())
       sessionStorage.setItem('is_admin', 'false')
+      await mergeGuestCart()
       router.replace('/landing')
     } catch (err: unknown) {
       const e = err as { response?: { data?: Record<string, string[]> } }
@@ -143,6 +147,7 @@ function LoginPageContent() {
         sessionStorage.setItem('refresh_token', data.refresh ?? data.refresh_token ?? '')
         if (data.is_admin) sessionStorage.setItem('is_admin', 'true')
         if (data.username) sessionStorage.setItem('username', data.username)
+        await mergeGuestCart()
         router.replace('/landing')
       } catch {
         setLoginErrors({ general: 'Google login failed. Please try again.' })

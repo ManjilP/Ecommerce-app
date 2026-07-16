@@ -11,6 +11,7 @@ export interface RealProduct {
   price: number | string
   image?: string
   description?: string
+  quantity?: number
 }
 
 interface ProductCardProps {
@@ -28,7 +29,12 @@ export default function ProductCard({ product, onAddToCart, wishlisted = false, 
   const price = typeof product.price === 'string' ? parseFloat(product.price) : product.price
   const hasValidImage = !!product.image && /^(https?:\/\/|\/)/.test(product.image)
 
+  const stock = typeof product.quantity === 'number' ? product.quantity : undefined
+  const outOfStock = stock === 0
+  const lowStock = stock !== undefined && stock > 0 && stock <= 5
+
   const handleAddToCart = () => {
+    if (outOfStock) return
     setAdded(true)
     onAddToCart?.(product)
     setTimeout(() => setAdded(false), 1800)
@@ -45,7 +51,7 @@ export default function ProductCard({ product, onAddToCart, wishlisted = false, 
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.4 }}
-      className="group bg-card rounded-2xl border border-border overflow-hidden hover:shadow-lg hover:border-primary/30 transition-all duration-300 flex flex-col"
+      className="group glass rounded-3xl overflow-hidden hover:shadow-xl hover:-translate-y-1 hover:border-primary/30 transition-all duration-300 flex flex-col"
     >
       {/* Image area */}
       <div className="relative bg-white aspect-square overflow-hidden">
@@ -99,22 +105,35 @@ export default function ProductCard({ product, onAddToCart, wishlisted = false, 
           <p className="text-lg font-bold text-foreground leading-none">
             NPR {isNaN(price) ? product.price : price.toLocaleString()}
           </p>
-          <span className="text-[10px] font-semibold px-2 py-1 rounded-full" style={{ color: 'var(--green)', background: 'color-mix(in srgb, var(--green) 14%, transparent)' }}>
-            In Stock
-          </span>
+          {outOfStock ? (
+            <span className="text-[10px] font-semibold px-2 py-1 rounded-full" style={{ color: 'var(--red)', background: 'color-mix(in srgb, var(--red) 14%, transparent)' }}>
+              Out of Stock
+            </span>
+          ) : lowStock ? (
+            <span className="text-[10px] font-semibold px-2 py-1 rounded-full" style={{ color: 'var(--orange)', background: 'color-mix(in srgb, var(--orange) 16%, transparent)' }}>
+              Low Stock
+            </span>
+          ) : (
+            <span className="text-[10px] font-semibold px-2 py-1 rounded-full" style={{ color: 'var(--green)', background: 'color-mix(in srgb, var(--green) 14%, transparent)' }}>
+              In Stock
+            </span>
+          )}
         </div>
 
         {/* Add to cart */}
         <button
           onClick={handleAddToCart}
+          disabled={outOfStock}
           className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
-            added
+            outOfStock
+              ? 'bg-muted text-muted-foreground cursor-not-allowed'
+              : added
               ? 'bg-primary text-primary-foreground scale-95'
               : 'bg-primary text-primary-foreground hover:bg-primary/90 active:scale-95'
           }`}
         >
           <ShoppingCart size={14} />
-          {added ? 'Added!' : 'Add to Cart'}
+          {outOfStock ? 'Out of Stock' : added ? 'Added!' : 'Add to Cart'}
         </button>
       </div>
     </motion.div>

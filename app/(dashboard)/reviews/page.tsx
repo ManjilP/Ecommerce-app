@@ -107,9 +107,9 @@ export default function ReviewsPage() {
           <h1 style={{ fontSize: "32px", fontWeight: 700, letterSpacing: "-0.5px", color: "var(--text)", lineHeight: 1.1 }}>My Reviews</h1>
           <p style={{ fontSize: "16px", color: "var(--text-2)", marginTop: "6px" }}>{reviews.length} {reviews.length === 1 ? "review" : "reviews"} written</p>
         </div>
-        <button onClick={openCreate} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "0 24px", height: "44px", borderRadius: "4px", fontSize: "15px", fontWeight: 600, color: "var(--accent)", background: "transparent", border: "1.5px solid rgba(136,115,76,0.6)", cursor: "pointer", transition: "all 0.15s" }}
-          onMouseEnter={e => { e.currentTarget.style.background = "rgba(136,115,76,0.06)"; e.currentTarget.style.borderColor = "var(--accent)"; }}
-          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(136,115,76,0.6)"; }}>
+        <button onClick={openCreate} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "0 24px", height: "44px", borderRadius: "4px", fontSize: "15px", fontWeight: 600, color: "var(--accent)", background: "transparent", border: "1.5px solid rgba(14,143,156,0.6)", cursor: "pointer", transition: "all 0.15s" }}
+          onMouseEnter={e => { e.currentTarget.style.background = "rgba(14,143,156,0.06)"; e.currentTarget.style.borderColor = "var(--accent)"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(14,143,156,0.6)"; }}>
           <Plus size={16} /> Write Review
         </button>
       </div>

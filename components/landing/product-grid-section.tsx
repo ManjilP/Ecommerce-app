@@ -9,8 +9,6 @@ import { useCart } from '@/hooks/useCart'
 import { useProducts } from '@/hooks/useProducts'
 import { useWishlist } from '@/hooks/useWishlist'
 
-const filterCategories = ['All', 'Medicines', 'Supplements', 'Skincare', 'Baby Care', 'Health Devices']
-
 interface ProductGridSectionProps {
   onProductsLoaded?: (products: RealProduct[]) => void
   activeCategory?: string
@@ -46,31 +44,13 @@ function ProductGridContent({ onProductsLoaded, activeCategory = 'All', onCatego
 
   return (
     <>
-      <section id="products" className="max-w-7xl mx-auto px-4 py-16 scroll-mt-28">
+      <section id="products" className="max-w-7xl mx-auto px-4 py-16 scroll-mt-36">
         {/* Section header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
-          <div>
-            <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-2">Our Products</p>
-            <h2 className="font-heading text-3xl md:text-4xl font-bold text-foreground">
-              Shop by Category
-            </h2>
-          </div>
-          {/* Filter pills */}
-          <div className="flex flex-wrap gap-2">
-            {filterCategories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => onCategoryChange?.(cat)}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
-                  activeCategory === cat
-                    ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'bg-card border border-border text-foreground hover:border-primary/40'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
+        <div className="mb-8">
+          <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-2">Our Products</p>
+          <h2 className="font-heading text-3xl md:text-4xl font-bold text-foreground">
+            {activeCategory === 'All' ? 'All Products' : activeCategory}
+          </h2>
         </div>
 
         {/* Loading state */}
@@ -120,7 +100,7 @@ function ProductGridContent({ onProductsLoaded, activeCategory = 'All', onCatego
                     product={product}
                     wishlisted={!!wishlistMap[product.id]}
                     onWishlist={(p) => toggle(p.id)}
-                    onAddToCart={(p) => addItem(p.id, 1, { name: p.name, price: typeof p.price === 'string' ? parseFloat(p.price) : p.price, image: p.image })}
+                    onAddToCart={(p) => addItem(p.id, 1, { name: p.name, price: typeof p.price === 'string' ? parseFloat(p.price) : p.price, image: p.image, stock: p.quantity })}
                   />
                 ))}
               </motion.div>

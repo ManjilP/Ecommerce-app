@@ -123,6 +123,7 @@ export default function CheckoutModal({ open, onClose, products = [], initialPro
       const orderData = {
         customer_name: name.trim(),
         delivery_city: city,
+        // Backend expects lowercase choices: "esewa" | "khalti" | "cod"
         payment_method: payment,
         items: items
           .filter((it) => it.productId && it.quantity > 0)

@@ -42,10 +42,9 @@ api.interceptors.request.use(async (config) => {
 
   if (token) config.headers.Authorization = `Bearer ${token}`;
 
-  const tenantSlug =
-    sessionStorage.getItem("tenant_slug") ||
-    process.env.NEXT_PUBLIC_TENANT_SLUG;
-  if (tenantSlug) config.headers["X-Tenant-Slug"] = tenantSlug;
+  const tenantRole = sessionStorage.getItem("tenant_role");
+  const tenantSlug = sessionStorage.getItem("tenant_slug");
+  if (tenantRole && tenantSlug) config.headers["X-Tenant-Slug"] = tenantSlug;
 
   return config;
 });
@@ -185,6 +184,12 @@ export const addToCart = (product: number, quantity: number) => api.post("/api/c
 export const updateCartItem = (id: number, quantity: number) => api.patch(`/api/cart/item/${id}/`, { quantity });
 export const removeCartItem = (id: number) => api.delete(`/api/cart/item/${id}/delete/`);
 export const clearCart = () => api.delete("/api/cart/clear/");
+// Save for later (server-side; logged-in users only). These cart APIViews have no
+// documented serializer in swagger — payloads inferred from /api/cart/add/ ({ product }).
+export const getSavedItems = () => api.get("/api/cart/saved-items/");
+export const saveForLater = (product: number) => api.post("/api/cart/save-for-later/", { product });
+export const moveToCart = (product: number) => api.post("/api/cart/move-to-cart/", { product });
+export const deleteSavedItem = (id: number) => api.delete(`/api/cart/saved-items/${id}/delete/`);
 export const checkoutCart = (data: { customer_name: string; payment_method: "COD" | "ESEWA" | "KHALTI"; delivery_city?: string }) =>
   api.post("/api/cart/checkout/", data);
 

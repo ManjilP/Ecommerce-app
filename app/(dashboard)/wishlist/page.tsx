@@ -174,9 +174,9 @@ export default function WishlistPage() {
               <X size={15} /> {clearing ? "Clearing..." : "Clear all"}
             </button>
           )}
-          <button onClick={openModal} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "0 20px", height: "40px", borderRadius: "4px", fontSize: "14px", fontWeight: 600, color: "var(--accent)", background: "transparent", border: "1.5px solid rgba(136,115,76,0.6)", cursor: "pointer", transition: "all 0.15s" }}
-            onMouseEnter={e => { e.currentTarget.style.background = "rgba(136,115,76,0.06)"; e.currentTarget.style.borderColor = "var(--accent)"; }}
-            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(136,115,76,0.6)"; }}>
+          <button onClick={openModal} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "0 20px", height: "40px", borderRadius: "4px", fontSize: "14px", fontWeight: 600, color: "var(--accent)", background: "transparent", border: "1.5px solid rgba(14,143,156,0.6)", cursor: "pointer", transition: "all 0.15s" }}
+            onMouseEnter={e => { e.currentTarget.style.background = "rgba(14,143,156,0.06)"; e.currentTarget.style.borderColor = "var(--accent)"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(14,143,156,0.6)"; }}>
             <Plus size={15} /> Add Product
           </button>
         </div>
@@ -281,7 +281,7 @@ export default function WishlistPage() {
                         <button
                           onClick={() => !inWishlist && handleAdd(p.id)}
                           disabled={inWishlist || addingId === p.id}
-                          style={{ display: "flex", alignItems: "center", gap: "6px", padding: "0 16px", height: "38px", borderRadius: "99px", fontSize: "14px", fontWeight: 600, flexShrink: 0, color: inWishlist ? "var(--red)" : "var(--card)", background: inWishlist ? "rgba(248,113,113,0.1)" : addingId === p.id ? "var(--border-strong)" : "rgba(136,115,76,0.85)", backdropFilter: inWishlist ? "none" : "blur(12px)", WebkitBackdropFilter: inWishlist ? "none" : "blur(12px)", border: inWishlist ? "1px solid rgba(248,113,113,0.3)" : "1px solid rgba(136,115,76,0.4)", cursor: inWishlist ? "default" : "pointer", transition: "all 0.2s" }}>
+                          style={{ display: "flex", alignItems: "center", gap: "6px", padding: "0 16px", height: "38px", borderRadius: "99px", fontSize: "14px", fontWeight: 600, flexShrink: 0, color: inWishlist ? "var(--red)" : "var(--card)", background: inWishlist ? "rgba(248,113,113,0.1)" : addingId === p.id ? "var(--border-strong)" : "rgba(14,143,156,0.85)", backdropFilter: inWishlist ? "none" : "blur(12px)", WebkitBackdropFilter: inWishlist ? "none" : "blur(12px)", border: inWishlist ? "1px solid rgba(248,113,113,0.3)" : "1px solid rgba(14,143,156,0.4)", cursor: inWishlist ? "default" : "pointer", transition: "all 0.2s" }}>
                           <Heart size={14} fill={inWishlist ? "var(--red)" : "none"} />
                           {addingId === p.id ? "Adding..." : inWishlist ? "Saved" : "Add"}
                         </button>

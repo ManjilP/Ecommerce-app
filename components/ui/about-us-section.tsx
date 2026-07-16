@@ -127,14 +127,14 @@ export default function AboutUsSection() {
       >
         <motion.div className="flex flex-col items-center mb-6">
           <motion.span
-            className="text-[#88734C] font-medium mb-2 flex items-center gap-2"
+            className="text-[#0E8F9C] font-medium mb-2 flex items-center gap-2"
           >
             <Zap className="w-4 h-4" />
             DISCOVER OUR STORY
           </motion.span>
           <h2 className="text-4xl md:text-5xl font-light mb-4 text-center">About Us</h2>
           <motion.div
-            className="w-24 h-1 bg-[#88734C]"
+            className="w-24 h-1 bg-[#0E8F9C]"
           ></motion.div>
         </motion.div>
 
@@ -234,12 +234,12 @@ function ServiceItem({ icon, secondaryIcon, title, description, variants, delay,
         className="flex items-center gap-3 mb-3"
       >
         <div
-          className="text-[#88734C] bg-[#88734C]/10 p-3 rounded-lg transition-colors duration-300 group-hover:bg-[#88734C]/20 relative"
+          className="text-[#0E8F9C] bg-[#0E8F9C]/10 p-3 rounded-lg transition-colors duration-300 group-hover:bg-[#0E8F9C]/20 relative"
         >
           {icon}
           {secondaryIcon}
         </div>
-        <h3 className="text-xl font-medium text-black transition-colors duration-300 group-hover:text-[#88734C]">
+        <h3 className="text-xl font-medium text-black transition-colors duration-300 group-hover:text-[#0E8F9C]">
           {title}
         </h3>
       </motion.div>
@@ -249,7 +249,7 @@ function ServiceItem({ icon, secondaryIcon, title, description, variants, delay,
         {description}
       </motion.p>
       <motion.div
-        className="mt-3 pl-12 flex items-center text-[#88734C] text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        className="mt-3 pl-12 flex items-center text-[#0E8F9C] text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300"
       >
         <span className="flex items-center gap-1">
           Learn more <ArrowRight className="w-3 h-3" />

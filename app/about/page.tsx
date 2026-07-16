@@ -11,10 +11,10 @@ export default function AboutPage() {
     <GridBackground className="min-h-screen flex flex-col bg-background">
       <Navbar />
       <SecondaryNav />
-      {/* AboutUsSection is designed with fixed light-palette colors (black text, brass
+      {/* AboutUsSection is designed with fixed light-palette colors (black text, teal
           accents) and isn't dark-mode aware, so this wrapper pins it to a light backdrop
           regardless of the site theme to keep its text readable. */}
-      <main className="flex-1 pt-32 bg-[#f5f0e6]">
+      <main className="flex-1 pt-32 bg-[#eef5f5]">
         <AboutUsSection />
       </main>
       <Footer />

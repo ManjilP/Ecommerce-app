@@ -52,6 +52,13 @@ export default function Navbar() {
     getMe().then((res) => setUser(res.data)).catch(() => {})
   }, [])
 
+  // Open the cart drawer when the "Added to cart" toast's View Cart is clicked
+  useEffect(() => {
+    const openCart = () => setCartOpen(true)
+    window.addEventListener('open-cart', openCart)
+    return () => window.removeEventListener('open-cart', openCart)
+  }, [])
+
   const handleSearchChange = (val: string) => {
     setSearchQuery(val)
     if (val.trim().length < 1) { setSuggestions([]); setShowSuggestions(false); return }
@@ -110,7 +117,7 @@ export default function Navbar() {
   return (
     <>
       {/* Primary Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-md border-b border-border shadow-sm">
+      <nav className="fixed top-0 left-0 right-0 z-50 glass-nav">
         <div className="max-w-[1600px] mx-auto px-4 md:px-8 h-20 flex items-center gap-4">
           {/* Logo */}
           <Link href="/landing" className="flex-shrink-0">
@@ -168,12 +175,30 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Wishlist / Notifications / Cart — kept close to the search bar */}
-          <div className="flex items-center gap-2">
-            <Link href="/my-wishlist" className="p-2 rounded-xl hover:bg-muted transition-colors relative">
-              <Heart size={20} className="text-foreground" />
+          {/* Right cluster — nav links + actions, grouped together on the right */}
+          <div className="flex items-center gap-1 ml-auto">
+            {/* About / Contact */}
+            <div className="hidden lg:flex items-center gap-1">
+              {[
+                { label: 'About', href: '/about' },
+                { label: 'Contact', href: '/contact' },
+              ].map(({ label, href }) => (
+                <Link
+                  key={label}
+                  href={href}
+                  className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-primary hover:bg-primary/8 rounded-full transition-colors whitespace-nowrap"
+                >
+                  {label}
+                </Link>
+              ))}
+            </div>
+
+            <div className="hidden lg:block w-px h-6 bg-border/70 mx-1.5" />
+
+            <Link href="/my-wishlist" className="p-2.5 rounded-full hover:bg-primary/8 transition-colors relative" aria-label="Wishlist">
+              <Heart size={19} className="text-foreground" />
               {wishlistCount > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                <span className="absolute top-0.5 right-0.5 min-w-[16px] h-4 px-1 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                   {wishlistCount > 9 ? '9+' : wishlistCount}
                 </span>
               )}
@@ -181,10 +206,10 @@ export default function Navbar() {
 
             <NotificationBell />
 
-            <button onClick={() => setCartOpen(true)} className="hidden md:flex p-2 rounded-xl hover:bg-muted transition-colors relative">
-              <ShoppingCart size={20} className="text-foreground" />
+            <button onClick={() => setCartOpen(true)} className="hidden md:flex p-2.5 rounded-full hover:bg-primary/8 transition-colors relative" aria-label="Cart">
+              <ShoppingCart size={19} className="text-foreground" />
               {cartCount > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                <span className="absolute top-0.5 right-0.5 min-w-[16px] h-4 px-1 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                   {cartCount > 9 ? '9+' : cartCount}
                 </span>
               )}
@@ -193,30 +218,14 @@ export default function Navbar() {
             {/* Mobile menu toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-xl hover:bg-muted transition-colors md:hidden"
+              className="p-2.5 rounded-full hover:bg-primary/8 transition-colors md:hidden"
+              aria-label="Menu"
             >
               {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
-          </div>
 
-          {/* About / Contact */}
-          <div className="hidden lg:flex items-center gap-1 flex-shrink-0 lg:ml-auto">
-            {[
-              { label: 'About', href: '/about' },
-              { label: 'Contact', href: '/contact' },
-            ].map(({ label, href }) => (
-              <Link
-                key={label}
-                href={href}
-                className="px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-lg transition-colors whitespace-nowrap"
-              >
-                {label}
-              </Link>
-            ))}
-          </div>
-
-          {/* Profile — pushed to the far right */}
-          <div className="flex items-center gap-2 ml-auto lg:ml-0">
+            {/* Profile */}
+            <div className="flex items-center gap-2 ml-0.5">
             {isLoggedIn ? (
               <div className="relative">
                 <button
@@ -281,6 +290,7 @@ export default function Navbar() {
                 Login
               </Link>
             )}
+            </div>
           </div>
         </div>
 

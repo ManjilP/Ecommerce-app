@@ -263,9 +263,9 @@ export default function OrdersPage() {
           <h1 style={{ fontSize: "32px", fontWeight: 700, letterSpacing: "-0.5px", color: "var(--text)", lineHeight: 1.1 }}>Orders</h1>
           <p style={{ fontSize: "16px", color: "var(--text-2)", marginTop: "6px" }}>{count} total orders</p>
         </div>
-        <button onClick={() => { setModal(true); setError(""); }} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "0 24px", height: "44px", borderRadius: "4px", fontSize: "15px", fontWeight: 600, color: "var(--accent)", background: "transparent", border: "1.5px solid rgba(136,115,76,0.6)", cursor: "pointer", transition: "all 0.15s" }}
-          onMouseEnter={e => { e.currentTarget.style.background = "rgba(136,115,76,0.06)"; e.currentTarget.style.borderColor = "var(--accent)"; }}
-          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(136,115,76,0.6)"; }}>
+        <button onClick={() => { setModal(true); setError(""); }} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "0 24px", height: "44px", borderRadius: "4px", fontSize: "15px", fontWeight: 600, color: "var(--accent)", background: "transparent", border: "1.5px solid rgba(14,143,156,0.6)", cursor: "pointer", transition: "all 0.15s" }}
+          onMouseEnter={e => { e.currentTarget.style.background = "rgba(14,143,156,0.06)"; e.currentTarget.style.borderColor = "var(--accent)"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(14,143,156,0.6)"; }}>
           <Plus size={16} /> New Order
         </button>
       </div>
@@ -275,9 +275,9 @@ export default function OrdersPage() {
           <Search size={16} style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", color: "var(--text-3)" }} />
           <input value={searchInput} onChange={(e) => setSearchInput(e.target.value)} placeholder="Search by customer or status..." style={{ paddingLeft: "46px", height: "50px" }} />
         </div>
-        <button type="submit" style={{ padding: "0 24px", height: "50px", borderRadius: "4px", fontSize: "15px", fontWeight: 600, color: "var(--accent)", background: "transparent", border: "1.5px solid rgba(136,115,76,0.6)", cursor: "pointer", whiteSpace: "nowrap", transition: "all 0.15s" }}
-          onMouseEnter={e => { e.currentTarget.style.background = "rgba(136,115,76,0.06)"; e.currentTarget.style.borderColor = "var(--accent)"; }}
-          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(136,115,76,0.6)"; }}>Search</button>
+        <button type="submit" style={{ padding: "0 24px", height: "50px", borderRadius: "4px", fontSize: "15px", fontWeight: 600, color: "var(--accent)", background: "transparent", border: "1.5px solid rgba(14,143,156,0.6)", cursor: "pointer", whiteSpace: "nowrap", transition: "all 0.15s" }}
+          onMouseEnter={e => { e.currentTarget.style.background = "rgba(14,143,156,0.06)"; e.currentTarget.style.borderColor = "var(--accent)"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(14,143,156,0.6)"; }}>Search</button>
         {search && <button type="button" onClick={() => { setSearchInput(""); setSearch(""); setPage(1); }} style={{ padding: "0 20px", height: "50px", borderRadius: "4px", fontSize: "15px", fontWeight: 500, color: "var(--text-2)", background: "transparent", border: "1.5px solid var(--border)", cursor: "pointer", transition: "all 0.15s" }}
           onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--text-3)"; }}
           onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border)"; }}>Clear</button>}

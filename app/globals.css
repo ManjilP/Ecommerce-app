@@ -2,58 +2,58 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* ── Light mode (default) — warm brass / cream, extended from the About Us section ── */
+/* ── Light mode (default) — clean pharmaceutical teal / aqua on crisp white ── */
 :root {
-  --bg: #f5f0e6;
-  --bg-elevated: #faf6ee;
-  --card: #fffdf8;
-  --card-2: #ece2d0;
-  --border: rgba(43,33,18,0.09);
-  --border-strong: rgba(43,33,18,0.15);
-  --text: #241f16;
-  --text-2: rgba(36,31,22,0.58);
-  --text-3: rgba(36,31,22,0.36);
-  --accent: #88734c;
-  --accent-hover: #6f5d3d;
-  --ring: rgba(136,115,76,0.18);
-  --green: #4f7a54;
-  --red: #b1473c;
-  --orange: #c17f3a;
-  --purple: #8d6f8a;
-  --yellow: #a68d3f;
-  --blue: #5c7688;
-  --card-shadow: 0 1px 2px rgba(43,33,18,0.05), 0 1px 3px rgba(43,33,18,0.07);
+  --bg: #eef5f5;
+  --bg-elevated: #f5faf9;
+  --card: #ffffff;
+  --card-2: #dfeceb;
+  --border: rgba(16,48,58,0.09);
+  --border-strong: rgba(16,48,58,0.15);
+  --text: #10303a;
+  --text-2: rgba(16,48,58,0.58);
+  --text-3: rgba(16,48,58,0.36);
+  --accent: #0e8f9c;
+  --accent-hover: #0b7480;
+  --ring: rgba(14,143,156,0.18);
+  --green: #1a9d6b;
+  --red: #c94f42;
+  --orange: #d1863a;
+  --purple: #7a6bbf;
+  --yellow: #c2a23c;
+  --blue: #2f7dac;
+  --card-shadow: 0 1px 2px rgba(16,48,58,0.05), 0 1px 3px rgba(16,48,58,0.07);
 
   /* Chart ink — same hues as above, punched up in chroma so data reads clearly
      against a card surface. Brand chrome (buttons, badges) keeps the softer tone;
      only chart fills use these. */
-  --chart-blue: #2f6f9e;
-  --chart-green: #3f8a54;
-  --chart-purple: #8a5a9e;
+  --chart-blue: #2f7dac;
+  --chart-green: #1a9d6b;
+  --chart-purple: #7a5aa0;
   --chart-orange: var(--orange);
   --chart-yellow: var(--yellow);
 }
 
 /* ── Dark mode ── */
 .dark {
-  --bg: #14110c;
-  --bg-elevated: #1a160f;
-  --card: #201a12;
-  --card-2: #291f15;
-  --border: rgba(255,247,232,0.08);
-  --border-strong: rgba(255,247,232,0.13);
-  --text: #f3ead9;
-  --text-2: rgba(243,234,217,0.62);
-  --text-3: rgba(243,234,217,0.36);
-  --accent: #c9a06a;
-  --accent-hover: #d9b581;
-  --ring: rgba(201,160,106,0.22);
-  --green: #7fae82;
-  --red: #d1786c;
-  --orange: #d99d5c;
-  --purple: #b090ac;
-  --yellow: #c2a869;
-  --blue: #8ba4b5;
+  --bg: #0a1c1f;
+  --bg-elevated: #0f2427;
+  --card: #12292d;
+  --card-2: #173237;
+  --border: rgba(224,244,244,0.08);
+  --border-strong: rgba(224,244,244,0.13);
+  --text: #e4f2f1;
+  --text-2: rgba(228,242,241,0.62);
+  --text-3: rgba(228,242,241,0.36);
+  --accent: #29c1cd;
+  --accent-hover: #4fd4de;
+  --ring: rgba(41,193,205,0.22);
+  --green: #45c78a;
+  --red: #db7368;
+  --orange: #dc9d5c;
+  --purple: #a394d8;
+  --yellow: #cbb066;
+  --blue: #6fa6c8;
   --card-shadow: none;
 
   --chart-blue: var(--blue);
@@ -83,7 +83,62 @@
   --color-border: var(--border);
   --color-input: var(--card-2);
   --color-ring: var(--accent);
-  --radius: 1rem;
+  --radius: 1.25rem;
+}
+
+/* ── Glassmorphism surfaces ── */
+:root {
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-bg-strong: rgba(255, 255, 255, 0.72);
+  --glass-nav-bg: rgba(244, 250, 250, 0.88);
+  --glass-border: rgba(255, 255, 255, 0.65);
+  --glass-shadow: 0 8px 32px rgba(16, 48, 58, 0.10);
+}
+.dark {
+  --glass-bg: rgba(18, 41, 45, 0.45);
+  --glass-bg-strong: rgba(18, 41, 45, 0.66);
+  --glass-nav-bg: rgba(12, 28, 31, 0.9);
+  --glass-border: rgba(224, 244, 244, 0.12);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+.glass-strong {
+  background: var(--glass-bg-strong);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+/* Horizontal bars (navbars) — frosted, bottom border only. More opaque than
+   card glass so scrolling content underneath doesn't bleed through legibly. */
+.glass-nav {
+  background: var(--glass-nav-bg);
+  backdrop-filter: blur(22px) saturate(180%);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(16, 48, 58, 0.05);
+}
+
+/* Layered teal / mint / blue mesh — gives the glass something to refract and
+   kills the flat, generic "AI-generated" look. Deliberately no purple/pink. */
+.mesh-bg {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(at 18% 12%, color-mix(in srgb, var(--primary) 20%, transparent) 0px, transparent 55%),
+    radial-gradient(at 82% 8%,  color-mix(in srgb, var(--blue) 16%, transparent) 0px, transparent 50%),
+    radial-gradient(at 78% 72%, color-mix(in srgb, var(--green) 14%, transparent) 0px, transparent 55%),
+    radial-gradient(at 12% 82%, color-mix(in srgb, var(--primary) 14%, transparent) 0px, transparent 50%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .glass, .glass-strong { transition: background 0.2s, border-color 0.2s, box-shadow 0.2s; }
 }
 
 *, *::before, *::after { box-sizing: border-box; }
