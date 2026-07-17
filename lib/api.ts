@@ -117,8 +117,8 @@ export const adminLogin = (username: string, password: string) =>
 export const vendorLogin = (username: string, password: string) =>
   api.post("/api/auth/vendor/login/", { username, password });
 
-export const vendorRegister = (username: string, password: string, email: string, store_name: string, slug: string) =>
-  api.post("/api/auth/vendor/register/", { username, password, email, store_name, slug });
+export const vendorRegister = (username: string, password: string, email: string, store_name: string, store_slug: string) =>
+  api.post("/api/auth/vendor/register/", { username, password, email, store_name, store_slug });
 
 
 export const register = (username: string, password: string, email: string, city?: string) =>
