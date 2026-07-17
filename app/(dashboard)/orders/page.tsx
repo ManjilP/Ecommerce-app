@@ -1,7 +1,7 @@
 ﻿﻿"use client";
 import { useEffect, useState } from "react";
-import { getVendorOrders, getOrders, deleteVendorOrder, updateVendorOrderStatus, createOrder, getVendorProducts, getProducts, trackOrder, confirmPayment, applyCoupon, cancelOrder } from "@/lib/api";
-import { ShoppingCart, Ban, Trash2, Plus, X, Search, ChevronLeft, ChevronRight, MapPin, ArrowRight, Tag, CheckCircle, CreditCard } from "lucide-react";
+import { getVendorOrders, getOrders, deleteVendorOrder, advanceVendorOrder, createOrder, getVendorProducts, getProducts, trackOrder, confirmPayment, applyCoupon, cancelOrder } from "@/lib/api";
+import { ShoppingCart, Ban, Trash2, Plus, X, Search, ChevronLeft, ChevronRight, MapPin, ArrowRight, Tag, CheckCircle, CreditCard, MoreVertical } from "lucide-react";
 import { OrderTracking } from "@/components/ui/order-tracking";
 import EsewaPayment from "@/components/ui/esewa-payment";
 import KhaltiPayment from "@/components/ui/khalti-payment";
@@ -53,6 +53,8 @@ export default function OrdersPage() {
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [items, setItems] = useState([{ product: "", quantity: 1 }]);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [menuOrder, setMenuOrder] = useState<Order | null>(null);
+  const [menuPos, setMenuPos] = useState<{ top: number; left: number } | null>(null);
   const [couponCode, setCouponCode] = useState("");
   const [couponResult, setCouponResult] = useState<{ discount_amount: string; final_amount: string; message?: string } | null>(null);
   const [couponError, setCouponError] = useState("");
@@ -154,9 +156,8 @@ export default function OrdersPage() {
   };
 
   const handleUpdateStatus = async (id: number, currentStatus: string) => {
-    const next = nextStatus[currentStatus];
-    if (!next) return;
-    await updateVendorOrderStatus(id, next).catch(() => null);
+    if (!nextStatus[currentStatus]) return;
+    await advanceVendorOrder(id, currentStatus).catch(() => null);
     sessionStorage.removeItem(CACHE_KEY);
     fetchAll();
   };
@@ -256,8 +257,43 @@ export default function OrdersPage() {
     }
   };
 
+  // Actions available for a given order (kebab menu contents)
+  const rowActions = (o: Order) => ([
+    { show: true, onClick: () => handleTrack(o.id), color: "var(--purple)", icon: <MapPin size={14} />, label: "Track" },
+    { show: (!o.payment_method || o.payment_method === "cod") && o.status === "pending", onClick: () => handleConfirmPayment(o.id), color: "var(--purple)", icon: <CreditCard size={14} />, label: "Confirm" },
+    { show: isAdmin && o.status !== "cancelled" && o.status !== "completed", onClick: () => handleUpdateStatus(o.id, o.status), color: "var(--blue)", icon: <ArrowRight size={14} />, label: "Advance" },
+    { show: o.status !== "cancelled", onClick: () => handleCancel(o.id), color: "var(--yellow)", icon: <Ban size={14} />, label: "Cancel" },
+    { show: true, onClick: () => handleDelete(o.id), color: "var(--red)", icon: <Trash2 size={14} />, label: "Delete" },
+  ] as { show: boolean; onClick: () => void; color: string; icon: React.ReactNode; label: string }[]).filter(b => b.show);
+
+  const openMenu = (o: Order, e: React.MouseEvent) => {
+    const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const width = 180;
+    setMenuPos({ top: r.bottom + 6, left: Math.max(8, r.right - width) });
+    setMenuOrder(o);
+  };
+  const closeMenu = () => { setMenuOrder(null); setMenuPos(null); };
+
   return (
     <div>
+      {/* Actions kebab menu */}
+      {menuOrder && menuPos && (
+        <>
+          <div onClick={closeMenu} style={{ position: "fixed", inset: 0, zIndex: 200 }} />
+          <div style={{ position: "fixed", top: menuPos.top, left: menuPos.left, width: "180px", zIndex: 201, background: "var(--card)", border: "1px solid var(--border)", borderRadius: "12px", boxShadow: "0 12px 32px rgba(0,0,0,0.16)", overflow: "hidden", padding: "4px" }}>
+            {rowActions(menuOrder).map((btn, i) => (
+              <button key={i} onClick={() => { closeMenu(); btn.onClick(); }}
+                style={{ display: "flex", alignItems: "center", gap: "10px", width: "100%", padding: "9px 12px", borderRadius: "8px", border: "none", background: "transparent", color: "var(--text)", fontSize: "13px", fontWeight: 500, cursor: "pointer", textAlign: "left", transition: "background 0.12s" }}
+                onMouseEnter={e => { e.currentTarget.style.background = "var(--card-2)"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}>
+                <span style={{ color: btn.color, display: "flex" }}>{btn.icon}</span>
+                {btn.label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "32px" }}>
         <div>
           <h1 style={{ fontSize: "32px", fontWeight: 700, letterSpacing: "-0.5px", color: "var(--text)", lineHeight: 1.1 }}>Orders</h1>
@@ -333,22 +369,12 @@ export default function OrdersPage() {
                     <td className="font-semibold" style={{ color: "var(--green)" }}>Rs. {parseFloat(o.total_price).toFixed(2)}</td>
                     <td style={{ color: "var(--text-3)" }}>{new Date(o.created_at).toLocaleDateString()}</td>
                     <td>
-                      <div style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
-                        {([
-                          { show: true, onClick: () => handleTrack(o.id), color: "var(--card)", bg: "var(--purple)", icon: <MapPin size={13} />, label: "Track" },
-                          { show: (!o.payment_method || o.payment_method === "cod") && o.status === "pending", onClick: () => handleConfirmPayment(o.id), color: "var(--card)", bg: "var(--purple)", icon: <CreditCard size={13} />, label: "Confirm" },
-                          { show: isAdmin && o.status !== "cancelled" && o.status !== "completed", onClick: () => handleUpdateStatus(o.id, o.status), color: "var(--card)", bg: "var(--blue)", icon: <ArrowRight size={13} />, label: "Advance" },
-                          { show: o.status !== "cancelled", onClick: () => handleCancel(o.id), color: "var(--card)", bg: "var(--yellow)", icon: <Ban size={13} />, label: "Cancel" },
-                          { show: true, onClick: () => handleDelete(o.id), color: "var(--card)", bg: "var(--red)", icon: <Trash2 size={13} />, label: "Delete" },
-                        ] as { show: boolean; onClick: () => void; color: string; bg: string; icon: React.ReactNode; label: string }[]).filter(b => b.show).map((btn, i) => (
-                          <button key={i} onClick={btn.onClick}
-                            style={{ display: "flex", alignItems: "center", gap: "5px", padding: "4px 10px", borderRadius: "6px", border: "none", background: btn.bg, color: btn.color, fontSize: "12px", fontWeight: 500, cursor: "pointer", transition: "opacity 0.15s", whiteSpace: "nowrap" }}
-                            onMouseEnter={e => { e.currentTarget.style.opacity = "0.8"; }}
-                            onMouseLeave={e => { e.currentTarget.style.opacity = "1"; }}>
-                            {btn.icon}{btn.label}
-                          </button>
-                        ))}
-                      </div>
+                      <button onClick={(e) => openMenu(o, e)} title="Actions"
+                        style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "34px", height: "34px", borderRadius: "8px", border: "1px solid var(--border)", background: menuOrder?.id === o.id ? "var(--card-2)" : "transparent", color: "var(--text-2)", cursor: "pointer", transition: "background 0.15s" }}
+                        onMouseEnter={e => { e.currentTarget.style.background = "var(--card-2)"; }}
+                        onMouseLeave={e => { if (menuOrder?.id !== o.id) e.currentTarget.style.background = "transparent"; }}>
+                        <MoreVertical size={16} />
+                      </button>
                     </td>
                   </tr>
                 ))}

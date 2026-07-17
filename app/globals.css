@@ -141,6 +141,31 @@
   .glass, .glass-strong { transition: background 0.2s, border-color 0.2s, box-shadow 0.2s; }
 }
 
+/* Report cards — staggered fade-up on load (CSS runs off the main thread) */
+@keyframes reportCardIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+.report-card { animation: reportCardIn 380ms cubic-bezier(0.23, 1, 0.32, 1) both; }
+.report-card:nth-child(1) { animation-delay: 0ms; }
+.report-card:nth-child(2) { animation-delay: 55ms; }
+.report-card:nth-child(3) { animation-delay: 110ms; }
+.report-card:nth-child(4) { animation-delay: 165ms; }
+.report-card:nth-child(5) { animation-delay: 220ms; }
+.report-card:nth-child(6) { animation-delay: 275ms; }
+.report-card:nth-child(7) { animation-delay: 330ms; }
+.report-card:nth-child(8) { animation-delay: 385ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* Keep the fade (aids comprehension), drop the movement */
+  @keyframes reportCardIn { from { opacity: 0; } to { opacity: 1; } }
+  .report-card { animation-duration: 240ms; }
+}
+
+/* Reusable press feedback — instant, responsive (Emil: pressable elements need this) */
+.press { transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1); }
+.press:active { transform: scale(0.97); }
+
 *, *::before, *::after { box-sizing: border-box; }
 
 html { font-size: 16px; scroll-behavior: smooth; }

@@ -62,10 +62,13 @@ export default function Navbar() {
   const handleSearchChange = (val: string) => {
     setSearchQuery(val)
     if (val.trim().length < 1) { setSuggestions([]); setShowSuggestions(false); return }
-    const filtered = products
+    const query = val.toLowerCase()
+    const matchingCategories = [...new Set(products.map((p) => p.category))]
+      .filter((c): c is string => !!c && c.toLowerCase().includes(query))
+    const matchingNames = products
       .map((p) => p.name)
-      .filter(n => n.toLowerCase().includes(val.toLowerCase()))
-      .slice(0, 8)
+      .filter((n) => n.toLowerCase().includes(query))
+    const filtered = [...matchingCategories, ...matchingNames].slice(0, 8)
     setSuggestions(filtered)
     setShowSuggestions(filtered.length > 0)
   }

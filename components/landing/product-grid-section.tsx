@@ -35,11 +35,16 @@ function ProductGridContent({ onProductsLoaded, activeCategory = 'All', onCatego
     if (products.length > 0) onProductsLoaded?.(products)
   }, [products, onProductsLoaded])
 
+  // Vendor-entered categories are free text ("Supplement" vs "Supplements", "medicine" vs
+  // "Medicines"), so match case/plural-insensitively instead of requiring an exact string.
+  const normalizeCategory = (s?: string) => (s ?? '').trim().toLowerCase().replace(/s$/, '')
+
   const filtered = products.filter((p) => {
-    const matchCategory = activeCategory === 'All' || p.category === activeCategory
-    const matchSearch = !searchParam || 
-      (p.name && p.name.toLowerCase().includes(searchParam.toLowerCase())) || 
-      (p.description && p.description.toLowerCase().includes(searchParam.toLowerCase()))
+    const matchCategory = activeCategory === 'All' || normalizeCategory(p.category) === normalizeCategory(activeCategory)
+    const matchSearch = !searchParam ||
+      (p.name && p.name.toLowerCase().includes(searchParam.toLowerCase())) ||
+      (p.description && p.description.toLowerCase().includes(searchParam.toLowerCase())) ||
+      (p.category && p.category.toLowerCase().includes(searchParam.toLowerCase()))
     return matchCategory && matchSearch
   })
 

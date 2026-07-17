@@ -149,9 +149,22 @@ export const updateOrderStatus = (id: number, status: string) => api.patch(`/api
 export const getPrescriptionStatus = (id: number) => api.get(`/api/orders/${id}/prescription-status/`);
 export const uploadPrescription = (id: number, image: File) => { const fd = new FormData(); fd.append("image", image); return api.post(`/api/orders/${id}/upload-prescription/`, fd, { headers: { "Content-Type": "multipart/form-data" } }); };
 
-// Vendor Orders (admin panel)
+// Vendor Orders (admin panel) — status transitions are dedicated POST actions
 export const getVendorOrders = (params?: { search?: string; page?: number }) => api.get("/api/vendor/orders/", { params });
-export const updateVendorOrderStatus = (id: number, status: string) => api.patch(`/api/vendor/orders/${id}/update-status/`, { status });
+export const processVendorOrder = (id: number) => api.post(`/api/vendor/orders/${id}/process/`);
+export const shipVendorOrder = (id: number) => api.post(`/api/vendor/orders/${id}/ship/`);
+export const completeVendorOrder = (id: number) => api.post(`/api/vendor/orders/${id}/complete/`);
+export const cancelVendorOrder = (id: number) => api.post(`/api/vendor/orders/${id}/cancel/`);
+// Advance an order to its next stage using the correct action endpoint
+export const advanceVendorOrder = (id: number, currentStatus: string) => {
+  const action: Record<string, (id: number) => ReturnType<typeof processVendorOrder>> = {
+    pending: processVendorOrder,
+    processing: shipVendorOrder,
+    shipped: completeVendorOrder,
+  };
+  const fn = action[currentStatus];
+  return fn ? fn(id) : Promise.reject(new Error(`No next stage for status "${currentStatus}"`));
+};
 export const deleteVendorOrder = (id: number) => api.delete(`/api/vendor/orders/${id}/`);
 
 // Vendor Products (admin panel)

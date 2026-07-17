@@ -33,6 +33,7 @@ export default function ProductsPage() {
   const [saveError, setSaveError] = useState("");
   const [uploadingId, setUploadingId] = useState<number | null>(null);
   const [fetchingId, setFetchingId] = useState<number | null>(null);
+  const [imageError, setImageError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadTargetId, setUploadTargetId] = useState<number | null>(null);
   const [stockBanner, setStockBanner] = useState<{ id: number; name: string } | null>(null);
@@ -105,13 +106,28 @@ export default function ProductsPage() {
     fileInputRef.current?.click();
   };
 
+  const extractError = (err: unknown, fallback: string) => {
+    const e = err as { response?: { status?: number; data?: Record<string, unknown> | string }; message?: string };
+    const data = e.response?.data;
+    if (typeof data === "string") return data;
+    if (data && typeof data === "object") {
+      const v = data.detail ?? data.error ?? data.image ?? Object.values(data)[0];
+      if (v) return Array.isArray(v) ? String(v[0]) : String(v);
+    }
+    if (e.response?.status) return `${fallback} (HTTP ${e.response.status})`;
+    return e.message ?? fallback;
+  };
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !uploadTargetId) return;
+    setImageError("");
     setUploadingId(uploadTargetId);
     try {
       await uploadProductImage(uploadTargetId, file);
       load();
+    } catch (err) {
+      setImageError(extractError(err, "Image upload failed"));
     } finally {
       setUploadingId(null);
       setUploadTargetId(null);
@@ -120,10 +136,13 @@ export default function ProductsPage() {
   };
 
   const handleFetchImage = async (id: number) => {
+    setImageError("");
     setFetchingId(id);
     try {
       await fetchProductImage(id);
       load();
+    } catch (err) {
+      setImageError(extractError(err, "Auto-fetch image failed"));
     } finally {
       setFetchingId(null);
     }
@@ -144,6 +163,14 @@ export default function ProductsPage() {
           <Plus size={15} /> Add Product
         </button>
       </div>
+
+      {imageError && (
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "14px 18px", marginBottom: "20px", borderRadius: "14px", background: "color-mix(in srgb, var(--red) 10%, transparent)", border: "1px solid color-mix(in srgb, var(--red) 30%, transparent)" }}>
+          <AlertCircle size={16} color="var(--red)" style={{ flexShrink: 0 }} />
+          <span style={{ fontSize: "14px", color: "var(--text)", flex: 1 }}>{imageError}</span>
+          <button onClick={() => setImageError("")} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-3)", display: "flex" }}><X size={15} /></button>
+        </div>
+      )}
 
       {stockBanner && (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", padding: "14px 18px", marginBottom: "20px", borderRadius: "14px", background: "color-mix(in srgb, var(--orange) 10%, transparent)", border: "1px solid color-mix(in srgb, var(--orange) 30%, transparent)" }}>
