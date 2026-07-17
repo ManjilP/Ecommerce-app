@@ -8,6 +8,7 @@ import ProductCard, { type RealProduct } from '@/components/product-card'
 import { useCart } from '@/hooks/useCart'
 import { useProducts } from '@/hooks/useProducts'
 import { useWishlist } from '@/hooks/useWishlist'
+import { categories } from '@/lib/pharmacy-data'
 
 interface ProductGridSectionProps {
   onProductsLoaded?: (products: RealProduct[]) => void
@@ -44,13 +45,33 @@ function ProductGridContent({ onProductsLoaded, activeCategory = 'All', onCatego
 
   return (
     <>
-      <section id="products" className="max-w-7xl mx-auto px-4 py-16 scroll-mt-36">
+      <section id="products" className="max-w-7xl mx-auto px-4 py-16 scroll-mt-24">
         {/* Section header */}
-        <div className="mb-8">
+        <div className="mb-6">
           <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-2">Our Products</p>
           <h2 className="font-heading text-3xl md:text-4xl font-bold text-foreground">
-            {activeCategory === 'All' ? 'All Products' : activeCategory}
+            Browse Products
           </h2>
+        </div>
+
+        {/* Category filter chips */}
+        <div className="flex flex-wrap gap-2 mb-10">
+          {['All', ...categories].map((cat) => {
+            const active = activeCategory === cat
+            return (
+              <button
+                key={cat}
+                onClick={() => onCategoryChange?.(cat)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  active
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'glass text-foreground/75 hover:text-primary'
+                }`}
+              >
+                {cat === 'All' ? 'All Products' : cat}
+              </button>
+            )
+          })}
         </div>
 
         {/* Loading state */}

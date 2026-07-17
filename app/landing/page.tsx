@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Navbar from '@/components/navbar'
-import SecondaryNav from '@/components/secondary-nav'
 import Footer from '@/components/footer'
 import HeroSection from '@/components/landing/hero-section'
 import PromoCards from '@/components/landing/promo-cards'
@@ -28,9 +27,8 @@ export default function LandingPage() {
   return (
     <GridBackground className="min-h-screen mesh-bg">
       <Navbar />
-      <SecondaryNav activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
-      {/* pt-32 accounts for fixed navbar (h-16) + secondary nav (h-12) */}
-      <main className="pt-32 relative z-10">
+      {/* pt-20 accounts for the fixed navbar (h-20); categories now live inline in the products section */}
+      <main className="pt-20 relative z-10">
         <HeroSection />
         <PromoCards />
         <ProductGridSection activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
