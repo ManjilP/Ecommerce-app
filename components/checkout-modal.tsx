@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Plus, Trash2, CheckCircle, Loader2, Tag } from 'lucide-react'
-import { createOrder, applyCoupon } from '@/lib/api'
+import { createOrder, applyCoupon, cancelOrder } from '@/lib/api'
 import EsewaPayment from '@/components/ui/esewa-payment'
 import KhaltiPayment from '@/components/ui/khalti-payment'
 import PrescriptionUpload from '@/components/ui/prescription-upload'
@@ -455,7 +455,13 @@ export default function CheckoutModal({ open, onClose, products = [], initialPro
         <EsewaPayment
           orderId={esewaOrder.id}
           amount={esewaOrder.amount}
-          onClose={() => setEsewaOrder(null)}
+          onClose={() => {
+            // Reaching here means the user never actually redirected to eSewa
+            // (closed manually, or payment initiation failed) — don't leave a
+            // phantom Pending order behind.
+            cancelOrder(esewaOrder.id).catch(() => {})
+            setEsewaOrder(null)
+          }}
         />
       )}
 
@@ -464,7 +470,10 @@ export default function CheckoutModal({ open, onClose, products = [], initialPro
         <KhaltiPayment
           orderId={khaltiOrder.id}
           amount={khaltiOrder.amount}
-          onClose={() => setKhaltiOrder(null)}
+          onClose={() => {
+            cancelOrder(khaltiOrder.id).catch(() => {})
+            setKhaltiOrder(null)
+          }}
         />
       )}
     </>

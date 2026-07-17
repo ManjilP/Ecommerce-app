@@ -3,10 +3,15 @@ import crypto from "crypto";
 
 const SECRET_KEY = process.env.ESEWA_SECRET_KEY!;
 const PRODUCT_CODE = process.env.ESEWA_PRODUCT_CODE!;
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL!;
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 export async function POST(req: NextRequest) {
   try {
+    if (!BASE_URL || !/^https?:\/\//.test(BASE_URL)) {
+      console.error("eSewa initiate error: NEXT_PUBLIC_BASE_URL is missing or lacks http(s):// —", BASE_URL);
+      return NextResponse.json({ error: "Server misconfiguration: NEXT_PUBLIC_BASE_URL is not set correctly" }, { status: 500 });
+    }
+
     const { amount, orderId } = await req.json();
 
     const transaction_uuid = `${orderId}-${Date.now()}`;
